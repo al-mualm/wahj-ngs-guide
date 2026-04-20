@@ -1,5 +1,8 @@
 const appConfig = window.WAHJ_NGS_CONFIG || {};
 const registrationApiUrl = (appConfig.registrationApiUrl || "").trim();
+const registrationFormConfig = appConfig.registrationForm || {};
+const registrationFormFields = registrationFormConfig.fields || {};
+const publicStatsGvizUrl = (appConfig.publicStatsGvizUrl || "").trim();
 const storageKey = "wahj-ngs-registration-v1";
 const sessionKey = "wahj-ngs-session-id";
 const uiLanguageKey = "wahj-ngs-ui-language";
@@ -62,7 +65,7 @@ const translations = {
     previewSuccess:
       "Local preview mode only: the page is unlocked, but registrations are not being sent to Google Sheets yet.",
     backendMissing:
-      "The Google Sheets backend is not connected yet, so public registrations cannot be saved.",
+      "The public registration backend is not connected yet, so registrations cannot be saved.",
     validationError: "Please complete your name, email, phone number, affiliation, and language.",
     saveError:
       "We could not save your registration right now. Please try again in a moment.",
@@ -104,7 +107,7 @@ const translations = {
     previewSuccess:
       "وضع معاينة محلي فقط: تم فتح الصفحة، لكن لم يتم إرسال البيانات إلى Google Sheets بعد.",
     backendMissing:
-      "ربط Google Sheets غير جاهز بعد، لذلك لا يمكن حفظ التسجيلات العامة حالياً.",
+      "ربط التسجيل العام غير جاهز بعد، لذلك لا يمكن حفظ التسجيلات حالياً.",
     validationError: "يرجى إدخال الاسم والبريد الإلكتروني ورقم الهاتف والانتماء واللغة.",
     saveError: "تعذر حفظ التسجيل الآن. حاول مرة أخرى بعد قليل.",
   },
@@ -236,6 +239,33 @@ function normalizePhoneNumber(phoneNumber) {
   return hasPlus ? `+${digits}` : digits;
 }
 
+function hasGoogleFormBackend() {
+  return Boolean(
+    registrationFormConfig.formResponseUrl &&
+      registrationFormFields.fullName &&
+      registrationFormFields.emailAddress &&
+      registrationFormFields.phoneNumber &&
+      registrationFormFields.affiliation &&
+      registrationFormFields.preferredLanguage
+  );
+}
+
+function hasAppsScriptBackend() {
+  return Boolean(registrationApiUrl);
+}
+
+function getRegistrationBackendMode() {
+  if (hasGoogleFormBackend()) {
+    return "googleForm";
+  }
+
+  if (hasAppsScriptBackend()) {
+    return "appsScript";
+  }
+
+  return "";
+}
+
 function renderVisitorStats(stats) {
   const uiLanguage = getCurrentUiLanguage();
   if (!stats) {
@@ -253,31 +283,164 @@ function renderVisitorStats(stats) {
   visitorCount.textContent = String(uniqueVisitors);
 }
 
+function loadJsonp(url, callbackName) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    const timeoutId = window.setTimeout(() => {
+      cleanup();
+      reject(new Error("Timed out while loading stats."));
+    }, 10000);
+
+    function cleanup() {
+      window.clearTimeout(timeoutId);
+      delete window[callbackName];
+      script.remove();
+    }
+
+    window[callbackName] = (payload) => {
+      cleanup();
+      resolve(payload);
+    };
+
+    script.onerror = () => {
+      cleanup();
+      reject(new Error("Unable to load stats."));
+    };
+
+    script.src = url;
+    document.head.appendChild(script);
+  });
+}
+
+function parseGvizStats(response) {
+  const rows = response?.table?.rows || [];
+  const stats = {};
+
+  rows.forEach((row) => {
+    const metric = row?.c?.[0]?.v;
+    const value = row?.c?.[1]?.v;
+    if (metric) {
+      stats[String(metric)] = value;
+    }
+  });
+
+  return {
+    uniqueVisitors: Number(stats.uniqueVisitors || 0),
+    totalSubmissions: Number(stats.totalSubmissions || 0),
+    lastUpdatedUtc: stats.lastUpdatedUtc || "",
+  };
+}
+
+async function fetchVisitorStatsFromGoogleSheet() {
+  const callbackName = `wahjStatsCallback_${Date.now()}`;
+  const url = new URL(publicStatsGvizUrl);
+  url.searchParams.set("tqx", `responseHandler:${callbackName};out:json`);
+
+  const data = await loadJsonp(url.toString(), callbackName);
+  return parseGvizStats(data);
+}
+
+async function fetchVisitorStatsFromAppsScript() {
+  const response = await fetch(
+    `${registrationApiUrl}?action=stats&site=${encodeURIComponent(appConfig.siteLabel || "Wahj NGS Guide")}`,
+    {
+      method: "GET",
+      cache: "no-store",
+    }
+  );
+
+  const data = await response.json();
+  if (!response.ok || !data.ok) {
+    throw new Error("Failed to fetch visitor stats");
+  }
+
+  return data.stats;
+}
+
+function delay(milliseconds) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, milliseconds);
+  });
+}
+
 async function fetchVisitorStats() {
   const uiLanguage = getCurrentUiLanguage();
+  if (publicStatsGvizUrl) {
+    try {
+      const stats = await fetchVisitorStatsFromGoogleSheet();
+      renderVisitorStats(stats);
+      return;
+    } catch (error) {
+      visitorCount.textContent = translations[uiLanguage].visitorCountError;
+      return;
+    }
+  }
+
   if (!registrationApiUrl) {
     visitorCount.textContent = translations[uiLanguage].visitorCountPending;
     return;
   }
 
   try {
-    const response = await fetch(
-      `${registrationApiUrl}?action=stats&site=${encodeURIComponent(appConfig.siteLabel || "Wahj NGS Guide")}`,
-      {
-        method: "GET",
-        cache: "no-store",
-      }
-    );
-
-    const data = await response.json();
-    if (!response.ok || !data.ok) {
-      throw new Error("Failed to fetch visitor stats");
-    }
-
-    renderVisitorStats(data.stats);
+    const stats = await fetchVisitorStatsFromAppsScript();
+    renderVisitorStats(stats);
   } catch (error) {
     visitorCount.textContent = translations[uiLanguage].visitorCountError;
   }
+}
+
+async function submitRegistrationToAppsScript(profile) {
+  const response = await fetch(registrationApiUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify({
+      action: "register",
+      fullName: profile.fullName,
+      emailAddress: profile.emailAddress,
+      phoneNumber: normalizePhoneNumber(profile.phoneNumber),
+      affiliation: profile.affiliation,
+      preferredLanguage: profile.preferredLanguage,
+      sessionId: getSessionId(),
+      pageUrl: window.location.href,
+      userAgent: navigator.userAgent,
+      siteLabel: appConfig.siteLabel || "Wahj NGS Guide",
+    }),
+  });
+
+  const data = await response.json();
+  if (!response.ok || !data.ok) {
+    throw new Error(data.error || "Unable to save registration");
+  }
+
+  return data;
+}
+
+async function submitRegistrationToGoogleForm(profile) {
+  const preferredLanguageLabel =
+    profile.preferredLanguage === "ar" ? "العربية" : "English";
+  const formPayload = new URLSearchParams();
+
+  formPayload.set(registrationFormFields.fullName, profile.fullName);
+  formPayload.set(registrationFormFields.emailAddress, profile.emailAddress);
+  formPayload.set(registrationFormFields.phoneNumber, normalizePhoneNumber(profile.phoneNumber));
+  formPayload.set(registrationFormFields.affiliation, profile.affiliation);
+  formPayload.set(registrationFormFields.preferredLanguage, preferredLanguageLabel);
+
+  await fetch(registrationFormConfig.formResponseUrl, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: formPayload.toString(),
+  });
+
+  return {
+    ok: true,
+    duplicate: false,
+  };
 }
 
 if (navToggle && primaryNav) {
@@ -419,7 +582,9 @@ if (registrationForm) {
       location.hostname === "localhost" ||
       location.hostname === "127.0.0.1";
 
-    if (!registrationApiUrl) {
+    const backendMode = getRegistrationBackendMode();
+
+    if (!backendMode) {
       if (!localPreviewAllowed) {
         setGateStatus("backendMissing", "is-error");
         return;
@@ -437,33 +602,19 @@ if (registrationForm) {
     setGateStatus("submitting");
 
     try {
-      const response = await fetch(registrationApiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8",
-        },
-        body: JSON.stringify({
-          action: "register",
-          fullName,
-          emailAddress,
-          phoneNumber: normalizePhoneNumber(phoneNumber),
-          affiliation,
-          preferredLanguage,
-          sessionId: getSessionId(),
-          pageUrl: window.location.href,
-          userAgent: navigator.userAgent,
-          siteLabel: appConfig.siteLabel || "Wahj NGS Guide",
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok || !data.ok) {
-        throw new Error(data.error || "Unable to save registration");
-      }
+      const data =
+        backendMode === "googleForm"
+          ? await submitRegistrationToGoogleForm(profile)
+          : await submitRegistrationToAppsScript(profile);
 
       saveStoredRegistration(profile);
-      renderVisitorStats(data.stats);
       unlockSite(profile);
+      if (data.stats) {
+        renderVisitorStats(data.stats);
+      } else if (publicStatsGvizUrl) {
+        await delay(1500);
+        await fetchVisitorStats();
+      }
       setGateStatus(data.duplicate ? "repeatSuccess" : "success", "is-success");
     } catch (error) {
       setGateStatus("saveError", "is-error");
