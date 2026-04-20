@@ -13,7 +13,117 @@
     </script>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
+  <body class="gate-active">
+    <div class="registration-gate" id="registration-gate" aria-modal="true" role="dialog">
+      <div class="gate-panel" id="gate-panel" dir="ltr">
+        <button class="gate-close" id="close-gate" type="button" hidden>
+          ×
+        </button>
+        <div class="gate-brand">
+          <img src="assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="gate-logo" />
+          <div>
+            <p class="eyebrow" data-i18n="gateEyebrow">Access Registration</p>
+            <h1 data-i18n="gateTitle">Welcome to the Wahj NGS learning page</h1>
+          </div>
+        </div>
+
+        <p class="gate-copy" data-i18n="gateIntro">
+          Please enter your details before opening the guide. Your registration is stored
+          securely for visitor logging and follow-up reporting.
+        </p>
+
+        <div class="gate-language-picker" aria-label="Interface language">
+          <button class="language-chip is-active" data-ui-lang="en" type="button">English</button>
+          <button class="language-chip" data-ui-lang="ar" type="button">العربية</button>
+        </div>
+
+        <form class="registration-form" id="registration-form">
+          <div class="form-grid">
+            <label class="field">
+              <span data-i18n="fullNameLabel">Full name</span>
+              <input
+                id="full-name"
+                name="full_name"
+                type="text"
+                required
+                autocomplete="name"
+                data-i18n-placeholder="fullNamePlaceholder"
+                placeholder="Your full name"
+              />
+            </label>
+            <label class="field">
+              <span data-i18n="emailLabel">Email address</span>
+              <input
+                id="email-address"
+                name="email_address"
+                type="email"
+                required
+                autocomplete="email"
+                inputmode="email"
+                data-i18n-placeholder="emailPlaceholder"
+                placeholder="name@example.com"
+              />
+            </label>
+            <label class="field">
+              <span data-i18n="phoneLabel">Phone number</span>
+              <input
+                id="phone-number"
+                name="phone_number"
+                type="tel"
+                required
+                autocomplete="tel"
+                inputmode="tel"
+                data-i18n-placeholder="phonePlaceholder"
+                placeholder="+964..."
+              />
+            </label>
+            <label class="field field-wide">
+              <span data-i18n="affiliationLabel">Affiliation</span>
+              <input
+                id="affiliation"
+                name="affiliation"
+                type="text"
+                required
+                autocomplete="organization"
+                data-i18n-placeholder="affiliationPlaceholder"
+                placeholder="University, company, or laboratory"
+              />
+            </label>
+            <label class="field">
+              <span data-i18n="preferredLanguageLabel">Preferred language</span>
+              <select id="preferred-language" name="preferred_language" required>
+                <option value="en" data-i18n="preferredLanguageEnglish">English</option>
+                <option value="ar" data-i18n="preferredLanguageArabic">Arabic</option>
+              </select>
+            </label>
+            <label class="field field-honeypot" aria-hidden="true">
+              <span>Website</span>
+              <input id="website-field" name="website" type="text" tabindex="-1" autocomplete="off" />
+            </label>
+          </div>
+
+          <div class="gate-actions">
+            <button class="primary-action" id="registration-submit" type="submit" data-i18n="submitLabel">
+              Save and open the guide
+            </button>
+          </div>
+        </form>
+
+        <p class="gate-status" id="gate-status" aria-live="polite">
+          <span data-i18n="defaultStatus">
+            Your details will be stored in a protected Google Sheet used for visitor logging.
+          </span>
+        </p>
+
+        <div class="gate-notes">
+          <p data-i18n="privacyNote">
+            We count unique registered visitors by phone number so the final counter reflects
+            real registrations rather than anonymous page refreshes.
+          </p>
+        </div>
+      </div>
+    </div>
+
     <div class="site-shell">
       <header class="site-header" id="top">
         <div class="brand-lockup">
@@ -1281,9 +1391,20 @@
             blue-red genetics branding.
           </p>
         </div>
+        <div class="footer-card">
+          <p><strong id="visitor-count-label">Unique registered visitors:</strong> <span id="visitor-count">Loading...</span></p>
+          <p id="registration-summary">Waiting for registration data.</p>
+          <p id="visitor-count-note">
+            This number is stored outside the browser and is based on successful registrations.
+          </p>
+          <button class="secondary-action" id="edit-registration" type="button" hidden>
+            Update registration details
+          </button>
+        </div>
       </footer>
     </div>
 
+    <script src="config.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
