@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Next-Generation Sequencing (NGS): A Beginner-Friendly Guide</title>
+    <meta
+      name="description"
+      content="A polished educational webpage that teaches Next-Generation Sequencing (NGS) from the ground up for beginners in molecular biology and bioinformatics."
+    />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="site-header" id="top">
+        <div class="brand-lockup">
+          <img src="assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Educational Handbook</p>
+            <p class="brand-title">Wahj Al-DNA</p>
+          </div>
+        </div>
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="primary-nav"
+        >
+          Menu
+        </button>
+        <nav class="primary-nav" id="primary-nav" aria-label="Primary">
+          <a href="#intro">Intro</a>
+          <a href="#what-is-ngs">What Is NGS?</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#applications">Applications</a>
+          <a href="#glossary">Terms</a>
+          <a href="#qc">Quality Control</a>
+          <a href="#platforms">Platforms</a>
+          <a href="#bioinformatics">Bioinformatics</a>
+          <a href="#choose">Choose</a>
+          <a href="#summary">Remember</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero section" id="intro">
+          <div class="hero-copy reveal">
+            <span class="section-chip">Modern genomics for new learners</span>
+            <h1>Next-Generation Sequencing (NGS): A Beginner-Friendly Guide</h1>
+            <p class="hero-lead">
+              A visual introduction for students who are just starting in molecular biology
+              and bioinformatics. This mini handbook explains what NGS is, how it works,
+              what files it produces, and how to think about sequencing data with confidence.
+            </p>
+
+            <div class="author-panel">
+              <img src="assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="author-logo" />
+              <div>
+                <p class="meta-label">Prepared by</p>
+                <h2>Mahmood Al-Mualm</h2>
+                <p>CEO of Wahj Al-DNA</p>
+                <p class="author-link">
+                  <a href="https://wahj-dna.com.iq/en/home/" target="_blank" rel="noreferrer"
+                    >wahj-dna.com.iq/en/home</a
+                  >
+                </p>
+              </div>
+            </div>
+
+            <p>
+              NGS matters because modern biology increasingly depends on seeing DNA and RNA
+              at scale. It supports medicine, cancer research, microbiology, microbial
+              ecology, pathogen genomics, and many other fields where small targeted methods
+              are not enough.
+            </p>
+
+            <div class="hero-highlights">
+              <article class="mini-card">
+                <span class="mini-icon">MD</span>
+                <h3>Medicine</h3>
+                <p>Detects mutations linked to inherited disease and cancer.</p>
+              </article>
+              <article class="mini-card">
+                <span class="mini-icon">MB</span>
+                <h3>Microbiology</h3>
+                <p>Profiles microbes, pathogens, and microbial communities.</p>
+              </article>
+              <article class="mini-card">
+                <span class="mini-icon">GX</span>
+                <h3>Genomics</h3>
+                <p>Supports large-scale DNA and RNA discovery across many samples.</p>
+              </article>
+            </div>
+          </div>
+
+          <div class="hero-visual reveal">
+            <div class="hero-figure">
+              <div class="hero-grid">
+                <div class="hero-stat">
+                  <p class="stat-number">Millions</p>
+                  <p class="stat-label">reads can be produced in a single sequencing run</p>
+                </div>
+                <div class="hero-stat">
+                  <p class="stat-number">Stepwise</p>
+                  <p class="stat-label">good biology and good bioinformatics work together</p>
+                </div>
+                <div class="hero-stat">
+                  <p class="stat-number">Question-driven</p>
+                  <p class="stat-label">the best assay depends on the biological goal</p>
+                </div>
+              </div>
+              <div class="learning-card">
+                <h3>What students will learn</h3>
+                <ul>
+                  <li>How NGS differs from Sanger sequencing</li>
+                  <li>How samples become reads, files, and biological results</li>
+                  <li>How to interpret common file formats and QC concepts</li>
+                  <li>How to choose an NGS strategy for different questions</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="what-is-ngs">
+          <div class="section-heading reveal">
+            <span class="section-chip">1. Foundations</span>
+            <h2>What is NGS?</h2>
+            <p>
+              Sequencing means reading the order of nucleotides in DNA or RNA. Traditional
+              sequencing usually reads one fragment at a time, while NGS reads enormous
+              numbers of fragments in parallel.
+            </p>
+          </div>
+
+          <div class="card-grid three-column reveal">
+            <article class="info-card">
+              <span class="card-badge">A</span>
+              <h3>What sequencing means</h3>
+              <p>
+                DNA stores biological information as a sequence of bases: A, T, C, and G.
+                Sequencing tells us that order.
+              </p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">B</span>
+              <h3>Why it is called next-generation</h3>
+              <p>
+                These methods improved scale dramatically by reading many fragments at the
+                same time instead of reading only a few.
+              </p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">C</span>
+              <h3>Why it is powerful</h3>
+              <p>
+                NGS lowers cost per base and makes genome-wide analysis possible in both
+                research and applied biology.
+              </p>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Table 1</p>
+              <h3>Sanger sequencing vs NGS</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Feature</th>
+                    <th>Sanger sequencing</th>
+                    <th>Next-Generation Sequencing</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Throughput</td>
+                    <td>Low, usually one fragment at a time</td>
+                    <td>Very high, many fragments in parallel</td>
+                  </tr>
+                  <tr>
+                    <td>Speed for large projects</td>
+                    <td>Slow</td>
+                    <td>Fast</td>
+                  </tr>
+                  <tr>
+                    <td>Cost per base</td>
+                    <td>High</td>
+                    <td>Much lower</td>
+                  </tr>
+                  <tr>
+                    <td>Typical use cases</td>
+                    <td>Plasmids, single amplicons, confirmation</td>
+                    <td>Whole genomes, transcriptomes, panels, microbiomes</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>
+              Sanger sequencing is still useful, but NGS made large-scale genomics practical.
+            </figcaption>
+            <p class="interpretation">
+              <strong>How to interpret this table:</strong> NGS becomes especially useful
+              when the question involves many genes, many samples, or a large genome.
+            </p>
+          </figure>
+
+          <div class="insight-grid reveal">
+            <article class="insight-card">
+              <h3>What this means</h3>
+              <p>NGS is not simply a faster machine. It changes the scale of biology.</p>
+            </article>
+            <article class="insight-card">
+              <h3>Why this matters</h3>
+              <p>Large biological questions often cannot be answered one fragment at a time.</p>
+            </article>
+            <article class="insight-card">
+              <h3>Student takeaway</h3>
+              <p>Choose sequencing methods according to the question, not only the buzzword.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="workflow">
+          <div class="section-heading reveal">
+            <span class="section-chip">2. From sample to answer</span>
+            <h2>The Big Picture Workflow</h2>
+            <p>
+              NGS is a connected chain of laboratory and computational steps. Each step
+              affects the quality and meaning of the final result.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Figure 1</p>
+              <h3>Full NGS workflow</h3>
+            </div>
+            <div class="workflow-map" role="img" aria-label="Full NGS workflow">
+              <div class="workflow-step"><span>1</span><strong>Sample collection</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>2</span><strong>DNA or RNA extraction</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>3</span><strong>Quality control</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>4</span><strong>Library preparation</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>5</span><strong>Sequencing run</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>6</span><strong>Raw reads</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>7</span><strong>Read QC</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>8</span><strong>Alignment or assembly</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>9</span><strong>Variant calling or quantification</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>10</span><strong>Biological interpretation</strong></div>
+            </div>
+            <figcaption>
+              Every box affects the next one. Weak samples, poor libraries, or poor-quality
+              reads reduce the value of the final analysis.
+            </figcaption>
+            <p class="interpretation">
+              <strong>What students should notice:</strong> the sequencer is only one part
+              of the story. Good biology, careful handling, and correct analysis all matter.
+            </p>
+          </figure>
+
+          <div class="step-grid reveal">
+            <article class="step-card">
+              <span class="step-icon">SC</span>
+              <h3>1. Sample collection</h3>
+              <p>The biological material is collected, such as blood, tissue, cells, or an environmental sample.</p>
+              <p><strong>Why this step matters:</strong> poor sampling can introduce degradation or contamination before sequencing even begins.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-icon">EX</span>
+              <h3>2. DNA or RNA extraction</h3>
+              <p>Nucleic acids are purified from the sample so they can be measured and processed.</p>
+              <p><strong>Why this step matters:</strong> impure or degraded material causes weak downstream results.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-icon">QC</span>
+              <h3>3. Input quality control</h3>
+              <p>Concentration, purity, and integrity are checked before library preparation.</p>
+              <p><strong>Why this step matters:</strong> poor starting material often leads to poor libraries.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-icon">LP</span>
+              <h3>4. Library preparation</h3>
+              <p>DNA or cDNA fragments are converted into machine-readable molecules by adding adapters and indexes.</p>
+              <p><strong>Why this step matters:</strong> most sequencers cannot read untreated genomic material directly.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-icon">SR</span>
+              <h3>5. Sequencing run</h3>
+              <p>The instrument reads bases from library fragments and records them as digital signal.</p>
+              <p><strong>Why this step matters:</strong> this is where molecules become computational data.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-icon">FQ</span>
+              <h3>6. Raw reads</h3>
+              <p>The output is usually a FASTQ file containing sequences and base quality scores.</p>
+              <p><strong>Why this step matters:</strong> FASTQ is the starting point for most analyses.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-icon">RQ</span>
+              <h3>7. Read quality check</h3>
+              <p>Software examines quality trends, adapter contamination, duplication, and other issues.</p>
+              <p><strong>Why this step matters:</strong> not every read is equally trustworthy.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-icon">AL</span>
+              <h3>8. Alignment or assembly</h3>
+              <p>Reads are matched to a reference genome or assembled into longer sequences.</p>
+              <p><strong>Why this step matters:</strong> genomic context is needed before many questions can be answered.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-icon">VC</span>
+              <h3>9. Variant calling or quantification</h3>
+              <p>Depending on the experiment, software detects mutations, counts transcripts, or profiles taxa.</p>
+              <p><strong>Why this step matters:</strong> this step turns aligned data into measurable results.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-icon">BI</span>
+              <h3>10. Biological interpretation</h3>
+              <p>Results are linked back to disease, function, ecology, evolution, or the original research question.</p>
+              <p><strong>Why this step matters:</strong> data becomes useful only when interpreted in context.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="applications">
+          <div class="section-heading reveal">
+            <span class="section-chip">3. Major use cases</span>
+            <h2>Types of NGS applications</h2>
+            <p>
+              Different NGS experiments answer different questions. The right method depends
+              on whether you care about whole genomes, coding regions, RNA, microbes, or a
+              small group of known targets.
+            </p>
+          </div>
+
+          <div class="card-grid applications-grid reveal">
+            <article class="application-card">
+              <h3>Whole Genome Sequencing (WGS)</h3>
+              <p><strong>What it studies:</strong> almost the entire genome.</p>
+              <p><strong>When it is used:</strong> broad mutation discovery and genome-wide analysis.</p>
+              <p><strong>What data it gives:</strong> reads and variants across the genome.</p>
+              <p><strong>Example:</strong> finding resistance mutations across a bacterial genome.</p>
+            </article>
+            <article class="application-card">
+              <h3>Whole Exome Sequencing (WES)</h3>
+              <p><strong>What it studies:</strong> protein-coding regions.</p>
+              <p><strong>When it is used:</strong> rare disease studies and many clinical variant projects.</p>
+              <p><strong>What data it gives:</strong> variants in captured exonic regions.</p>
+              <p><strong>Example:</strong> searching for coding mutations linked to an inherited condition.</p>
+            </article>
+            <article class="application-card">
+              <h3>RNA-Seq</h3>
+              <p><strong>What it studies:</strong> RNA molecules and gene expression.</p>
+              <p><strong>When it is used:</strong> transcriptomics and expression comparison.</p>
+              <p><strong>What data it gives:</strong> transcript counts and expression patterns.</p>
+              <p><strong>Example:</strong> comparing gene expression in tumor versus normal tissue.</p>
+            </article>
+            <article class="application-card">
+              <h3>16S rRNA sequencing</h3>
+              <p><strong>What it studies:</strong> bacterial community composition using a marker gene.</p>
+              <p><strong>When it is used:</strong> microbiome surveys.</p>
+              <p><strong>What data it gives:</strong> relative abundance of bacterial taxa.</p>
+              <p><strong>Example:</strong> comparing gut microbiota between groups.</p>
+            </article>
+            <article class="application-card">
+              <h3>Metagenomics</h3>
+              <p><strong>What it studies:</strong> all DNA in a mixed community.</p>
+              <p><strong>When it is used:</strong> complex environmental or host-associated microbiomes.</p>
+              <p><strong>What data it gives:</strong> taxonomic and functional information.</p>
+              <p><strong>Example:</strong> analyzing all microbial DNA in soil or wastewater.</p>
+            </article>
+            <article class="application-card">
+              <h3>Targeted sequencing</h3>
+              <p><strong>What it studies:</strong> selected genes or hotspot regions.</p>
+              <p><strong>When it is used:</strong> focused diagnostics or known candidate genes.</p>
+              <p><strong>What data it gives:</strong> deep coverage over chosen targets.</p>
+              <p><strong>Example:</strong> screening a focused cancer panel.</p>
+            </article>
+            <article class="application-card">
+              <h3>Small RNA or microRNA sequencing</h3>
+              <p><strong>What it studies:</strong> short regulatory RNAs.</p>
+              <p><strong>When it is used:</strong> biomarker or regulation studies.</p>
+              <p><strong>What data it gives:</strong> counts of small RNA species.</p>
+              <p><strong>Example:</strong> detecting microRNAs linked to inflammation or cancer.</p>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Table 2</p>
+              <h3>NGS applications comparison</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Application</th>
+                    <th>Best for</th>
+                    <th>Main data type</th>
+                    <th>Simple example</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>WGS</td>
+                    <td>Genome-wide mutation discovery</td>
+                    <td>Genome reads and variants</td>
+                    <td>Pathogen outbreak genomics</td>
+                  </tr>
+                  <tr>
+                    <td>WES</td>
+                    <td>Coding-region variants</td>
+                    <td>Exonic variants</td>
+                    <td>Rare disease gene search</td>
+                  </tr>
+                  <tr>
+                    <td>RNA-Seq</td>
+                    <td>Expression and transcript structure</td>
+                    <td>Transcript counts</td>
+                    <td>Tumor versus normal expression</td>
+                  </tr>
+                  <tr>
+                    <td>16S</td>
+                    <td>Bacterial community profiling</td>
+                    <td>Taxonomic composition</td>
+                    <td>Gut microbiome survey</td>
+                  </tr>
+                  <tr>
+                    <td>Metagenomics</td>
+                    <td>Whole community DNA</td>
+                    <td>Taxonomic and functional profiles</td>
+                    <td>Wastewater microbiome</td>
+                  </tr>
+                  <tr>
+                    <td>Targeted sequencing</td>
+                    <td>Known genes or hotspots</td>
+                    <td>Deep targeted variants</td>
+                    <td>Focused cancer panel</td>
+                  </tr>
+                  <tr>
+                    <td>Small RNA-Seq</td>
+                    <td>Regulatory short RNAs</td>
+                    <td>Small RNA counts</td>
+                    <td>microRNA biomarker study</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>
+              NGS is a family of approaches, not a single experiment. The biological
+              question should guide the method.
+            </figcaption>
+            <p class="interpretation">
+              <strong>Student interpretation:</strong> ask first what you want to measure:
+              variants, expression, or community composition. The method follows from that.
+            </p>
+          </figure>
+        </section>
+
+        <section class="section section-alt" id="glossary">
+          <div class="section-heading reveal">
+            <span class="section-chip">4. Vocabulary</span>
+            <h2>Important terms every student should know</h2>
+            <p>
+              NGS becomes much easier once common words in laboratory protocols, file names,
+              reports, and analysis outputs stop feeling unfamiliar.
+            </p>
+          </div>
+
+          <div class="glossary-tools reveal">
+            <label class="search-label" for="glossary-search">Glossary filter</label>
+            <input
+              id="glossary-search"
+              type="search"
+              placeholder="Type a term like FASTQ, coverage, or SNP"
+              aria-describedby="glossary-help"
+            />
+            <p id="glossary-help">
+              This quick filter makes the glossary easier to review before class, lab work,
+              or bioinformatics practice.
+            </p>
+          </div>
+
+          <div class="glossary-grid reveal" id="glossary-grid">
+            <article class="glossary-card" data-term="read">
+              <h3>Read</h3>
+              <p>A sequence produced by the machine from one library fragment.</p>
+            </article>
+            <article class="glossary-card" data-term="read length">
+              <h3>Read length</h3>
+              <p>The number of bases in each read, such as 75 bp or 150 bp.</p>
+            </article>
+            <article class="glossary-card" data-term="depth coverage">
+              <h3>Depth / coverage</h3>
+              <p>How many times a position is read. Higher coverage often improves confidence.</p>
+            </article>
+            <article class="glossary-card" data-term="reference genome">
+              <h3>Reference genome</h3>
+              <p>A known sequence used as a guide when aligning reads.</p>
+            </article>
+            <article class="glossary-card" data-term="alignment">
+              <h3>Alignment</h3>
+              <p>The process of placing reads onto a reference genome.</p>
+            </article>
+            <article class="glossary-card" data-term="fastq">
+              <h3>FASTQ</h3>
+              <p>A file that stores read sequences and quality scores.</p>
+            </article>
+            <article class="glossary-card" data-term="bam">
+              <h3>BAM</h3>
+              <p>A compressed binary format of aligned reads.</p>
+            </article>
+            <article class="glossary-card" data-term="vcf">
+              <h3>VCF</h3>
+              <p>A file format that stores called variants such as SNPs and indels.</p>
+            </article>
+            <article class="glossary-card" data-term="adapter">
+              <h3>Adapter</h3>
+              <p>A short artificial sequence added during library preparation.</p>
+            </article>
+            <article class="glossary-card" data-term="library">
+              <h3>Library</h3>
+              <p>The prepared collection of fragments that is ready for sequencing.</p>
+            </article>
+            <article class="glossary-card" data-term="paired-end reads">
+              <h3>Paired-end reads</h3>
+              <p>Two reads generated from opposite ends of the same fragment.</p>
+            </article>
+            <article class="glossary-card" data-term="single-end reads">
+              <h3>Single-end reads</h3>
+              <p>One read generated from only one end of each fragment.</p>
+            </article>
+            <article class="glossary-card" data-term="variant snp">
+              <h3>Variant / SNP</h3>
+              <p>A difference from the reference sequence. A SNP is a one-base change.</p>
+            </article>
+            <article class="glossary-card" data-term="qc mapping rate">
+              <h3>QC / mapping rate</h3>
+              <p>QC means quality control. Mapping rate is the fraction of reads that align.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="file-formats">
+          <div class="section-heading reveal">
+            <span class="section-chip">5. Data literacy</span>
+            <h2>Key file formats</h2>
+            <p>
+              Students often see file names before they understand what those files mean.
+              Learning the formats helps you follow the data through the pipeline.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Table 3</p>
+              <h3>Common NGS file formats</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Format</th>
+                    <th>Full name</th>
+                    <th>What it stores</th>
+                    <th>Why students should care</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>FASTQ</td>
+                    <td>FastQ sequence format</td>
+                    <td>Read sequences plus quality scores</td>
+                    <td>Usually the starting point after sequencing</td>
+                  </tr>
+                  <tr>
+                    <td>FASTA</td>
+                    <td>FastA sequence format</td>
+                    <td>Plain sequences without quality scores</td>
+                    <td>Used for references and assemblies</td>
+                  </tr>
+                  <tr>
+                    <td>SAM</td>
+                    <td>Sequence Alignment/Map</td>
+                    <td>Text-based aligned reads</td>
+                    <td>Helpful for learning alignment structure</td>
+                  </tr>
+                  <tr>
+                    <td>BAM</td>
+                    <td>Binary Alignment/Map</td>
+                    <td>Compressed aligned reads</td>
+                    <td>Common working format for downstream analysis</td>
+                  </tr>
+                  <tr>
+                    <td>VCF</td>
+                    <td>Variant Call Format</td>
+                    <td>Called variants and related fields</td>
+                    <td>Central for mutation analysis</td>
+                  </tr>
+                  <tr>
+                    <td>GTF / GFF</td>
+                    <td>Gene Transfer Format / General Feature Format</td>
+                    <td>Gene and feature annotations</td>
+                    <td>Connects genomic coordinates to genes and transcripts</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>
+              These formats represent the journey from raw reads to aligned data, variants,
+              and annotated biology.
+            </figcaption>
+            <p class="interpretation">
+              <strong>How to read this table:</strong> FASTQ is early raw data, BAM and SAM
+              describe aligned reads, and VCF stores called variants.
+            </p>
+          </figure>
+
+          <div class="file-journey reveal" role="img" aria-label="File journey from FASTQ to interpretation">
+            <div class="file-pill">FASTQ</div>
+            <div class="journey-arrow">→</div>
+            <div class="file-pill">Trimmed FASTQ</div>
+            <div class="journey-arrow">→</div>
+            <div class="file-pill">SAM/BAM</div>
+            <div class="journey-arrow">→</div>
+            <div class="file-pill">VCF or count matrix</div>
+            <div class="journey-arrow">→</div>
+            <div class="file-pill">Biological interpretation</div>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="qc">
+          <div class="section-heading reveal">
+            <span class="section-chip">6. Trust the data carefully</span>
+            <h2>Quality control and why it matters</h2>
+            <p>
+              Raw reads are not automatically ready for interpretation. Some are strong,
+              some are weak, and some contain technical artifacts such as adapters or
+              contamination.
+            </p>
+          </div>
+
+          <div class="card-grid two-column reveal">
+            <article class="info-card">
+              <h3>Why reads are not ready immediately</h3>
+              <p>
+                The sequencer can produce uncertainty in base calling, technical sequences,
+                duplicates, and other artifacts that need inspection before analysis.
+              </p>
+            </article>
+            <article class="info-card">
+              <h3>What low quality means</h3>
+              <p>
+                A low-quality base is a base call the instrument is less confident about,
+                which increases the chance of mapping or variant errors.
+              </p>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Figure 2</p>
+              <h3>Good-quality vs poor-quality reads</h3>
+            </div>
+            <svg class="quality-svg" viewBox="0 0 780 310" role="img" aria-label="Comparison of good and poor quality reads">
+              <rect x="20" y="20" width="350" height="270" rx="18"></rect>
+              <rect x="410" y="20" width="350" height="270" rx="18"></rect>
+              <text x="50" y="60">Good-quality reads</text>
+              <text x="440" y="60">Poor-quality reads</text>
+              <line x1="60" y1="230" x2="330" y2="230"></line>
+              <line x1="60" y1="230" x2="60" y2="90"></line>
+              <line x1="450" y1="230" x2="720" y2="230"></line>
+              <line x1="450" y1="230" x2="450" y2="90"></line>
+              <polyline points="70,120 110,118 150,115 190,116 230,117 270,119 320,122"></polyline>
+              <polyline points="460,120 500,125 540,140 580,165 620,188 660,205 710,220"></polyline>
+              <text x="110" y="255">Read cycle</text>
+              <text x="500" y="255">Read cycle</text>
+              <text x="75" y="95">High base quality</text>
+              <text x="465" y="95">Base quality drops</text>
+              <g class="quality-legend">
+                <rect x="95" y="150" width="18" height="18" rx="4"></rect>
+                <text x="122" y="164">Stable quality across the read</text>
+                <rect x="485" y="150" width="18" height="18" rx="4"></rect>
+                <text x="512" y="164">Quality decreases toward the end</text>
+                <rect x="485" y="182" width="18" height="18" rx="4"></rect>
+                <text x="512" y="196">May need trimming before analysis</text>
+              </g>
+            </svg>
+            <figcaption>
+              Many datasets show weaker base quality toward the ends of reads, which is why
+              trimming and QC review are common early steps.
+            </figcaption>
+            <p class="interpretation">
+              <strong>Beginner interpretation:</strong> if quality stays high across the
+              read, the data is easier to trust. If quality falls sharply, trimming may help.
+            </p>
+          </figure>
+
+          <div class="card-grid three-column reveal">
+            <article class="info-card">
+              <span class="card-badge">Q</span>
+              <h3>Base quality scores</h3>
+              <p>These estimate the confidence of each base call. Higher scores mean lower error probability.</p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">A</span>
+              <h3>Adapters</h3>
+              <p>If inserts are short, the read may continue into adapter sequence, which is usually removed.</p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">D</span>
+              <h3>Duplicate reads</h3>
+              <p>Too many duplicates may reflect PCR bias or low library complexity rather than new information.</p>
+            </article>
+          </div>
+
+          <article class="callout-box reveal">
+            <h3>How a beginner can read a QC report</h3>
+            <p>
+              Start with a few questions: Are base qualities generally high? Is there adapter
+              contamination? Are duplication levels suspicious? Do reads map well to the
+              expected reference? You do not need to master every plot at once.
+            </p>
+          </article>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Table 4</p>
+              <h3>Common QC problems and what they may indicate</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>QC problem</th>
+                    <th>What it may indicate</th>
+                    <th>Why it matters</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Low base quality</td>
+                    <td>Uncertain base calls, especially at read ends</td>
+                    <td>Can reduce mapping accuracy and variant confidence</td>
+                  </tr>
+                  <tr>
+                    <td>Adapter contamination</td>
+                    <td>Short inserts or incomplete cleanup</td>
+                    <td>Non-biological sequence can interfere with alignment</td>
+                  </tr>
+                  <tr>
+                    <td>High duplication</td>
+                    <td>PCR bias or low library complexity</td>
+                    <td>Apparent depth may be less informative than it looks</td>
+                  </tr>
+                  <tr>
+                    <td>Low mapping rate</td>
+                    <td>Contamination, wrong reference, or poor read quality</td>
+                    <td>Suggests reads do not match the expected genome well</td>
+                  </tr>
+                  <tr>
+                    <td>Unexpected sequence content</td>
+                    <td>Bias, contamination, or protocol artifacts</td>
+                    <td>Can distort taxonomic or expression conclusions</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>
+              QC flags do not always mean total failure, but they always deserve interpretation.
+            </figcaption>
+            <p class="interpretation">
+              <strong>Student takeaway:</strong> QC is not optional. A large dataset can still
+              be misleading if its technical quality is poor.
+            </p>
+          </figure>
+        </section>
+
+        <section class="section" id="library-prep">
+          <div class="section-heading reveal">
+            <span class="section-chip">7. Wet-lab logic</span>
+            <h2>Library preparation explained simply</h2>
+            <p>
+              Library preparation converts biological molecules into a form the sequencing
+              machine can recognize. This step often feels mysterious at first, but it becomes
+              much easier when broken into a few clear actions.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Figure 3</p>
+              <h3>Library preparation process</h3>
+            </div>
+            <div class="library-figure" role="img" aria-label="Library preparation process">
+              <div class="library-stage">
+                <span>1</span>
+                <h4>Fragmentation</h4>
+                <p>Long nucleic acids are broken into shorter pieces.</p>
+              </div>
+              <div class="library-arrow">→</div>
+              <div class="library-stage">
+                <span>2</span>
+                <h4>Adapter ligation</h4>
+                <p>Technical sequences are attached to fragment ends.</p>
+              </div>
+              <div class="library-arrow">→</div>
+              <div class="library-stage">
+                <span>3</span>
+                <h4>Amplification</h4>
+                <p>Some protocols copy fragments to produce enough material.</p>
+              </div>
+              <div class="library-arrow">→</div>
+              <div class="library-stage">
+                <span>4</span>
+                <h4>Indexing / barcoding</h4>
+                <p>Each sample gets a sequence label so it can be recognized later.</p>
+              </div>
+              <div class="library-arrow">→</div>
+              <div class="library-stage">
+                <span>5</span>
+                <h4>Multiplexing</h4>
+                <p>Indexed samples are pooled together in one sequencing run.</p>
+              </div>
+            </div>
+            <figcaption>
+              Library preparation adds the physical and informational features the machine
+              needs to read, identify, and separate fragments.
+            </figcaption>
+            <p class="interpretation">
+              <strong>Plain-language interpretation:</strong> fragmentation makes pieces small
+              enough to handle, adapters make them machine-ready, and barcodes let multiple
+              samples share one run.
+            </p>
+          </figure>
+
+          <div class="insight-grid reveal">
+            <article class="insight-card">
+              <h3>What this means</h3>
+              <p>The library is a prepared version of the sample, not the untouched original DNA.</p>
+            </article>
+            <article class="insight-card">
+              <h3>Why this matters</h3>
+              <p>Many artifacts begin during library preparation, including PCR duplicates and uneven representation.</p>
+            </article>
+            <article class="insight-card">
+              <h3>Student takeaway</h3>
+              <p>Library quality strongly influences read quality, duplication, and downstream confidence.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="platforms">
+          <div class="section-heading reveal">
+            <span class="section-chip">8. Sequencing platforms</span>
+            <h2>How sequencing machines read DNA</h2>
+            <p>
+              Different platforms use different chemistries, but the main idea is the same:
+              the instrument detects signals corresponding to nucleotide identities and converts
+              those signals into digital sequence data.
+            </p>
+          </div>
+
+          <article class="callout-box reveal">
+            <h3>The first concept beginners should understand</h3>
+            <p>
+              Some platforms usually produce short reads and some produce long reads. Short
+              reads are often highly accurate and cost-effective. Long reads are especially
+              helpful when the goal involves repeats, structural variants, or long molecules.
+            </p>
+          </article>
+
+          <div class="card-grid three-column reveal">
+            <article class="info-card">
+              <span class="card-badge">IL</span>
+              <h3>Illumina in simple terms</h3>
+              <p>
+                Illumina commonly uses sequencing-by-synthesis. Bases are added step by step,
+                and the machine records a signal after each cycle to infer the sequence.
+              </p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">ON</span>
+              <h3>Oxford Nanopore in simple terms</h3>
+              <p>
+                A molecule passes through a tiny pore, and changes in electrical signal help
+                identify the sequence in real time.
+              </p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">PB</span>
+              <h3>PacBio in simple terms</h3>
+              <p>
+                PacBio observes DNA synthesis directly as a polymerase works on a single
+                molecule, helping generate long-read information.
+              </p>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Figure 4</p>
+              <h3>Short reads vs long reads</h3>
+            </div>
+            <div class="read-compare" role="img" aria-label="Short read and long read comparison">
+              <div class="read-panel">
+                <h4>Short-read concept</h4>
+                <div class="read-bars short">
+                  <span></span><span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <p>Many short overlapping fragments. Excellent for high-throughput routine sequencing.</p>
+              </div>
+              <div class="read-panel">
+                <h4>Long-read concept</h4>
+                <div class="read-bars long">
+                  <span></span><span></span>
+                </div>
+                <p>Fewer but much longer fragments. Useful for complex regions and large structural changes.</p>
+              </div>
+            </div>
+            <figcaption>
+              Short reads provide dense coverage, while long reads can span larger genomic regions.
+            </figcaption>
+            <p class="interpretation">
+              <strong>What students should notice:</strong> neither read type is always better.
+              The best platform depends on the biological question and the needed resolution.
+            </p>
+          </figure>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Table 5</p>
+              <h3>Common sequencing platform families</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Platform family</th>
+                    <th>Typical read style</th>
+                    <th>Strengths</th>
+                    <th>Limitations</th>
+                    <th>What beginners should remember</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Illumina</td>
+                    <td>Short reads</td>
+                    <td>High accuracy, high throughput, strong ecosystem</td>
+                    <td>Short reads can struggle with repeats and large structural variation</td>
+                    <td>Very common in many research and clinical workflows</td>
+                  </tr>
+                  <tr>
+                    <td>Oxford Nanopore</td>
+                    <td>Long reads</td>
+                    <td>Very long reads and flexible devices</td>
+                    <td>Error patterns differ from short-read systems</td>
+                    <td>Helpful when read length matters a lot</td>
+                  </tr>
+                  <tr>
+                    <td>PacBio</td>
+                    <td>Long reads</td>
+                    <td>Long reads with strong consensus accuracy in many workflows</td>
+                    <td>Different cost and throughput trade-offs</td>
+                    <td>Strong for assemblies and complex genomic structure</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>
+              Platform choice is usually a trade-off among read length, accuracy pattern,
+              throughput, and the biological question.
+            </figcaption>
+            <p class="interpretation">
+              <strong>Student takeaway:</strong> learn short-read versus long-read thinking
+              first. Many later details make sense after that.
+            </p>
+          </figure>
+        </section>
+
+        <section class="section" id="bioinformatics">
+          <div class="section-heading reveal">
+            <span class="section-chip">9. After the machine finishes</span>
+            <h2>Basic bioinformatics after sequencing</h2>
+            <p>
+              The machine creates data, but bioinformatics turns that data into information.
+              The exact pipeline changes by experiment, but the main logic is similar across
+              many workflows.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Figure 5</p>
+              <h3>Basic post-sequencing bioinformatics pipeline</h3>
+            </div>
+            <div class="pipeline-flow" role="img" aria-label="Bioinformatics pipeline after sequencing">
+              <div class="pipeline-node">FASTQ generation</div>
+              <div class="pipeline-node">QC</div>
+              <div class="pipeline-node">Trimming</div>
+              <div class="pipeline-node">Alignment or assembly</div>
+              <div class="pipeline-node">Counting or variant calling</div>
+              <div class="pipeline-node">Visualization</div>
+              <div class="pipeline-node">Interpretation</div>
+            </div>
+            <figcaption>
+              Bioinformatics is the bridge between sequencing output and scientific meaning.
+            </figcaption>
+            <p class="interpretation">
+              <strong>How to interpret this figure:</strong> data is gradually cleaned,
+              organized, measured, and then translated into biological insight.
+            </p>
+          </figure>
+
+          <div class="card-grid two-column reveal">
+            <article class="info-card">
+              <h3>FASTQ generation and QC</h3>
+              <p>
+                The sequencing output is commonly delivered as FASTQ files, then checked for
+                base quality, adapters, duplication, and other warning signs.
+              </p>
+            </article>
+            <article class="info-card">
+              <h3>Trimming</h3>
+              <p>
+                Low-quality tails and adapter sequences may be removed before alignment or
+                assembly so later steps work more reliably.
+              </p>
+            </article>
+            <article class="info-card">
+              <h3>Alignment or assembly</h3>
+              <p>
+                If a good reference exists, reads are aligned to it. If not, sequences may be
+                assembled into longer contigs or transcripts.
+              </p>
+            </article>
+            <article class="info-card">
+              <h3>Counting, calling, visualization, interpretation</h3>
+              <p>
+                RNA-Seq often counts transcripts, while DNA sequencing often focuses on variants.
+                The last step is explaining what the results mean biologically.
+              </p>
+            </article>
+          </div>
+
+          <div class="insight-grid reveal">
+            <article class="insight-card">
+              <h3>What this means</h3>
+              <p>Sequencing and analysis are connected but not identical tasks.</p>
+            </article>
+            <article class="insight-card">
+              <h3>Why this matters</h3>
+              <p>Similar read files may need very different pipelines depending on the experiment.</p>
+            </article>
+            <article class="insight-card">
+              <h3>Student takeaway</h3>
+              <p>Bioinformatics is not extra. It is part of the experiment itself.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="misconceptions">
+          <div class="section-heading reveal">
+            <span class="section-chip">10. Common pitfalls</span>
+            <h2>Common mistakes and misconceptions in learning NGS</h2>
+            <p>
+              Beginners often focus on read numbers or the machine alone. A stronger way to
+              think is to connect experiment design, data quality, and the biological question.
+            </p>
+          </div>
+
+          <div class="misconception-grid reveal">
+            <article class="misconception-card">
+              <h3>High read count does not always mean good data</h3>
+              <p><strong>Reality:</strong> many reads can still be low quality, duplicated, contaminated, or poorly matched to the question.</p>
+            </article>
+            <article class="misconception-card">
+              <h3>More coverage is not always useful</h3>
+              <p><strong>Reality:</strong> useful coverage depends on the goal. Very high depth may add cost more than insight.</p>
+            </article>
+            <article class="misconception-card">
+              <h3>QC is not optional</h3>
+              <p><strong>Reality:</strong> skipping QC can turn technical artifacts into false biological conclusions.</p>
+            </article>
+            <article class="misconception-card">
+              <h3>Different experiments require different pipelines</h3>
+              <p><strong>Reality:</strong> RNA-Seq, WGS, 16S, and metagenomics are not analyzed in the same way.</p>
+            </article>
+            <article class="misconception-card">
+              <h3>Sequencing and interpretation are not the same thing</h3>
+              <p><strong>Reality:</strong> a sequence file is data, not a conclusion. Biological context is still needed.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="choose">
+          <div class="section-heading reveal">
+            <span class="section-chip">11. Practical decision-making</span>
+            <h2>How to choose the right NGS approach</h2>
+            <p>
+              One of the most useful beginner skills is matching the experiment to the
+              question. The question should come first, followed by the assay and then the
+              analysis plan.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Figure 6</p>
+              <h3>Decision guide for selecting an NGS approach</h3>
+            </div>
+            <div class="decision-flow" role="img" aria-label="Decision flowchart for choosing an NGS method">
+              <div class="decision-start">What do you want to study?</div>
+              <div class="decision-row">
+                <div class="decision-node">
+                  <h4>Mutations across the whole genome</h4>
+                  <p>Use <strong>WGS</strong></p>
+                </div>
+                <div class="decision-node">
+                  <h4>Coding-region variants</h4>
+                  <p>Use <strong>WES</strong></p>
+                </div>
+                <div class="decision-node">
+                  <h4>Gene expression</h4>
+                  <p>Use <strong>RNA-Seq</strong></p>
+                </div>
+              </div>
+              <div class="decision-row">
+                <div class="decision-node">
+                  <h4>Bacterial community composition</h4>
+                  <p>Use <strong>16S rRNA sequencing</strong></p>
+                </div>
+                <div class="decision-node">
+                  <h4>All microbial DNA in a sample</h4>
+                  <p>Use <strong>Metagenomics</strong></p>
+                </div>
+                <div class="decision-node">
+                  <h4>Specific known genes</h4>
+                  <p>Use <strong>Targeted sequencing</strong></p>
+                </div>
+              </div>
+            </div>
+            <figcaption>
+              The research question is the most important starting point when selecting an NGS strategy.
+            </figcaption>
+            <p class="interpretation">
+              <strong>How to use this figure:</strong> begin with the biological question,
+              then choose the method that produces the most relevant data.
+            </p>
+          </figure>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Table 6</p>
+              <h3>Decision table for beginners</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>If the student wants to study...</th>
+                    <th>Recommended approach</th>
+                    <th>Main reason</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Mutations across the genome</td>
+                    <td>WGS</td>
+                    <td>Broadest view of genomic variation</td>
+                  </tr>
+                  <tr>
+                    <td>Coding-region variants</td>
+                    <td>WES</td>
+                    <td>Focuses on exons where many disease variants occur</td>
+                  </tr>
+                  <tr>
+                    <td>Gene expression</td>
+                    <td>RNA-Seq</td>
+                    <td>Measures transcript abundance</td>
+                  </tr>
+                  <tr>
+                    <td>Bacterial community composition</td>
+                    <td>16S rRNA sequencing</td>
+                    <td>Efficient marker-based taxonomic survey</td>
+                  </tr>
+                  <tr>
+                    <td>All microbial DNA in a sample</td>
+                    <td>Metagenomics</td>
+                    <td>Captures mixed-community DNA beyond one marker gene</td>
+                  </tr>
+                  <tr>
+                    <td>Specific known genes</td>
+                    <td>Targeted sequencing</td>
+                    <td>Provides focused high-depth analysis</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>
+              Good experiment design is a matching problem: question, sample, sequencing
+              strategy, and analysis plan must fit together.
+            </figcaption>
+            <p class="interpretation">
+              <strong>Student takeaway:</strong> more data is not always better. The most
+              useful dataset is the one that best answers the question.
+            </p>
+          </figure>
+        </section>
+
+        <section class="section summary-section" id="summary">
+          <div class="section-heading reveal">
+            <span class="section-chip">12. Final memory map</span>
+            <h2>What students should remember about NGS</h2>
+            <p>
+              If you remember the ideas below, you already have a strong beginner-level
+              foundation for future study in genomics, molecular diagnostics, microbiology,
+              and bioinformatics.
+            </p>
+          </div>
+
+          <div class="summary-grid reveal">
+            <article class="summary-card">
+              <h3>NGS reads many fragments in parallel</h3>
+              <p>That parallelism is what makes large-scale sequencing practical.</p>
+            </article>
+            <article class="summary-card">
+              <h3>The experiment starts before the machine</h3>
+              <p>Sample quality and library preparation strongly shape the data.</p>
+            </article>
+            <article class="summary-card">
+              <h3>QC protects interpretation</h3>
+              <p>Never trust a dataset fully until you understand its quality profile.</p>
+            </article>
+            <article class="summary-card">
+              <h3>Different questions need different NGS methods</h3>
+              <p>WGS, WES, RNA-Seq, 16S, and metagenomics are not interchangeable.</p>
+            </article>
+            <article class="summary-card">
+              <h3>Bioinformatics is part of the experiment</h3>
+              <p>Sequencing files become useful only after careful analysis and interpretation.</p>
+            </article>
+          </div>
+
+          <article class="closing-note reveal">
+            <h3>Student takeaway</h3>
+            <p>
+              NGS is best learned as a connected story: sample, library, machine, reads, QC,
+              analysis, and biological meaning. Once that story feels clear, the terminology
+              and technical details become much easier to understand.
+            </p>
+          </article>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <p><strong>Author:</strong> Mahmood Al-Mualm</p>
+          <p><strong>Title:</strong> CEO of Wahj Al-DNA</p>
+          <p><strong>Organization:</strong> Wahj Al-DNA</p>
+        </div>
+        <div>
+          <p>Educational resource for introductory learning in genomics and sequencing.</p>
+          <p>
+            The visual style draws on Wahj's scientific, training-oriented identity and its
+            blue-red genetics branding.
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
