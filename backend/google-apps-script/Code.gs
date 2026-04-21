@@ -1,103 +1,35 @@
 const SPREADSHEET_ID = "1bF4CgbdG_0K34i9yM9gZl3yweLBwli_XLeARUMeJqFo";
-const REGISTRATIONS_SHEET = "Registrations";
-const START_ROW = 3;
-const CONFIG_SHEET = "Config";
-const PUBLIC_STATS_SHEET = "Public Stats";
-const REGISTRATION_FORM_TITLE = "Wahj NGS Guide Access Registration";
-const REGISTRATION_FORM_DESCRIPTION =
-  "Public access form for the Wahj Next-Generation Sequencing learning page.";
-const SCRIPT_PROPERTY_FORM_ID = "registrationFormId";
-const SCRIPT_PROPERTY_PUBLIC_STATS_ID = "publicStatsSpreadsheetId";
-const SCRIPT_PROPERTY_RESPONSE_SHEET_NAME = "responseSheetName";
-
-const FORM_FIELD_TITLES = {
-  fullName: "Full name",
-  emailAddress: "Email address",
-  phoneNumber: "Phone number",
-  affiliation: "Affiliation / workplace",
-  preferredLanguage: "Preferred language",
-};
-
-function setupRegistrationInfrastructure() {
-  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const form = getOrCreateRegistrationForm_();
-
-  shareFileByLink_(ScriptApp.getScriptId());
-  rebuildRegistrationForm_(form);
-  form.setDestination(FormApp.DestinationType.SPREADSHEET, SPREADSHEET_ID);
-  form.setAcceptingResponses(true);
-
-  if (
-    typeof form.supportsAdvancedResponderPermissions === "function" &&
-    form.supportsAdvancedResponderPermissions()
-  ) {
-    form.setPublished(true);
-  }
-
-  const formFile = DriveApp.getFileById(form.getId());
-  formFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-
-  const responseSheet = findResponseSheet_(spreadsheet);
-  if (responseSheet) {
-    PropertiesService.getScriptProperties().setProperty(
-      SCRIPT_PROPERTY_RESPONSE_SHEET_NAME,
-      responseSheet.getName()
-    );
-  }
-
-  const publicStatsSpreadsheet = getOrCreatePublicStatsSpreadsheet_();
-  const publicStatsSheet = preparePublicStatsSheet_(publicStatsSpreadsheet);
-  ensureFormSubmitTrigger_();
-
-  const stats = syncPublicStats();
-  const config = buildRegistrationConfig_(form, responseSheet, publicStatsSpreadsheet, publicStatsSheet);
-
-  writeConfigSheet_(spreadsheet, config, stats);
-  return config;
-}
-
-function syncPublicStats() {
-  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const responseSheet = findResponseSheet_(spreadsheet);
-  const publicStatsSpreadsheet = getOrCreatePublicStatsSpreadsheet_();
-  const publicStatsSheet = preparePublicStatsSheet_(publicStatsSpreadsheet);
-  const stats = responseSheet ? calculateResponseStats_(responseSheet) : emptyStats_();
-
-  publicStatsSheet.clearContents();
-  publicStatsSheet
-    .getRange(1, 1, 4, 2)
-    .setValues([
-      ["metric", "value"],
-      ["uniqueVisitors", stats.uniqueVisitors],
-      ["totalSubmissions", stats.totalSubmissions],
-      ["lastUpdatedUtc", stats.lastUpdatedUtc],
-    ]);
-
-  return stats;
-}
-
-function testRegistrationInfrastructure() {
-  return {
-    config: setupRegistrationInfrastructure(),
-    stats: syncPublicStats(),
-  };
-}
+const READERS_SHEET = "Readers";
+const READER_HEADERS = [
+  "visitor_id",
+  "first_seen_utc",
+  "last_seen_utc",
+  "visit_count",
+  "first_page_url",
+  "last_page_url",
+  "site_label",
+];
 
 function doGet(e) {
   const params = e && e.parameter ? e.parameter : {};
-  const action = params.action || "stats";
+  const action = sanitizeText_(params.action || "stats").toLowerCase();
+  let payload;
 
-  if (action === "stats") {
-    return jsonOutput_({
+  if (action === "visit") {
+    payload = registerReaderVisit_(params);
+  } else if (action === "stats") {
+    payload = {
       ok: true,
       stats: getStats_(),
-    });
+    };
+  } else {
+    payload = {
+      ok: false,
+      error: "Unsupported action.",
+    };
   }
 
-  return jsonOutput_({
-    ok: false,
-    error: "Unsupported action.",
-  });
+  return outputResponse_(payload, params.callback);
 }
 
 function doPost(e) {
@@ -112,380 +44,232 @@ function doPost(e) {
     });
   }
 
-  if (payload.action !== "register") {
+  const action = sanitizeText_(payload.action).toLowerCase();
+  if (action !== "visit") {
     return jsonOutput_({
       ok: false,
       error: "Unsupported action.",
     });
   }
 
-  const fullName = sanitizeText_(payload.fullName);
-  const emailAddress = sanitizeEmail_(payload.emailAddress);
-  const phoneNumber = normalizePhone_(payload.phoneNumber);
-  const affiliation = sanitizeText_(payload.affiliation);
-  const preferredLanguage = sanitizeLanguage_(payload.preferredLanguage);
-  const sessionId = sanitizeText_(payload.sessionId);
-  const pageUrl = sanitizeText_(payload.pageUrl);
-  const userAgent = truncateText_(sanitizeText_(payload.userAgent), 500);
-
-  if (!fullName || !emailAddress || !phoneNumber || !affiliation || !preferredLanguage) {
-    return jsonOutput_({
-      ok: false,
-      error: "Missing required fields.",
-    });
-  }
-
-  const sheet = getRegistrationsSheet_();
-  const existingPhones = getExistingPhones_(sheet);
-  const duplicate = existingPhones.has(phoneNumber);
-
-  sheet.appendRow([
-    new Date().toISOString(),
-    fullName,
-    emailAddress,
-    phoneNumber,
-    affiliation,
-    preferredLanguage,
-    duplicate ? "repeat_register" : "register",
-    sessionId,
-    pageUrl,
-    userAgent,
-  ]);
-
-  SpreadsheetApp.flush();
-
-  return jsonOutput_({
-    ok: true,
-    duplicate: duplicate,
-    stats: getStats_(),
-    profile: {
-      fullName: fullName,
-      emailAddress: emailAddress,
-      phoneNumber: phoneNumber,
-      affiliation: affiliation,
-      preferredLanguage: preferredLanguage,
-    },
-  });
+  return jsonOutput_(registerReaderVisit_(payload));
 }
 
-function getRegistrationsSheet_() {
-  return SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(REGISTRATIONS_SHEET);
-}
-
-function getOrCreateRegistrationForm_() {
-  const properties = PropertiesService.getScriptProperties();
-  const existingId = properties.getProperty(SCRIPT_PROPERTY_FORM_ID);
-
-  if (existingId) {
-    try {
-      return FormApp.openById(existingId);
-    } catch (error) {
-      properties.deleteProperty(SCRIPT_PROPERTY_FORM_ID);
-    }
-  }
-
-  const form = FormApp.create(REGISTRATION_FORM_TITLE);
-  properties.setProperty(SCRIPT_PROPERTY_FORM_ID, form.getId());
-  return form;
-}
-
-function shareFileByLink_(fileId) {
-  try {
-    DriveApp.getFileById(fileId).setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  } catch (error) {
-    Logger.log("Unable to update sharing for file " + fileId + ": " + error);
-  }
-}
-
-function rebuildRegistrationForm_(form) {
-  const items = form.getItems();
-  for (let index = items.length - 1; index >= 0; index -= 1) {
-    form.deleteItem(items[index]);
-  }
-
-  form.setTitle(REGISTRATION_FORM_TITLE);
-  form.setDescription(REGISTRATION_FORM_DESCRIPTION);
-
-  form
-    .addTextItem()
-    .setTitle(FORM_FIELD_TITLES.fullName)
-    .setHelpText("Enter your full name.")
-    .setRequired(true);
-
-  const emailValidation = FormApp.createTextValidation()
-    .requireTextIsEmail()
-    .setHelpText("Enter a valid email address.")
-    .build();
-
-  form
-    .addTextItem()
-    .setTitle(FORM_FIELD_TITLES.emailAddress)
-    .setHelpText("Enter your email address.")
-    .setValidation(emailValidation)
-    .setRequired(true);
-
-  form
-    .addTextItem()
-    .setTitle(FORM_FIELD_TITLES.phoneNumber)
-    .setHelpText("Enter your phone number, including country code if available.")
-    .setRequired(true);
-
-  form
-    .addTextItem()
-    .setTitle(FORM_FIELD_TITLES.affiliation)
-    .setHelpText("Enter your university, company, laboratory, or hospital.")
-    .setRequired(true);
-
-  form
-    .addListItem()
-    .setTitle(FORM_FIELD_TITLES.preferredLanguage)
-    .setChoiceValues(["English", "العربية"])
-    .setHelpText("Choose the language you prefer for the page.")
-    .setRequired(true);
-}
-
-function getOrCreatePublicStatsSpreadsheet_() {
-  const properties = PropertiesService.getScriptProperties();
-  const existingId = properties.getProperty(SCRIPT_PROPERTY_PUBLIC_STATS_ID);
-
-  if (existingId) {
-    try {
-      return SpreadsheetApp.openById(existingId);
-    } catch (error) {
-      properties.deleteProperty(SCRIPT_PROPERTY_PUBLIC_STATS_ID);
-    }
-  }
-
-  const publicStatsSpreadsheet = SpreadsheetApp.create("Wahj NGS Guide Public Stats");
-  properties.setProperty(SCRIPT_PROPERTY_PUBLIC_STATS_ID, publicStatsSpreadsheet.getId());
-
-  const file = DriveApp.getFileById(publicStatsSpreadsheet.getId());
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-
-  return publicStatsSpreadsheet;
-}
-
-function preparePublicStatsSheet_(spreadsheet) {
-  const sheet =
-    spreadsheet.getSheetByName(PUBLIC_STATS_SHEET) || spreadsheet.getSheets()[0].setName(PUBLIC_STATS_SHEET);
-
-  sheet.clear();
-  sheet.getRange("A1:B1").setFontWeight("bold");
-  return sheet;
-}
-
-function ensureFormSubmitTrigger_() {
-  const triggers = ScriptApp.getProjectTriggers().filter(function (trigger) {
-    return trigger.getHandlerFunction() === "syncPublicStats";
-  });
-
-  triggers.forEach(function (trigger, index) {
-    if (index > 0) {
-      ScriptApp.deleteTrigger(trigger);
-    }
-  });
-
-  if (!triggers.length) {
-    ScriptApp.newTrigger("syncPublicStats").forSpreadsheet(SPREADSHEET_ID).onFormSubmit().create();
-  }
-}
-
-function buildRegistrationConfig_(form, responseSheet, publicStatsSpreadsheet, publicStatsSheet) {
-  const publishedUrl = form.getPublishedUrl();
-  const liveUrl = publishedUrl.split("?")[0];
-  const responseUrl = liveUrl.replace(/viewform$/, "formResponse");
-  const items = form.getItems();
-  const itemMap = {};
-
-  items.forEach(function (item) {
-    itemMap[item.getTitle()] = "entry." + item.getId();
-  });
-
+function setupReaderCounter() {
+  const sheet = getReadersSheet_();
   return {
-    generatedAtUtc: new Date().toISOString(),
-    formId: form.getId(),
-    formPublishedUrl: publishedUrl,
-    formResponseUrl: responseUrl,
-    responseSheetName: responseSheet ? responseSheet.getName() : "",
-    fullNameEntry: itemMap[FORM_FIELD_TITLES.fullName] || "",
-    emailAddressEntry: itemMap[FORM_FIELD_TITLES.emailAddress] || "",
-    phoneNumberEntry: itemMap[FORM_FIELD_TITLES.phoneNumber] || "",
-    affiliationEntry: itemMap[FORM_FIELD_TITLES.affiliation] || "",
-    preferredLanguageEntry: itemMap[FORM_FIELD_TITLES.preferredLanguage] || "",
-    publicStatsSpreadsheetId: publicStatsSpreadsheet.getId(),
-    publicStatsSheetId: String(publicStatsSheet.getSheetId()),
-    publicStatsGvizUrl:
-      "https://docs.google.com/spreadsheets/d/" +
-      publicStatsSpreadsheet.getId() +
-      "/gviz/tq?gid=" +
-      publicStatsSheet.getSheetId() +
-      "&tqx=out:json",
-    publicStatsSheetUrl: publicStatsSpreadsheet.getUrl(),
+    ok: true,
+    sheetName: sheet.getName(),
+    spreadsheetUrl: SpreadsheetApp.openById(SPREADSHEET_ID).getUrl(),
+    stats: getStatsFromSheet_(sheet),
   };
 }
 
-function writeConfigSheet_(spreadsheet, config, stats) {
-  let sheet = spreadsheet.getSheetByName(CONFIG_SHEET);
-  if (!sheet) {
-    sheet = spreadsheet.insertSheet(CONFIG_SHEET);
+function deleteReaderByVisitorId(visitorId) {
+  const safeVisitorId = sanitizeVisitorId_(visitorId);
+  if (!safeVisitorId) {
+    return {
+      ok: false,
+      error: "Missing visitorId.",
+    };
   }
 
-  sheet.clear();
-  sheet
-    .getRange(1, 1, 1, 2)
-    .setValues([["key", "value"]])
-    .setFontWeight("bold");
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
 
-  const rows = [
-    ["generatedAtUtc", config.generatedAtUtc],
-    ["formId", config.formId],
-    ["formPublishedUrl", config.formPublishedUrl],
-    ["formResponseUrl", config.formResponseUrl],
-    ["responseSheetName", config.responseSheetName],
-    ["fullNameEntry", config.fullNameEntry],
-    ["emailAddressEntry", config.emailAddressEntry],
-    ["phoneNumberEntry", config.phoneNumberEntry],
-    ["affiliationEntry", config.affiliationEntry],
-    ["preferredLanguageEntry", config.preferredLanguageEntry],
-    ["publicStatsSpreadsheetId", config.publicStatsSpreadsheetId],
-    ["publicStatsSheetId", config.publicStatsSheetId],
-    ["publicStatsGvizUrl", config.publicStatsGvizUrl],
-    ["publicStatsSheetUrl", config.publicStatsSheetUrl],
-    ["currentUniqueVisitors", String(stats.uniqueVisitors)],
-    ["currentTotalSubmissions", String(stats.totalSubmissions)],
-    ["currentLastUpdatedUtc", stats.lastUpdatedUtc],
-  ];
+  try {
+    const sheet = getReadersSheet_();
+    const readerRow = findReaderRow_(sheet, safeVisitorId);
 
-  sheet.getRange(2, 1, rows.length, 2).setValues(rows);
-  sheet.autoResizeColumns(1, 2);
+    if (readerRow) {
+      sheet.deleteRow(readerRow);
+      SpreadsheetApp.flush();
+    }
+
+    return {
+      ok: true,
+      deleted: Boolean(readerRow),
+      stats: getStatsFromSheet_(sheet),
+    };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
-function findResponseSheet_(spreadsheet) {
-  const properties = PropertiesService.getScriptProperties();
-  const knownName = properties.getProperty(SCRIPT_PROPERTY_RESPONSE_SHEET_NAME);
+function registerReaderVisit_(input) {
+  const visitorId = sanitizeVisitorId_(input.visitorId);
+  const pageUrl = sanitizeUrl_(input.pageUrl);
+  const siteLabel = sanitizeSiteLabel_(input.siteLabel || input.site);
 
-  if (knownName) {
-    const knownSheet = spreadsheet.getSheetByName(knownName);
-    if (knownSheet) {
-      return knownSheet;
-    }
+  if (!visitorId) {
+    return {
+      ok: false,
+      error: "Missing visitorId.",
+    };
   }
 
-  const titles = Object.keys(FORM_FIELD_TITLES).map(function (key) {
-    return FORM_FIELD_TITLES[key];
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+
+  try {
+    const sheet = getReadersSheet_();
+    const readerRow = findReaderRow_(sheet, visitorId);
+    const now = new Date().toISOString();
+    let duplicate = false;
+
+    if (readerRow) {
+      duplicate = true;
+      const currentVisitCount = Number(sheet.getRange(readerRow, 4).getValue()) || 0;
+      const firstPageUrl = sanitizeUrl_(sheet.getRange(readerRow, 5).getDisplayValue()) || pageUrl;
+      const lastKnownSite = sanitizeSiteLabel_(sheet.getRange(readerRow, 7).getDisplayValue());
+
+      sheet
+        .getRange(readerRow, 3, 1, 5)
+        .setValues([
+          [
+            now,
+            currentVisitCount + 1,
+            firstPageUrl,
+            pageUrl || firstPageUrl,
+            siteLabel || lastKnownSite,
+          ],
+        ]);
+    } else {
+      sheet.appendRow([
+        visitorId,
+        now,
+        now,
+        1,
+        pageUrl,
+        pageUrl,
+        siteLabel,
+      ]);
+    }
+
+    SpreadsheetApp.flush();
+
+    return {
+      ok: true,
+      duplicate: duplicate,
+      stats: getStatsFromSheet_(sheet),
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: String(error && error.message ? error.message : error),
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function getReadersSheet_() {
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  let sheet = spreadsheet.getSheetByName(READERS_SHEET);
+
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(READERS_SHEET);
+  }
+
+  ensureReaderHeaders_(sheet);
+  return sheet;
+}
+
+function ensureReaderHeaders_(sheet) {
+  const headerRange = sheet.getRange(1, 1, 1, READER_HEADERS.length);
+  const currentHeaders = headerRange.getDisplayValues()[0];
+  const headersMatch = READER_HEADERS.every(function (header, index) {
+    return currentHeaders[index] === header;
   });
 
-  const sheets = spreadsheet.getSheets();
-  for (let index = 0; index < sheets.length; index += 1) {
-    const sheet = sheets[index];
-    const lastColumn = Math.max(sheet.getLastColumn(), 1);
-    const header = sheet.getRange(1, 1, 1, lastColumn).getDisplayValues()[0];
-    const hasAllFields = titles.every(function (title) {
-      return header.indexOf(title) !== -1;
-    });
+  if (!headersMatch) {
+    headerRange.setValues([READER_HEADERS]);
+  }
 
-    if (hasAllFields) {
-      properties.setProperty(SCRIPT_PROPERTY_RESPONSE_SHEET_NAME, sheet.getName());
-      return sheet;
+  headerRange.setFontWeight("bold");
+  sheet.setFrozenRows(1);
+  sheet.autoResizeColumns(1, READER_HEADERS.length);
+}
+
+function findReaderRow_(sheet, visitorId) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) {
+    return 0;
+  }
+
+  const visitorIds = sheet.getRange(2, 1, lastRow - 1, 1).getDisplayValues();
+  for (let index = 0; index < visitorIds.length; index += 1) {
+    if (sanitizeVisitorId_(visitorIds[index][0]) === visitorId) {
+      return index + 2;
     }
   }
 
-  return null;
+  return 0;
 }
 
-function calculateResponseStats_(sheet) {
-  const lastRow = sheet.getLastRow();
-  const lastColumn = sheet.getLastColumn();
+function getStats_() {
+  return getStatsFromSheet_(getReadersSheet_());
+}
 
-  if (lastRow < 2 || lastColumn < 1) {
+function getStatsFromSheet_(sheet) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) {
     return emptyStats_();
   }
 
-  const values = sheet.getRange(1, 1, lastRow, lastColumn).getDisplayValues();
-  const header = values[0];
-  const rows = values.slice(1).filter(function (row) {
-    return row[0];
-  });
+  const rows = sheet
+    .getRange(2, 1, lastRow - 1, READER_HEADERS.length)
+    .getDisplayValues()
+    .filter(function (row) {
+      return sanitizeVisitorId_(row[0]);
+    });
 
   if (!rows.length) {
     return emptyStats_();
   }
 
-  const phoneIndex = header.indexOf(FORM_FIELD_TITLES.phoneNumber);
-  const uniquePhones = new Set();
+  let totalVisits = 0;
+  let lastUpdatedUtc = "";
 
   rows.forEach(function (row) {
-    const phoneValue = phoneIndex === -1 ? "" : normalizePhone_(row[phoneIndex]);
-    if (phoneValue) {
-      uniquePhones.add(phoneValue);
+    totalVisits += Number(row[3]) || 0;
+    if (row[2] && row[2] > lastUpdatedUtc) {
+      lastUpdatedUtc = row[2];
     }
   });
 
   return {
-    totalSubmissions: rows.length,
-    uniqueVisitors: uniquePhones.size,
-    lastUpdatedUtc: new Date().toISOString(),
+    totalSubmissions: totalVisits,
+    totalVisits: totalVisits,
+    uniqueVisitors: rows.length,
+    lastUpdatedUtc: lastUpdatedUtc,
   };
 }
 
 function emptyStats_() {
   return {
     totalSubmissions: 0,
+    totalVisits: 0,
     uniqueVisitors: 0,
     lastUpdatedUtc: "",
   };
 }
 
-function getExistingPhones_(sheet) {
-  const lastRow = sheet.getLastRow();
-  if (lastRow < START_ROW) {
-    return new Set();
+function outputResponse_(payload, callback) {
+  const safeCallback = sanitizeCallback_(callback);
+  if (!safeCallback) {
+    return jsonOutput_(payload);
   }
 
-  const values = sheet
-    .getRange(START_ROW, 4, lastRow - START_ROW + 1, 1)
-    .getDisplayValues()
-    .flat()
-    .map(normalizePhone_)
-    .filter(Boolean);
-
-  return new Set(values);
+  return ContentService.createTextOutput(
+    safeCallback + "(" + JSON.stringify(payload) + ");"
+  ).setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
 
-function getStats_() {
-  const sheet = getRegistrationsSheet_();
-  const lastRow = sheet.getLastRow();
-
-  if (lastRow < START_ROW) {
-    return {
-      totalSubmissions: 0,
-      uniqueVisitors: 0,
-      lastUpdatedUtc: "",
-    };
-  }
-
-  const rows = sheet
-    .getRange(START_ROW, 1, lastRow - START_ROW + 1, 9)
-    .getDisplayValues()
-    .filter(function (row) {
-      return row[0];
-    });
-
-  const uniquePhones = new Set(
-    rows
-      .map(function (row) {
-        return normalizePhone_(row[3]);
-      })
-      .filter(Boolean)
+function jsonOutput_(payload) {
+  return ContentService.createTextOutput(JSON.stringify(payload)).setMimeType(
+    ContentService.MimeType.JSON
   );
-
-  const lastUpdatedUtc = rows.length ? rows[rows.length - 1][0] : "";
-
-  return {
-    totalSubmissions: rows.length,
-    uniqueVisitors: uniquePhones.size,
-    lastUpdatedUtc: lastUpdatedUtc,
-  };
 }
 
 function sanitizeText_(value) {
@@ -496,33 +280,29 @@ function truncateText_(value, maxLength) {
   return value.length > maxLength ? value.slice(0, maxLength) : value;
 }
 
-function normalizePhone_(value) {
-  const raw = sanitizeText_(value);
-  if (!raw) {
+function sanitizeVisitorId_(value) {
+  const visitorId = truncateText_(sanitizeText_(value), 128);
+  return /^[A-Za-z0-9._-]+$/.test(visitorId) ? visitorId : "";
+}
+
+function sanitizeUrl_(value) {
+  const rawValue = truncateText_(sanitizeText_(value), 500);
+  if (!rawValue) {
     return "";
   }
 
-  const hasPlus = raw.charAt(0) === "+";
-  const digits = raw.replace(/\D+/g, "");
-  return hasPlus ? "+" + digits : digits;
-}
-
-function sanitizeLanguage_(value) {
-  const language = sanitizeText_(value).toLowerCase();
-  return language === "ar" ? "ar" : language === "en" ? "en" : "";
-}
-
-function sanitizeEmail_(value) {
-  const email = sanitizeText_(value).toLowerCase();
-  if (!email) {
-    return "";
+  if (/^https?:\/\//i.test(rawValue)) {
+    return rawValue;
   }
 
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : "";
+  return "";
 }
 
-function jsonOutput_(payload) {
-  return ContentService.createTextOutput(JSON.stringify(payload)).setMimeType(
-    ContentService.MimeType.JSON
-  );
+function sanitizeSiteLabel_(value) {
+  return truncateText_(sanitizeText_(value) || "Wahj NGS Guide", 120);
+}
+
+function sanitizeCallback_(value) {
+  const callback = truncateText_(sanitizeText_(value), 80);
+  return /^[A-Za-z_$][A-Za-z0-9_$.]*$/.test(callback) ? callback : "";
 }
