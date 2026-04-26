@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>دليل مبسّط في تقنيات التسلسل عالي الإنتاجية NGS</title>
+    <meta
+      name="description"
+      content="صفحة تعليمية عربية مبسطة تشرح تقنيات التسلسل عالي الإنتاجية NGS لطلبة الأحياء الجزيئية والمعلوماتية الحيوية."
+    />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="site-header" id="top">
+        <div class="brand-lockup">
+          <img src="../assets/wahj-logo.png" alt="شعار Wahj Al-DNA" class="brand-logo" />
+          <div>
+            <p class="eyebrow">دليل تعليمي</p>
+            <p class="brand-title">Wahj Al-DNA</p>
+          </div>
+        </div>
+        <div class="language-switch" aria-label="تبديل اللغة">
+          <a class="language-link" href="../">English</a>
+          <a class="language-link is-active" href="./">العربية</a>
+        </div>
+        <div class="reader-badge" aria-live="polite">
+          <p class="reader-label">القرّاء</p>
+          <p class="reader-count"><span id="reader-count">جاري التحميل...</span></p>
+          <p class="reader-note" id="reader-note">
+            يتم تحديث عدد القرّاء المجهول تلقائياً من دون جمع أي معلومات شخصية.
+          </p>
+        </div>
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="primary-nav"
+        >
+          القائمة
+        </button>
+        <nav class="primary-nav" id="primary-nav" aria-label="التنقل الرئيسي">
+          <a href="#intro">المقدمة</a>
+          <a href="#what-is-ngs">ما هو <span class="term-ltr">NGS</span>؟</a>
+          <a href="#workflow">سير العمل</a>
+          <a href="#applications">التطبيقات</a>
+          <a href="#glossary">المصطلحات</a>
+          <a href="#qc">ضبط الجودة</a>
+          <a href="#platforms">المنصات</a>
+          <a href="#bioinformatics">التحليل الحيوي</a>
+          <a href="#choose">الاختيار</a>
+          <a href="#summary">الخلاصة</a>
+          <a href="#comments">التعليقات</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero section" id="intro">
+          <div class="hero-copy reveal">
+            <span class="section-chip">الجينوميات الحديثة للمتعلمين الجدد</span>
+            <h1>دليل مبسّط في تقنيات التسلسل عالي الإنتاجية <span class="term-ltr">NGS</span></h1>
+            <p class="hero-lead">
+              مورد تعليمي بصري لطلبة الأحياء الجزيئية والمعلوماتية الحيوية في بداية
+              الطريق. يشرح هذا الدليل ما هو <span class="term-ltr">NGS</span>، وكيف
+              يعمل، وما أنواع الملفات التي ينتجها، وكيف نفكر في بيانات التسلسل بصورة
+              علمية وواضحة.
+            </p>
+
+            <div class="author-panel">
+              <img src="../assets/wahj-logo.png" alt="شعار Wahj Al-DNA" class="author-logo" />
+              <div>
+                <p class="meta-label">إعداد</p>
+                <h2>Mahmood Al-Mualm</h2>
+                <p>CEO of Wahj Al-DNA</p>
+                <p class="author-link">
+                  <a href="https://wahj-dna.com.iq/en/home/" target="_blank" rel="noreferrer"
+                    >wahj-dna.com.iq/en/home</a
+                  >
+                </p>
+              </div>
+            </div>
+
+            <p>
+              تزداد أهمية <span class="term-ltr">NGS</span> لأن الأحياء الحديثة أصبحت
+              تعتمد على قراءة <span class="term-ltr">DNA</span> و<span class="term-ltr"
+                >RNA</span
+              >
+              على نطاق واسع. ويظهر دورها بوضوح في الطب، وأبحاث السرطان، والأحياء
+              الدقيقة، وجينومات الممرضات، ودراسات الميكروبيوم، وعلم الجينوم بصورة عامة.
+            </p>
+
+            <div class="hero-highlights">
+              <article class="mini-card">
+                <span class="mini-icon">MD</span>
+                <h3>الطب</h3>
+                <p>تساعد على كشف الطفرات المرتبطة بالأمراض الوراثية والسرطان.</p>
+              </article>
+              <article class="mini-card">
+                <span class="mini-icon">MB</span>
+                <h3>الأحياء الدقيقة</h3>
+                <p>تصف المجتمعات الميكروبية والممرضات والعينات البيئية المعقدة.</p>
+              </article>
+              <article class="mini-card">
+                <span class="mini-icon">GX</span>
+                <h3>علم الجينوم</h3>
+                <p>تجعل الدراسات الواسعة النطاق أكثر عملية من حيث الوقت والكلفة.</p>
+              </article>
+            </div>
+          </div>
+
+          <div class="hero-visual reveal">
+            <div class="hero-figure">
+              <div class="hero-grid">
+                <div class="hero-stat">
+                  <p class="stat-number">ملايين</p>
+                  <p class="stat-label">القراءات يمكن توليدها في تشغيل واحد</p>
+                </div>
+                <div class="hero-stat">
+                  <p class="stat-number">تسلسلي</p>
+                  <p class="stat-label">جودة المختبر وجودة التحليل الحيوي تعملان معاً</p>
+                </div>
+                <div class="hero-stat">
+                  <p class="stat-number">موجّه بالسؤال</p>
+                  <p class="stat-label">أفضل تقنية هي التي تجيب عن السؤال البيولوجي الصحيح</p>
+                </div>
+              </div>
+              <div class="learning-card">
+                <h3>ماذا سيتعلم الطالب؟</h3>
+                <ul>
+                  <li>الفرق بين <span class="term-ltr">Sanger</span> و<span class="term-ltr">NGS</span></li>
+                  <li>كيف تتحول العينة إلى قراءات وملفات ونتائج بيولوجية</li>
+                  <li>كيف نفهم المصطلحات والملفات وضبط الجودة</li>
+                  <li>كيف نختار طريقة <span class="term-ltr">NGS</span> المناسبة</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="what-is-ngs">
+          <div class="section-heading reveal">
+            <span class="section-chip">1. الأساسيات</span>
+            <h2>ما هو <span class="term-ltr">NGS</span>؟</h2>
+            <p>
+              التسلسل يعني قراءة ترتيب القواعد النيتروجينية في
+              <span class="term-ltr">DNA</span> أو <span class="term-ltr">RNA</span>.
+              أما <span class="term-ltr">NGS</span> فيعني قراءة أعداد هائلة من القطع
+              بالتوازي بدلاً من قراءة قطعة واحدة كل مرة.
+            </p>
+          </div>
+
+          <div class="card-grid three-column reveal">
+            <article class="info-card">
+              <span class="card-badge">A</span>
+              <h3>ما معنى التسلسل؟</h3>
+              <p>
+                يخزن <span class="term-ltr">DNA</span> المعلومات الحيوية على هيئة
+                ترتيب من <span class="term-ltr">A, T, C, G</span>. والتسلسل يخبرنا بهذا
+                الترتيب.
+              </p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">B</span>
+              <h3>لماذا يسمى الجيل التالي؟</h3>
+              <p>
+                لأنه نقل علم التسلسل من قراءة محدودة وبطيئة إلى قراءة متوازية واسعة
+                النطاق.
+              </p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">C</span>
+              <h3>لماذا هو قوي؟</h3>
+              <p>
+                لأنه يقلل كلفة القاعدة الواحدة ويجعل التحليل الجينومي الواسع ممكناً.
+              </p>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">الجدول 1</p>
+              <h3>مقارنة بين <span class="term-ltr">Sanger</span> و<span class="term-ltr">NGS</span></h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>العنصر</th>
+                    <th><span class="term-ltr">Sanger</span></th>
+                    <th><span class="term-ltr">NGS</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>الإنتاجية</td>
+                    <td>منخفضة، غالباً قطعة واحدة في كل مرة</td>
+                    <td>عالية جداً، ملايين القطع بالتوازي</td>
+                  </tr>
+                  <tr>
+                    <td>السرعة في المشاريع الكبيرة</td>
+                    <td>أبطأ</td>
+                    <td>أسرع</td>
+                  </tr>
+                  <tr>
+                    <td>الكلفة لكل قاعدة</td>
+                    <td>أعلى</td>
+                    <td>أقل بكثير</td>
+                  </tr>
+                  <tr>
+                    <td>أمثلة استخدام</td>
+                    <td>بلازميدات وأمبليكونات مفردة وتأكيد نتائج</td>
+                    <td>جينومات كاملة وترانسكريبتومات ولوحات مستهدفة وميكروبيومات</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>ما زال <span class="term-ltr">Sanger</span> مفيداً، لكن <span class="term-ltr">NGS</span> غيّر مقياس الدراسات الجينومية.</figcaption>
+            <p class="interpretation">
+              <strong>كيف نقرأ هذا الجدول؟</strong> يصبح <span class="term-ltr">NGS</span>
+              أكثر فائدة كلما ازداد عدد الجينات أو العينات أو اتسع حجم الجينوم.
+            </p>
+          </figure>
+        </section>
+
+        <section class="section section-alt" id="workflow">
+          <div class="section-heading reveal">
+            <span class="section-chip">2. من العينة إلى النتيجة</span>
+            <h2>الصورة العامة لسير العمل</h2>
+            <p>
+              <span class="term-ltr">NGS</span> ليس مجرد جهاز. بل هو سلسلة مترابطة من
+              خطوات مختبرية وحاسوبية، وكل خطوة تؤثر في الخطوة التالية.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">الشكل 1</p>
+              <h3>سير العمل الكامل في <span class="term-ltr">NGS</span></h3>
+            </div>
+            <div class="workflow-map" role="img" aria-label="سير العمل الكامل">
+              <div class="workflow-step"><span>1</span><strong>جمع العينة</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>2</span><strong>استخلاص الحمض النووي</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>3</span><strong>ضبط الجودة</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>4</span><strong>تحضير المكتبة</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>5</span><strong>التشغيل على الجهاز</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>6</span><strong>القراءات الخام</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>7</span><strong>فحص القراءات</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>8</span><strong>المحاذاة أو التجميع</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>9</span><strong>الاستدعاء أو الكمية</strong></div>
+              <div class="workflow-arrow">→</div>
+              <div class="workflow-step"><span>10</span><strong>التفسير البيولوجي</strong></div>
+            </div>
+            <figcaption>كل صندوق في هذا المسار يؤثر في الصندوق التالي.</figcaption>
+            <p class="interpretation">
+              <strong>ما الذي يجب أن يلاحظه الطالب؟</strong> جهاز التسلسل جزء واحد فقط من
+              القصة؛ فالعينة والمكتبة والتحليل عوامل أساسية أيضاً.
+            </p>
+          </figure>
+
+          <div class="step-grid reveal">
+            <article class="step-card">
+              <span class="step-icon">SC</span>
+              <h3>1. جمع العينة</h3>
+              <p>قد تكون العينة دماً أو نسيجاً أو خلايا أو مادة بيئية.</p>
+              <p><strong>لماذا هذه الخطوة مهمة؟</strong> جمع سيئ قد يسبب تلوثاً أو تحللاً مبكراً.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-icon">EX</span>
+              <h3>2. الاستخلاص</h3>
+              <p>يتم تنقية <span class="term-ltr">DNA/RNA</span> لكي يصبح قابلاً للقياس والمعالجة.</p>
+              <p><strong>الأهمية:</strong> المادة المتحللة أو غير النقية تنتج نتائج ضعيفة.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-icon">QC</span>
+              <h3>3. ضبط الجودة الأولي</h3>
+              <p>يتم تقييم التركيز والنقاوة والتكامل قبل تحضير المكتبة.</p>
+              <p><strong>الأهمية:</strong> البداية الضعيفة تقود غالباً إلى مكتبات ضعيفة.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-icon">LP</span>
+              <h3>4. تحضير المكتبة</h3>
+              <p>تضاف المحولات والمؤشرات لتحويل الجزيئات إلى صورة قابلة للقراءة.</p>
+              <p><strong>الأهمية:</strong> أغلب الأجهزة لا تقرأ المادة الجينومية الخام مباشرة.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-icon">FQ</span>
+              <h3>5-7. من التشغيل إلى <span class="term-ltr">FASTQ</span></h3>
+              <p>بعد تشغيل الجهاز نحصل غالباً على ملفات <span class="term-ltr">FASTQ</span> مع درجات الجودة.</p>
+              <p><strong>الأهمية:</strong> هذه هي نقطة البداية لمعظم التحليلات.</p>
+            </article>
+            <article class="step-card">
+              <span class="step-icon">BI</span>
+              <h3>8-10. التحليل والتفسير</h3>
+              <p>تتم المحاذاة أو التجميع ثم استدعاء الطفرات أو حساب التعبير ثم التفسير.</p>
+              <p><strong>الأهمية:</strong> البيانات لا تصبح معرفة إلا بعد تفسيرها في سياقها الحيوي.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="applications">
+          <div class="section-heading reveal">
+            <span class="section-chip">3. الاستخدامات الكبرى</span>
+            <h2>أنواع تطبيقات <span class="term-ltr">NGS</span></h2>
+            <p>
+              لكل تجربة سؤالها الخاص. لذلك لا توجد تجربة واحدة تناسب كل شيء، بل توجد
+              مجموعة من التطبيقات التي تُختار حسب نوع السؤال البيولوجي.
+            </p>
+          </div>
+
+          <div class="applications-grid card-grid reveal">
+            <article class="application-card">
+              <h3><span class="term-ltr">WGS</span></h3>
+              <p><strong>ماذا يدرس؟</strong> الجينوم كاملاً تقريباً.</p>
+              <p><strong>متى يستخدم؟</strong> عند البحث الواسع عن الطفرات.</p>
+              <p><strong>ما نوع البيانات؟</strong> قراءات ومتغيرات جينومية شاملة.</p>
+              <p><strong>مثال:</strong> تتبع طفرات مقاومة المضادات في بكتيريا كاملة الجينوم.</p>
+            </article>
+            <article class="application-card">
+              <h3><span class="term-ltr">WES</span></h3>
+              <p><strong>ماذا يدرس؟</strong> المناطق المشفرة للبروتين.</p>
+              <p><strong>متى يستخدم؟</strong> في أمراض نادرة ودراسات سريرية كثيرة.</p>
+              <p><strong>ما نوع البيانات؟</strong> متغيرات في الإكسونات المستهدفة.</p>
+              <p><strong>مثال:</strong> البحث عن طفرة مشفرة مرتبطة بمرض وراثي.</p>
+            </article>
+            <article class="application-card">
+              <h3><span class="term-ltr">RNA-Seq</span></h3>
+              <p><strong>ماذا يدرس؟</strong> التعبير الجيني والجزيئات RNA.</p>
+              <p><strong>متى يستخدم؟</strong> في الترانسكريبتوم والمقارنات التعبيرية.</p>
+              <p><strong>ما نوع البيانات؟</strong> عدّ النسخ وأنماط التعبير.</p>
+              <p><strong>مثال:</strong> مقارنة الورم بالنسيج الطبيعي.</p>
+            </article>
+            <article class="application-card">
+              <h3><span class="term-ltr">16S rRNA</span></h3>
+              <p><strong>ماذا يدرس؟</strong> تركيب المجتمع البكتيري عبر جين دلالي.</p>
+              <p><strong>متى يستخدم؟</strong> في مسوحات الميكروبيوم.</p>
+              <p><strong>ما نوع البيانات؟</strong> الوفرة النسبية للتصنيفات البكتيرية.</p>
+              <p><strong>مثال:</strong> مقارنة ميكروبيوم الأمعاء بين مجموعات.</p>
+            </article>
+            <article class="application-card">
+              <h3>الميتاجينومكس</h3>
+              <p><strong>ماذا يدرس؟</strong> كل <span class="term-ltr">DNA</span> في مجتمع مختلط.</p>
+              <p><strong>متى يستخدم؟</strong> في العينات البيئية والمعقدة.</p>
+              <p><strong>ما نوع البيانات؟</strong> معلومات تصنيفية ووظيفية.</p>
+              <p><strong>مثال:</strong> تحليل الحمض النووي الميكروبي في مياه الصرف.</p>
+            </article>
+            <article class="application-card">
+              <h3>التسلسل المستهدف</h3>
+              <p><strong>ماذا يدرس؟</strong> جينات أو مناطق معلومة مسبقاً.</p>
+              <p><strong>متى يستخدم؟</strong> في التشخيص المركّز أو لوحات الجينات.</p>
+              <p><strong>ما نوع البيانات؟</strong> تغطية عميقة لأهداف محددة.</p>
+              <p><strong>مثال:</strong> لوحة طفرات سرطانية معروفة.</p>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">الجدول 2</p>
+              <h3>مقارنة سريعة بين التطبيقات</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>التطبيق</th>
+                    <th>الأفضل له</th>
+                    <th>البيانات الرئيسية</th>
+                    <th>مثال بسيط</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="term-ltr">WGS</span></td>
+                    <td>اكتشاف الطفرات على مستوى الجينوم</td>
+                    <td>قراءات ومتغيرات جينومية</td>
+                    <td>جينومات تفشّي الممرضات</td>
+                  </tr>
+                  <tr>
+                    <td><span class="term-ltr">WES</span></td>
+                    <td>متغيرات المناطق المشفرة</td>
+                    <td>متغيرات إكسونية</td>
+                    <td>البحث عن سبب جيني لمرض نادر</td>
+                  </tr>
+                  <tr>
+                    <td><span class="term-ltr">RNA-Seq</span></td>
+                    <td>التعبير الجيني</td>
+                    <td>عدّ النسخ</td>
+                    <td>الورم مقابل الطبيعي</td>
+                  </tr>
+                  <tr>
+                    <td><span class="term-ltr">16S</span></td>
+                    <td>تركيب المجتمع البكتيري</td>
+                    <td>تصنيف بكتيري</td>
+                    <td>مسح ميكروبيوم الأمعاء</td>
+                  </tr>
+                  <tr>
+                    <td>الميتاجينومكس</td>
+                    <td>كل حمض نووي ميكروبي في العينة</td>
+                    <td>تصنيف ووظيفة</td>
+                    <td>عينة بيئية معقّدة</td>
+                  </tr>
+                  <tr>
+                    <td>التسلسل المستهدف</td>
+                    <td>جينات معروفة</td>
+                    <td>متغيرات عميقة ومركّزة</td>
+                    <td>لوحة جينات سرطانية</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>السؤال البيولوجي هو الذي يحدد نوع التجربة، وليس العكس.</figcaption>
+          </figure>
+        </section>
+
+        <section class="section section-alt" id="glossary">
+          <div class="section-heading reveal">
+            <span class="section-chip">4. المفردات الأساسية</span>
+            <h2>مصطلحات مهمة يجب أن يعرفها كل طالب</h2>
+            <p>
+              تصبح تقنية <span class="term-ltr">NGS</span> أسهل بكثير عندما تتوقف
+              المصطلحات عن كونها غريبة في التقارير والملفات والأدوات التحليلية.
+            </p>
+          </div>
+
+          <div class="glossary-tools reveal">
+            <label class="search-label" for="glossary-search">تصفية المصطلحات</label>
+            <input
+              id="glossary-search"
+              type="search"
+              placeholder="ابحث عن مصطلح مثل FASTQ أو coverage"
+              aria-describedby="glossary-help"
+            />
+            <p id="glossary-help">
+              يساعد هذا الحقل في مراجعة المصطلحات قبل الدرس أو المختبر أو التدريب العملي.
+            </p>
+          </div>
+
+          <div class="glossary-grid reveal" id="glossary-grid">
+            <article class="glossary-card" data-term="read">
+              <h3>Read</h3>
+              <p>تسلسل ينتجه الجهاز من قطعة واحدة في المكتبة.</p>
+            </article>
+            <article class="glossary-card" data-term="read length">
+              <h3>Read length</h3>
+              <p>عدد القواعد في كل قراءة مثل <span class="term-ltr">75 bp</span> أو <span class="term-ltr">150 bp</span>.</p>
+            </article>
+            <article class="glossary-card" data-term="depth coverage">
+              <h3>Depth / coverage</h3>
+              <p>عدد مرات قراءة الموضع الجينومي الواحد.</p>
+            </article>
+            <article class="glossary-card" data-term="reference genome">
+              <h3>Reference genome</h3>
+              <p>تسلسل مرجعي معروف تستخدمه المحاذاة كدليل.</p>
+            </article>
+            <article class="glossary-card" data-term="alignment">
+              <h3>Alignment</h3>
+              <p>وضع القراءات على الجينوم المرجعي.</p>
+            </article>
+            <article class="glossary-card" data-term="fastq">
+              <h3>FASTQ</h3>
+              <p>ملف يحفظ التسلسلات ودرجات جودة القواعد.</p>
+            </article>
+            <article class="glossary-card" data-term="bam">
+              <h3>BAM</h3>
+              <p>صيغة ثنائية مضغوطة للقراءات بعد المحاذاة.</p>
+            </article>
+            <article class="glossary-card" data-term="vcf">
+              <h3>VCF</h3>
+              <p>ملف يخزن المتغيرات المستدعاة مثل <span class="term-ltr">SNPs</span>.</p>
+            </article>
+            <article class="glossary-card" data-term="adapter">
+              <h3>Adapter</h3>
+              <p>تسلسل صناعي قصير يضاف أثناء تحضير المكتبة.</p>
+            </article>
+            <article class="glossary-card" data-term="library">
+              <h3>Library</h3>
+              <p>المجموعة المجهزة من القطع الجزيئية الجاهزة للتسلسل.</p>
+            </article>
+            <article class="glossary-card" data-term="paired-end reads">
+              <h3>Paired-end reads</h3>
+              <p>قراءتان من طرفي القطعة نفسها.</p>
+            </article>
+            <article class="glossary-card" data-term="single-end reads">
+              <h3>Single-end reads</h3>
+              <p>قراءة واحدة من طرف واحد لكل قطعة.</p>
+            </article>
+            <article class="glossary-card" data-term="variant snp">
+              <h3>Variant / SNP</h3>
+              <p>اختلاف عن المرجع. أما <span class="term-ltr">SNP</span> فهو تغير في قاعدة واحدة.</p>
+            </article>
+            <article class="glossary-card" data-term="qc mapping rate">
+              <h3>QC / mapping rate</h3>
+              <p><span class="term-ltr">QC</span> تعني ضبط الجودة، ومعدل المحاذاة هو نسبة القراءات التي تصطف على المرجع.</p>
+            </article>
+            <article class="glossary-card" data-term="dna nanoball dnb">
+              <h3>DNA nanoball (DNB)</h3>
+              <p>بنية مضخمة مدمجة من <span class="term-ltr">DNA</span> تستخدم في أنظمة <span class="term-ltr">MGI DNBSEQ</span>.</p>
+            </article>
+            <article class="glossary-card" data-term="cpas">
+              <h3>cPAS</h3>
+              <p>اختصار <span class="term-ltr">Combinatorial Probe-Anchor Synthesis</span> وهي كيمياء التسلسل في أنظمة <span class="term-ltr">MGI DNBSEQ</span>.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="file-formats">
+          <div class="section-heading reveal">
+            <span class="section-chip">5. ثقافة البيانات</span>
+            <h2>أهم صيغ الملفات</h2>
+            <p>
+              كثيراً ما يرى الطالب أسماء الملفات قبل أن يفهم معناها. لذلك فإن معرفة
+              الصيغ تساعد على تتبع البيانات من البداية إلى النهاية.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">الجدول 3</p>
+              <h3>صيغ الملفات الشائعة في <span class="term-ltr">NGS</span></h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>الصيغة</th>
+                    <th>الاسم الكامل</th>
+                    <th>ما الذي تخزنه؟</th>
+                    <th>لماذا تهم الطالب؟</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="term-ltr">FASTQ</span></td>
+                    <td>FastQ sequence format</td>
+                    <td>تسلسلات القراءات مع درجات الجودة</td>
+                    <td>غالباً نقطة البداية بعد تشغيل الجهاز</td>
+                  </tr>
+                  <tr>
+                    <td><span class="term-ltr">FASTA</span></td>
+                    <td>FastA sequence format</td>
+                    <td>تسلسلات من دون درجات جودة</td>
+                    <td>مهم للمرجع أو التجميعات</td>
+                  </tr>
+                  <tr>
+                    <td><span class="term-ltr">SAM</span></td>
+                    <td>Sequence Alignment/Map</td>
+                    <td>قراءات محاذاة بصيغة نصية</td>
+                    <td>مفيد لفهم بنية المحاذاة</td>
+                  </tr>
+                  <tr>
+                    <td><span class="term-ltr">BAM</span></td>
+                    <td>Binary Alignment/Map</td>
+                    <td>النسخة الثنائية المضغوطة من <span class="term-ltr">SAM</span></td>
+                    <td>صيغة تشغيل شائعة في التحليل</td>
+                  </tr>
+                  <tr>
+                    <td><span class="term-ltr">VCF</span></td>
+                    <td>Variant Call Format</td>
+                    <td>المتغيرات المستدعاة والمعلومات المرتبطة بها</td>
+                    <td>أساسي في تحليل الطفرات</td>
+                  </tr>
+                  <tr>
+                    <td><span class="term-ltr">GTF / GFF</span></td>
+                    <td>Gene Transfer / General Feature Format</td>
+                    <td>تعليقات الجينات والمعالم الجينومية</td>
+                    <td>يربط الإحداثيات بالجينات والترانسكريبتات</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>توضح هذه الصيغ رحلة البيانات من القراءات الخام إلى المتغيرات والتفسير.</figcaption>
+          </figure>
+        </section>
+
+        <section class="section section-alt" id="qc">
+          <div class="section-heading reveal">
+            <span class="section-chip">6. الثقة الحذرة بالبيانات</span>
+            <h2>ضبط الجودة ولماذا هو مهم</h2>
+            <p>
+              لا تكون القراءات الخام جاهزة للتفسير مباشرة. فقد تحتوي على قواعد منخفضة
+              الجودة أو محولات أو تكرارات أو تلوث أو انحيازات تقنية.
+            </p>
+          </div>
+
+          <div class="card-grid three-column reveal">
+            <article class="info-card">
+              <span class="card-badge">Q</span>
+              <h3>درجات الجودة</h3>
+              <p>تعكس مدى الثقة في كل قاعدة تمت قراءتها.</p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">A</span>
+              <h3>المحولات</h3>
+              <p>قد تظهر إذا كانت القطع قصيرة أو لم يتم تنظيف المكتبة بشكل كافٍ.</p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">D</span>
+              <h3>التكرارات</h3>
+              <p>قد تشير إلى انحياز <span class="term-ltr">PCR</span> أو تعقيد مكتبة منخفض.</p>
+            </article>
+          </div>
+
+          <article class="callout-box reveal">
+            <h3>كيف يقرأ المبتدئ تقرير <span class="term-ltr">QC</span>؟</h3>
+            <p>
+              اسأل أولاً: هل جودة القواعد عالية عموماً؟ هل توجد محولات؟ هل هناك تكرار
+              مفرط؟ هل معدل المحاذاة جيد؟ لست مضطراً لفهم كل رسم منذ اليوم الأول.
+            </p>
+          </article>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">الجدول 4</p>
+              <h3>مشكلات <span class="term-ltr">QC</span> الشائعة وما قد تعنيه</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>المشكلة</th>
+                    <th>ماذا قد تعني؟</th>
+                    <th>لماذا تهم؟</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>جودة قواعد منخفضة</td>
+                    <td>عدم يقين أعلى في قراءة القواعد</td>
+                    <td>يضعف المحاذاة والثقة في المتغيرات</td>
+                  </tr>
+                  <tr>
+                    <td>تلوث بالمحولات</td>
+                    <td>قطع قصيرة أو تنظيف غير كامل</td>
+                    <td>يضيف تسلسلات غير بيولوجية إلى التحليل</td>
+                  </tr>
+                  <tr>
+                    <td>ارتفاع التكرارات</td>
+                    <td>انحياز أو تعقيد مكتبة منخفض</td>
+                    <td>قد يجعل العمق أقل فائدة مما يبدو</td>
+                  </tr>
+                  <tr>
+                    <td>انخفاض معدل المحاذاة</td>
+                    <td>تلوث أو مرجع غير مناسب أو جودة ضعيفة</td>
+                    <td>يشير إلى أن القراءات لا تطابق المتوقع جيداً</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>علامات <span class="term-ltr">QC</span> لا تعني دائماً الفشل، لكنها دائماً تستحق التفسير.</figcaption>
+          </figure>
+        </section>
+
+        <section class="section" id="library-prep">
+          <div class="section-heading reveal">
+            <span class="section-chip">7. منطق المختبر الرطب</span>
+            <h2>شرح مبسّط لتحضير المكتبة</h2>
+            <p>
+              تحضير المكتبة هو المرحلة التي تُحوَّل فيها المادة الحيوية إلى صيغة يمكن
+              للجهاز أن يتعامل معها ويقرأها.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">الشكل 2</p>
+              <h3>مراحل تحضير المكتبة</h3>
+            </div>
+            <div class="library-figure" role="img" aria-label="مراحل تحضير المكتبة">
+              <div class="library-stage">
+                <span>1</span>
+                <h4>التجزئة</h4>
+                <p>تقطيع الجزيئات الطويلة إلى أجزاء أقصر.</p>
+              </div>
+              <div class="library-arrow">→</div>
+              <div class="library-stage">
+                <span>2</span>
+                <h4>إضافة المحولات</h4>
+                <p>ربط تسلسلات تقنية بنهايات القطع.</p>
+              </div>
+              <div class="library-arrow">→</div>
+              <div class="library-stage">
+                <span>3</span>
+                <h4>التضخيم</h4>
+                <p>زيادة المادة عند الحاجة لبعض البروتوكولات.</p>
+              </div>
+              <div class="library-arrow">→</div>
+              <div class="library-stage">
+                <span>4</span>
+                <h4>الترميز</h4>
+                <p>إعطاء كل عينة رمزاً للتعرف عليها لاحقاً.</p>
+              </div>
+              <div class="library-arrow">→</div>
+              <div class="library-stage">
+                <span>5</span>
+                <h4>الدمج</h4>
+                <p>جمع العينات المشفرة في تشغيل واحد.</p>
+              </div>
+            </div>
+            <figcaption>تضيف هذه المراحل العناصر التي تجعل الجزيئات قابلة للقراءة والتمييز.</figcaption>
+            <p class="interpretation">
+              <strong>تفسير مبسط:</strong> التجزئة تجعل القطع قابلة للمعالجة، والمحولات
+              تجعلها جاهزة للجهاز، والترميز يسمح بتشغيل عدة عينات معاً.
+            </p>
+          </figure>
+
+          <article class="callout-box reveal">
+            <h3>أين تدخل تقنية <span class="term-ltr">MGI DNA nanoball</span>؟</h3>
+            <p>
+              في بعض مسارات <span class="term-ltr">MGI DNBSEQ</span> يتم بعد تحضير
+              المكتبة تحويل الجزيئات إلى دوائر مفردة السلسلة ثم إنتاج
+              <span class="term-ltr">DNA nanoballs</span> بواسطة
+              <span class="term-ltr">rolling circle amplification</span> قبل تحميلها على
+              المصفوفة المنظمة.
+            </p>
+          </article>
+        </section>
+
+        <section class="section section-alt" id="platforms">
+          <div class="section-heading reveal">
+            <span class="section-chip">8. منصات التسلسل</span>
+            <h2>كيف تقرأ أجهزة التسلسل الحمض النووي؟</h2>
+            <p>
+              تختلف الكيميائيات بين المنصات، لكن الفكرة العامة واحدة: الجهاز يلتقط
+              إشارة مرتبطة بالقواعد ثم يحولها إلى بيانات رقمية.
+            </p>
+          </div>
+
+          <article class="callout-box reveal">
+            <h3>الفكرة الأولى التي يجب أن يفهمها المبتدئ</h3>
+            <p>
+              توجد منصات قصيرة القراءة ومنصات طويلة القراءة. القراءة القصيرة غالباً
+              أدق وأوفر للكثير من الأعمال الروتينية، بينما القراءة الطويلة مفيدة في
+              المناطق المعقدة والبنى التركيبية الكبيرة.
+            </p>
+          </article>
+
+          <div class="card-grid three-column reveal">
+            <article class="info-card">
+              <span class="card-badge">IL</span>
+              <h3>Illumina بصورة مبسطة</h3>
+              <p>تعتمد عادة على <span class="term-ltr">sequencing-by-synthesis</span> مع رصد إشارة كل دورة.</p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">MG</span>
+              <h3>MGI DNBSEQ بصورة مبسطة</h3>
+              <p>تعتمد على <span class="term-ltr">DNA nanoballs</span> و<span class="term-ltr">cPAS</span> على مصفوفات منظمة.</p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">ON</span>
+              <h3>Oxford Nanopore بصورة مبسطة</h3>
+              <p>تمر الجزيئات عبر مسام نانوية وتتغير الإشارة الكهربائية مع القواعد.</p>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">الجدول 5</p>
+              <h3>عائلات المنصات الشائعة</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>العائلة</th>
+                    <th>نوع القراءة المعتاد</th>
+                    <th>نقاط القوة</th>
+                    <th>القيود</th>
+                    <th>ما الذي يجب تذكره؟</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Illumina</td>
+                    <td>قصيرة</td>
+                    <td>دقة عالية ونظام استخدام واسع</td>
+                    <td>تعاني في بعض المناطق المكررة أو البنى الكبيرة</td>
+                    <td>منصة قصيرة القراءة شائعة جداً</td>
+                  </tr>
+                  <tr>
+                    <td>MGI DNBSEQ</td>
+                    <td>قصيرة</td>
+                    <td><span class="term-ltr">DNA nanoballs</span> ومصفوفات منظمة وملفات نهائية مألوفة</td>
+                    <td>الكيمياء والمواد والأنظمة ليست قابلة للاستبدال مع منصات قصيرة أخرى</td>
+                    <td>فكّر بها كعائلة قصيرة القراءة ذات بنية نانوبولية خاصة</td>
+                  </tr>
+                  <tr>
+                    <td>Oxford Nanopore</td>
+                    <td>طويلة</td>
+                    <td>قراءات طويلة جداً ومرونة تشغيلية</td>
+                    <td>أنماط خطأ مختلفة عن المنصات القصيرة</td>
+                    <td>مفيدة حين تكون طول القراءة مهماً جداً</td>
+                  </tr>
+                  <tr>
+                    <td>PacBio</td>
+                    <td>طويلة</td>
+                    <td>قراءات طويلة مع دقة توافقية قوية</td>
+                    <td>مفاضلات مختلفة في الكلفة والإنتاجية</td>
+                    <td>قوية في التجميعات والبنى الجينومية المعقدة</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>اختيار المنصة هو موازنة بين طول القراءة ونمط الدقة والإنتاجية والسؤال العلمي.</figcaption>
+          </figure>
+        </section>
+
+        <section class="section" id="bioinformatics">
+          <div class="section-heading reveal">
+            <span class="section-chip">9. بعد انتهاء الجهاز</span>
+            <h2>التحليل الحيوي الأساسي بعد التسلسل</h2>
+            <p>
+              يصنع الجهاز البيانات، لكن المعلوماتية الحيوية هي التي تحولها إلى معنى.
+              يختلف المسار الدقيق باختلاف التجربة، لكن المنطق العام متشابه.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">الشكل 3</p>
+              <h3>المسار التحليلي الأساسي بعد التسلسل</h3>
+            </div>
+            <div class="pipeline-flow" role="img" aria-label="المسار التحليلي بعد التسلسل">
+              <div class="pipeline-node">FASTQ</div>
+              <div class="pipeline-node">QC</div>
+              <div class="pipeline-node">Trimming</div>
+              <div class="pipeline-node">Alignment / Assembly</div>
+              <div class="pipeline-node">Counting / Calling</div>
+              <div class="pipeline-node">Visualization</div>
+              <div class="pipeline-node">Interpretation</div>
+            </div>
+            <figcaption>التحليل الحيوي هو الجسر بين خرج الجهاز والمعنى العلمي.</figcaption>
+          </figure>
+
+          <article class="callout-box reveal">
+            <h3>ما الذي يتغير وما الذي يبقى ثابتاً مع بيانات <span class="term-ltr">MGI</span>؟</h3>
+            <p>
+              قد تختلف كيمياء المنصة قبل تكوين التسلسل، لكن الطالب غالباً سيعمل بعد
+              ذلك مع مفاهيم مألوفة مثل <span class="term-ltr">FASTQ</span> و<span class="term-ltr">BAM</span> و<span class="term-ltr">VCF</span> ومصفوفات العدّ.
+            </p>
+          </article>
+
+          <div class="insight-grid reveal">
+            <article class="insight-card">
+              <h3>ماذا يعني هذا؟</h3>
+              <p>التسلسل والتحليل مرحلتان متصلتان لكنهما ليستا الشيء نفسه.</p>
+            </article>
+            <article class="insight-card">
+              <h3>لماذا يهم؟</h3>
+              <p>قد تحتاج ملفات متشابهة إلى مسارات تحليل مختلفة تماماً بحسب نوع التجربة.</p>
+            </article>
+            <article class="insight-card">
+              <h3>خلاصة الطالب</h3>
+              <p>المعلوماتية الحيوية ليست إضافة ثانوية، بل جزء من التجربة.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="misconceptions">
+          <div class="section-heading reveal">
+            <span class="section-chip">10. أخطاء شائعة</span>
+            <h2>مفاهيم خاطئة متكررة عند تعلم <span class="term-ltr">NGS</span></h2>
+            <p>
+              يقع المبتدئون كثيراً في التركيز على عدد القراءات أو على الجهاز وحده.
+              والطريقة الأقوى هي الربط بين التصميم وجودة البيانات والسؤال العلمي.
+            </p>
+          </div>
+
+          <div class="misconception-grid reveal">
+            <article class="misconception-card">
+              <h3>القراءات الكثيرة لا تعني دائماً بيانات جيدة</h3>
+              <p><strong>الحقيقة:</strong> قد تكون القراءات كثيرة لكنها ضعيفة أو مكررة أو غير مناسبة للسؤال.</p>
+            </article>
+            <article class="misconception-card">
+              <h3>المزيد من التغطية ليس مفيداً دائماً</h3>
+              <p><strong>الحقيقة:</strong> قيمة العمق تعتمد على الهدف، وليس على الرقم وحده.</p>
+            </article>
+            <article class="misconception-card">
+              <h3><span class="term-ltr">QC</span> ليس خطوة اختيارية</h3>
+              <p><strong>الحقيقة:</strong> تجاهله قد يحول الشوائب التقنية إلى استنتاجات بيولوجية خاطئة.</p>
+            </article>
+            <article class="misconception-card">
+              <h3>كل التجارب لا تستخدم التحليل نفسه</h3>
+              <p><strong>الحقيقة:</strong> <span class="term-ltr">RNA-Seq</span> و<span class="term-ltr">WGS</span> و<span class="term-ltr">16S</span> لا تُحلل بالطريقة نفسها.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="choose">
+          <div class="section-heading reveal">
+            <span class="section-chip">11. اتخاذ القرار</span>
+            <h2>كيف نختار الطريقة الصحيحة؟</h2>
+            <p>
+              من أهم مهارات المبتدئ أن يطابق بين السؤال البيولوجي والتجربة والبيانات
+              المطلوبة وخطة التحليل.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">الشكل 4</p>
+              <h3>دليل القرار لاختيار تجربة <span class="term-ltr">NGS</span></h3>
+            </div>
+            <div class="decision-flow" role="img" aria-label="دليل القرار">
+              <div class="decision-start">ماذا تريد أن تدرس؟</div>
+              <div class="decision-row">
+                <div class="decision-node">
+                  <h4>طفرات على مستوى الجينوم</h4>
+                  <p>استخدم <strong><span class="term-ltr">WGS</span></strong></p>
+                </div>
+                <div class="decision-node">
+                  <h4>متغيرات في المناطق المشفرة</h4>
+                  <p>استخدم <strong><span class="term-ltr">WES</span></strong></p>
+                </div>
+                <div class="decision-node">
+                  <h4>التعبير الجيني</h4>
+                  <p>استخدم <strong><span class="term-ltr">RNA-Seq</span></strong></p>
+                </div>
+              </div>
+              <div class="decision-row">
+                <div class="decision-node">
+                  <h4>تركيب المجتمع البكتيري</h4>
+                  <p>استخدم <strong><span class="term-ltr">16S rRNA</span></strong></p>
+                </div>
+                <div class="decision-node">
+                  <h4>كل الحمض النووي الميكروبي</h4>
+                  <p>استخدم <strong>الميتاجينومكس</strong></p>
+                </div>
+                <div class="decision-node">
+                  <h4>جينات معلومة محددة</h4>
+                  <p>استخدم <strong>التسلسل المستهدف</strong></p>
+                </div>
+              </div>
+            </div>
+            <figcaption>السؤال العلمي هو نقطة البداية الأهم عند اختيار استراتيجية التسلسل.</figcaption>
+          </figure>
+        </section>
+
+        <section class="section summary-section" id="summary">
+          <div class="section-heading reveal">
+            <span class="section-chip">12. خريطة الذاكرة الأخيرة</span>
+            <h2>ما الذي يجب أن يتذكره الطالب عن <span class="term-ltr">NGS</span>؟</h2>
+            <p>
+              إذا تذكرت النقاط الآتية، فأنت تملك أساساً جيداً للانطلاق نحو دراسات أعمق
+              في الجينوميات والتشخيص الجزيئي والأحياء الدقيقة والمعلوماتية الحيوية.
+            </p>
+          </div>
+
+          <div class="summary-grid reveal">
+            <article class="summary-card">
+              <h3><span class="term-ltr">NGS</span> يقرأ قطعاً كثيرة بالتوازي</h3>
+              <p>وهذا ما يجعل الدراسات الواسعة النطاق ممكنة عملياً.</p>
+            </article>
+            <article class="summary-card">
+              <h3>التجربة تبدأ قبل الجهاز</h3>
+              <p>جودة العينة وتحضير المكتبة يتركان أثراً كبيراً على البيانات.</p>
+            </article>
+            <article class="summary-card">
+              <h3><span class="term-ltr">QC</span> يحمي التفسير</h3>
+              <p>لا تثق بالبيانات ثقة كاملة قبل فهم ملفها النوعي.</p>
+            </article>
+            <article class="summary-card">
+              <h3>الأسئلة المختلفة تحتاج طرائق مختلفة</h3>
+              <p><span class="term-ltr">WGS</span> و<span class="term-ltr">RNA-Seq</span> و<span class="term-ltr">16S</span> ليست بدائل متكافئة.</p>
+            </article>
+            <article class="summary-card">
+              <h3>التحليل الحيوي جزء من التجربة</h3>
+              <p>الملفات لا تصبح مفيدة إلا بعد تحليل وتفسير دقيقين.</p>
+            </article>
+          </div>
+
+          <article class="closing-note reveal">
+            <h3>خلاصة الطالب</h3>
+            <p>
+              أفضل طريقة لتعلم <span class="term-ltr">NGS</span> هي أن تراه قصة مترابطة:
+              عينة، مكتبة، جهاز، قراءات، <span class="term-ltr">QC</span>، تحليل، ثم
+              معنى بيولوجي.
+            </p>
+          </article>
+        </section>
+
+        <section class="section section-alt" id="comments">
+          <div class="section-heading reveal">
+            <span class="section-chip">13. تغذية راجعة مهنية</span>
+            <h2>تعليقات الأطباء والأساتذة والقراء</h2>
+            <p>
+              خُصص هذا القسم للآراء التعليمية والعلمية حول هذا الدليل. تُحفظ التعليقات
+              عبر الخدمة الخلفية للموقع وتُعرض هنا ليستفيد منها القراء القادمون.
+            </p>
+          </div>
+
+          <div class="comments-layout reveal">
+            <article class="callout-box comments-intro">
+              <h3>ما نوع التعليقات المناسبة هنا؟</h3>
+              <p>
+                أفضل التعليقات هي التي تشير إلى نقطة قوة تعليمية أو تصحيح علمي أو
+                اقتراح موضوع إضافي أو تجربة استخدام هذا الدليل في درس أو ورشة أو مختبر.
+              </p>
+            </article>
+
+            <form class="comment-form" id="comment-form" novalidate>
+              <div class="comment-grid">
+                <label class="field">
+                  <span>الاسم</span>
+                  <input
+                    type="text"
+                    name="display_name"
+                    maxlength="120"
+                    autocomplete="name"
+                    required
+                  />
+                </label>
+                <label class="field">
+                  <span>الصفة المهنية</span>
+                  <input
+                    type="text"
+                    name="professional_title"
+                    maxlength="120"
+                    placeholder="أستاذ، استشاري، باحث، تدريسي..."
+                    required
+                  />
+                </label>
+                <label class="field field-wide">
+                  <span>الانتماء</span>
+                  <input
+                    type="text"
+                    name="affiliation"
+                    maxlength="180"
+                    placeholder="جامعة، مستشفى، شركة، مختبر، أو مؤسسة"
+                    required
+                  />
+                </label>
+                <label class="field field-wide">
+                  <span>التعليق</span>
+                  <textarea
+                    name="comment_text"
+                    rows="5"
+                    maxlength="500"
+                    placeholder="اكتب تعليقاً علمياً أو تعليمياً موجزاً..."
+                    required
+                  ></textarea>
+                </label>
+                <label class="field field-honeypot" aria-hidden="true">
+                  <span>Website</span>
+                  <input type="text" name="website" tabindex="-1" autocomplete="off" />
+                </label>
+              </div>
+              <div class="comment-actions">
+                <button class="primary-action" id="comment-submit" type="submit">
+                  إرسال التعليق
+                </button>
+                <p class="comment-status" id="comment-status" aria-live="polite">
+                  يتم تحميل التعليقات تلقائياً من الخدمة الخلفية للموقع.
+                </p>
+              </div>
+            </form>
+          </div>
+
+          <div class="comments-feed reveal">
+            <div class="comments-feed-header">
+              <h3>أحدث التعليقات</h3>
+              <p>ستظهر التعليقات الجديدة هنا بعد حفظها بنجاح.</p>
+            </div>
+            <div class="comments-list" id="comments-list" aria-live="polite">
+              <article class="comment-card comment-card-empty">
+                <h4>لا توجد تعليقات بعد</h4>
+                <p>سيظهر أول تعليق مهني هنا.</p>
+              </article>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <p><strong>إعداد:</strong> Mahmood Al-Mualm</p>
+          <p><strong>الصفة:</strong> CEO of Wahj Al-DNA</p>
+          <p><strong>المؤسسة:</strong> Wahj Al-DNA</p>
+        </div>
+        <div>
+          <p>مورد تعليمي تمهيدي في الجينوميات وتقنيات التسلسل.</p>
+          <p>
+            استُلهمت الهوية البصرية من الطابع العلمي التدريبي لمؤسسة Wahj ومن ألوان
+            الشعار الأزرق والأحمر.
+          </p>
+        </div>
+        <div class="footer-card">
+          <p><strong>القرّاء:</strong> <span id="footer-reader-count">جاري التحميل...</span></p>
+          <p>يُحفظ هذا العداد المجهول خارج المتصفح ويُحدَّث تلقائياً مع كل قارئ جديد.</p>
+        </div>
+      </footer>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="../script.js"></script>
+  </body>
+</html>

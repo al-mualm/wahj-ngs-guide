@@ -23,6 +23,10 @@
             <p class="brand-title">Wahj Al-DNA</p>
           </div>
         </div>
+        <div class="language-switch" aria-label="Language switch">
+          <a class="language-link is-active" href="./">English</a>
+          <a class="language-link" href="ar/">العربية</a>
+        </div>
         <div class="reader-badge" aria-live="polite">
           <p class="reader-label">Readers</p>
           <p class="reader-count"><span id="reader-count">Loading...</span></p>
@@ -49,6 +53,7 @@
           <a href="#bioinformatics">Bioinformatics</a>
           <a href="#choose">Choose</a>
           <a href="#summary">Remember</a>
+          <a href="#comments">Comments</a>
         </nav>
       </header>
 
@@ -559,6 +564,14 @@
               <h3>QC / mapping rate</h3>
               <p>QC means quality control. Mapping rate is the fraction of reads that align.</p>
             </article>
+            <article class="glossary-card" data-term="dna nanoball dnb">
+              <h3>DNA nanoball (DNB)</h3>
+              <p>A compact amplified DNA structure used in MGI DNBSEQ sequencing workflows.</p>
+            </article>
+            <article class="glossary-card" data-term="cpas">
+              <h3>cPAS</h3>
+              <p>Combinatorial Probe-Anchor Synthesis, the sequencing chemistry used in MGI DNBSEQ systems.</p>
+            </article>
           </div>
         </section>
 
@@ -869,6 +882,21 @@
               <p>Library quality strongly influences read quality, duplication, and downstream confidence.</p>
             </article>
           </div>
+
+          <article class="callout-box reveal">
+            <h3>Where MGI DNA nanoball technology fits</h3>
+            <p>
+              In MGI <strong>DNBSEQ</strong> workflows, prepared fragments can be converted
+              into single-stranded circles and then copied by rolling circle amplification to
+              form <strong>DNA nanoballs (DNBs)</strong>. Those DNBs are loaded onto a
+              patterned array before sequencing chemistry begins.
+            </p>
+            <p>
+              <strong>Why this matters for beginners:</strong> the core NGS logic is still
+              sample to library to sequencing to FASTQ, but some platforms add a specialized
+              preparation stage between library construction and signal detection.
+            </p>
+          </article>
         </section>
 
         <section class="section section-alt" id="platforms">
@@ -917,6 +945,21 @@
               </p>
             </article>
           </div>
+
+          <article class="callout-box reveal">
+            <h3>MGI DNBSEQ and DNA nanoballs in simple terms</h3>
+            <p>
+              MGI short-read platforms use <strong>DNBSEQ</strong> technology. Library
+              molecules are circularized, amplified into <strong>DNA nanoballs</strong>, and
+              loaded onto patterned arrays. Sequencing is then read through
+              <strong>cPAS</strong> chemistry and imaging.
+            </p>
+            <p>
+              <strong>Beginner takeaway:</strong> MGI belongs in the short-read family when
+              you are making first-pass comparisons, but its chemistry and flow-cell design
+              are different from Illumina.
+            </p>
+          </article>
 
           <figure class="figure-card reveal">
             <div class="figure-heading">
@@ -971,6 +1014,13 @@
                     <td>High accuracy, high throughput, strong ecosystem</td>
                     <td>Short reads can struggle with repeats and large structural variation</td>
                     <td>Very common in many research and clinical workflows</td>
+                  </tr>
+                  <tr>
+                    <td>MGI DNBSEQ</td>
+                    <td>Short reads</td>
+                    <td>DNA nanoballs, patterned arrays, strong throughput, familiar downstream file types</td>
+                    <td>Platform chemistry differs from other short-read systems, so workflows and reagents are not interchangeable</td>
+                    <td>Think of it as a short-read platform family with its own nanoball-based architecture</td>
                   </tr>
                   <tr>
                     <td>Oxford Nanopore</td>
@@ -1064,6 +1114,21 @@
               </p>
             </article>
           </div>
+
+          <article class="callout-box reveal">
+            <h3>What changes and what stays the same with MGI data</h3>
+            <p>
+              MGI <strong>DNBSEQ</strong> instruments use platform-specific chemistry before
+              the sequence is called, but once the run is finished, students usually work with
+              familiar downstream concepts such as <strong>FASTQ</strong>,
+              <strong>BAM</strong>, count matrices, and <strong>VCF</strong> files.
+            </p>
+            <p>
+              <strong>Why this matters:</strong> the wet-lab technology may differ, but the
+              logic of QC, trimming, alignment, quantification, and interpretation still
+              remains recognizable to beginners.
+            </p>
+          </article>
 
           <div class="insight-grid reveal">
             <article class="insight-card">
@@ -1272,6 +1337,105 @@
               and technical details become much easier to understand.
             </p>
           </article>
+        </section>
+
+        <section class="section section-alt" id="comments">
+          <div class="section-heading reveal">
+            <span class="section-chip">13. Professional feedback</span>
+            <h2>Comments from doctors, professors, and readers</h2>
+            <p>
+              This section is for professional reflections, teaching feedback, and scientific
+              notes about the guide. Submitted comments are stored with the site backend and
+              shown here for future readers.
+            </p>
+          </div>
+
+          <div class="comments-layout reveal">
+            <article class="callout-box comments-intro">
+              <h3>What kind of comments work best here</h3>
+              <p>
+                Useful comments often point out a teaching strength, suggest a correction,
+                recommend an additional topic, or explain how this guide was used in a class,
+                workshop, or laboratory setting.
+              </p>
+              <p>
+                Please keep comments academic, respectful, and relevant to sequencing,
+                molecular biology, bioinformatics, or scientific training.
+              </p>
+            </article>
+
+            <form class="comment-form" id="comment-form" novalidate>
+              <div class="comment-grid">
+                <label class="field">
+                  <span>Name</span>
+                  <input
+                    type="text"
+                    name="display_name"
+                    maxlength="120"
+                    autocomplete="name"
+                    required
+                  />
+                </label>
+                <label class="field">
+                  <span>Professional title</span>
+                  <input
+                    type="text"
+                    name="professional_title"
+                    maxlength="120"
+                    placeholder="Professor, consultant, lecturer, researcher..."
+                    required
+                  />
+                </label>
+                <label class="field field-wide">
+                  <span>Affiliation</span>
+                  <input
+                    type="text"
+                    name="affiliation"
+                    maxlength="180"
+                    placeholder="University, hospital, company, laboratory, or institute"
+                    required
+                  />
+                </label>
+                <label class="field field-wide">
+                  <span>Comment</span>
+                  <textarea
+                    name="comment_text"
+                    rows="5"
+                    maxlength="500"
+                    placeholder="Share a concise scientific or teaching comment..."
+                    required
+                  ></textarea>
+                </label>
+                <label class="field field-honeypot" aria-hidden="true">
+                  <span>Website</span>
+                  <input type="text" name="website" tabindex="-1" autocomplete="off" />
+                </label>
+              </div>
+              <div class="comment-actions">
+                <button class="primary-action" id="comment-submit" type="submit">
+                  Submit comment
+                </button>
+                <p class="comment-status" id="comment-status" aria-live="polite">
+                  Comments load automatically from the live site backend.
+                </p>
+              </div>
+            </form>
+          </div>
+
+          <div class="comments-feed reveal">
+            <div class="comments-feed-header">
+              <h3>Recent comments</h3>
+              <p>
+                New comments appear here after they are saved successfully.
+              </p>
+            </div>
+            <div class="comments-list" id="comments-list" aria-live="polite">
+              <article class="comment-card comment-card-empty">
+                <h4>No comments yet</h4>
+                <p>The first professional comment will appear here.</p>
+              </article>
+            </div>
+          </div>
         </section>
       </main>
 

@@ -1,5 +1,7 @@
 const SPREADSHEET_ID = "1bF4CgbdG_0K34i9yM9gZl3yweLBwli_XLeARUMeJqFo";
 const READERS_SHEET = "Readers";
+const COMMENTS_SHEET = "Comments";
+
 const READER_HEADERS = [
   "visitor_id",
   "first_seen_utc",
@@ -7,6 +9,18 @@ const READER_HEADERS = [
   "visit_count",
   "first_page_url",
   "last_page_url",
+  "site_label",
+];
+
+const COMMENT_HEADERS = [
+  "comment_id",
+  "submitted_utc",
+  "status",
+  "display_name",
+  "professional_title",
+  "affiliation",
+  "comment_text",
+  "page_url",
   "site_label",
 ];
 
@@ -22,6 +36,13 @@ function doGet(e) {
       ok: true,
       stats: getStats_(),
     };
+  } else if (action === "comments") {
+    payload = {
+      ok: true,
+      comments: getComments_(params.limit),
+    };
+  } else if (action === "comment") {
+    payload = registerComment_(params);
   } else {
     payload = {
       ok: false,
@@ -45,23 +66,31 @@ function doPost(e) {
   }
 
   const action = sanitizeText_(payload.action).toLowerCase();
-  if (action !== "visit") {
-    return jsonOutput_({
-      ok: false,
-      error: "Unsupported action.",
-    });
+  if (action === "visit") {
+    return jsonOutput_(registerReaderVisit_(payload));
   }
 
-  return jsonOutput_(registerReaderVisit_(payload));
+  if (action === "comment") {
+    return jsonOutput_(registerComment_(payload));
+  }
+
+  return jsonOutput_({
+    ok: false,
+    error: "Unsupported action.",
+  });
 }
 
 function setupReaderCounter() {
-  const sheet = getReadersSheet_();
+  const readersSheet = getReadersSheet_();
+  const commentsSheet = getCommentsSheet_();
+
   return {
     ok: true,
-    sheetName: sheet.getName(),
+    readersSheetName: readersSheet.getName(),
+    commentsSheetName: commentsSheet.getName(),
     spreadsheetUrl: SpreadsheetApp.openById(SPREADSHEET_ID).getUrl(),
-    stats: getStatsFromSheet_(sheet),
+    stats: getStatsFromSheet_(readersSheet),
+    commentsCount: getComments_(10).length,
   };
 }
 
@@ -79,7 +108,7 @@ function deleteReaderByVisitorId(visitorId) {
 
   try {
     const sheet = getReadersSheet_();
-    const readerRow = findReaderRow_(sheet, safeVisitorId);
+    const readerRow = findRowByValue_(sheet, 1, safeVisitorId);
 
     if (readerRow) {
       sheet.deleteRow(readerRow);
@@ -90,6 +119,37 @@ function deleteReaderByVisitorId(visitorId) {
       ok: true,
       deleted: Boolean(readerRow),
       stats: getStatsFromSheet_(sheet),
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function deleteCommentById(commentId) {
+  const safeCommentId = sanitizeIdentifier_(commentId, 128);
+  if (!safeCommentId) {
+    return {
+      ok: false,
+      error: "Missing commentId.",
+    };
+  }
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+
+  try {
+    const sheet = getCommentsSheet_();
+    const commentRow = findRowByValue_(sheet, 1, safeCommentId);
+
+    if (commentRow) {
+      sheet.deleteRow(commentRow);
+      SpreadsheetApp.flush();
+    }
+
+    return {
+      ok: true,
+      deleted: Boolean(commentRow),
+      comments: getComments_(10),
     };
   } finally {
     lock.releaseLock();
@@ -113,7 +173,7 @@ function registerReaderVisit_(input) {
 
   try {
     const sheet = getReadersSheet_();
-    const readerRow = findReaderRow_(sheet, visitorId);
+    const readerRow = findRowByValue_(sheet, 1, visitorId);
     const now = new Date().toISOString();
     let duplicate = false;
 
@@ -163,6 +223,57 @@ function registerReaderVisit_(input) {
   }
 }
 
+function registerComment_(input) {
+  const commentId = sanitizeIdentifier_(input.commentId, 128) || createServerId_("comment");
+  const displayName = truncateText_(sanitizeText_(input.displayName), 120);
+  const professionalTitle = truncateText_(sanitizeText_(input.professionalTitle), 120);
+  const affiliation = truncateText_(sanitizeText_(input.affiliation), 180);
+  const commentText = truncateText_(sanitizeText_(input.commentText), 500);
+  const pageUrl = sanitizeUrl_(input.pageUrl);
+  const siteLabel = sanitizeSiteLabel_(input.siteLabel || input.site);
+
+  if (!displayName || !professionalTitle || !affiliation || !commentText) {
+    return {
+      ok: false,
+      error: "Missing required comment fields.",
+    };
+  }
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+
+  try {
+    const sheet = getCommentsSheet_();
+    const submittedAt = new Date().toISOString();
+
+    sheet.appendRow([
+      commentId,
+      submittedAt,
+      "Published",
+      displayName,
+      professionalTitle,
+      affiliation,
+      commentText,
+      pageUrl,
+      siteLabel,
+    ]);
+
+    SpreadsheetApp.flush();
+
+    return {
+      ok: true,
+      comments: getComments_(10),
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: String(error && error.message ? error.message : error),
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function getReadersSheet_() {
   const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   let sheet = spreadsheet.getSheetByName(READERS_SHEET);
@@ -171,35 +282,47 @@ function getReadersSheet_() {
     sheet = spreadsheet.insertSheet(READERS_SHEET);
   }
 
-  ensureReaderHeaders_(sheet);
+  ensureHeaders_(sheet, READER_HEADERS);
   return sheet;
 }
 
-function ensureReaderHeaders_(sheet) {
-  const headerRange = sheet.getRange(1, 1, 1, READER_HEADERS.length);
+function getCommentsSheet_() {
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  let sheet = spreadsheet.getSheetByName(COMMENTS_SHEET);
+
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(COMMENTS_SHEET);
+  }
+
+  ensureHeaders_(sheet, COMMENT_HEADERS);
+  return sheet;
+}
+
+function ensureHeaders_(sheet, headers) {
+  const headerRange = sheet.getRange(1, 1, 1, headers.length);
   const currentHeaders = headerRange.getDisplayValues()[0];
-  const headersMatch = READER_HEADERS.every(function (header, index) {
+  const headersMatch = headers.every(function (header, index) {
     return currentHeaders[index] === header;
   });
 
   if (!headersMatch) {
-    headerRange.setValues([READER_HEADERS]);
+    headerRange.setValues([headers]);
   }
 
   headerRange.setFontWeight("bold");
   sheet.setFrozenRows(1);
-  sheet.autoResizeColumns(1, READER_HEADERS.length);
+  sheet.autoResizeColumns(1, headers.length);
 }
 
-function findReaderRow_(sheet, visitorId) {
+function findRowByValue_(sheet, columnIndex, matchValue) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) {
     return 0;
   }
 
-  const visitorIds = sheet.getRange(2, 1, lastRow - 1, 1).getDisplayValues();
-  for (let index = 0; index < visitorIds.length; index += 1) {
-    if (sanitizeVisitorId_(visitorIds[index][0]) === visitorId) {
+  const values = sheet.getRange(2, columnIndex, lastRow - 1, 1).getDisplayValues();
+  for (let index = 0; index < values.length; index += 1) {
+    if (sanitizeText_(values[index][0]) === matchValue) {
       return index + 2;
     }
   }
@@ -246,6 +369,50 @@ function getStatsFromSheet_(sheet) {
   };
 }
 
+function getComments_(limitValue) {
+  const sheet = getCommentsSheet_();
+  const lastRow = sheet.getLastRow();
+  const limit = normalizeLimit_(limitValue, 6, 12);
+
+  if (lastRow < 2) {
+    return [];
+  }
+
+  const rows = sheet
+    .getRange(2, 1, lastRow - 1, COMMENT_HEADERS.length)
+    .getDisplayValues()
+    .map(function (row) {
+      return {
+        id: sanitizeText_(row[0]),
+        submittedAt: sanitizeText_(row[1]),
+        status: sanitizeText_(row[2]).toLowerCase(),
+        displayName: sanitizeText_(row[3]),
+        professionalTitle: sanitizeText_(row[4]),
+        affiliation: sanitizeText_(row[5]),
+        commentText: sanitizeText_(row[6]),
+        pageUrl: sanitizeText_(row[7]),
+        siteLabel: sanitizeText_(row[8]),
+      };
+    })
+    .filter(function (comment) {
+      if (!comment.displayName || !comment.commentText) {
+        return false;
+      }
+
+      return (
+        comment.status === "" ||
+        comment.status === "published" ||
+        comment.status === "approve" ||
+        comment.status === "approved"
+      );
+    })
+    .sort(function (left, right) {
+      return right.submittedAt.localeCompare(left.submittedAt);
+    });
+
+  return rows.slice(0, limit);
+}
+
 function emptyStats_() {
   return {
     totalSubmissions: 0,
@@ -272,6 +439,19 @@ function jsonOutput_(payload) {
   );
 }
 
+function createServerId_(prefix) {
+  return prefix + "-" + new Date().getTime() + "-" + Math.floor(Math.random() * 1000000);
+}
+
+function normalizeLimit_(value, fallback, maxLimit) {
+  const parsed = Number(value);
+  if (!parsed || parsed < 1) {
+    return fallback;
+  }
+
+  return Math.min(parsed, maxLimit);
+}
+
 function sanitizeText_(value) {
   return String(value || "").trim();
 }
@@ -280,9 +460,13 @@ function truncateText_(value, maxLength) {
   return value.length > maxLength ? value.slice(0, maxLength) : value;
 }
 
+function sanitizeIdentifier_(value, maxLength) {
+  const identifier = truncateText_(sanitizeText_(value), maxLength);
+  return /^[A-Za-z0-9._-]+$/.test(identifier) ? identifier : "";
+}
+
 function sanitizeVisitorId_(value) {
-  const visitorId = truncateText_(sanitizeText_(value), 128);
-  return /^[A-Za-z0-9._-]+$/.test(visitorId) ? visitorId : "";
+  return sanitizeIdentifier_(value, 128);
 }
 
 function sanitizeUrl_(value) {
