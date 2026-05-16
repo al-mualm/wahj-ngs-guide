@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-Time PCR: A Practical Beginner Guide</title>
+    <meta
+      name="description"
+      content="A concise educational webpage on real-time PCR for beginners, including assay types, workflow, and SYBR Green versus TaqMan."
+    />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="site-header" id="top">
+        <div class="brand-lockup">
+          <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Educational Handbook</p>
+            <p class="brand-title">Wahj Al-DNA</p>
+          </div>
+        </div>
+        <div class="reader-badge" aria-live="polite">
+          <p class="reader-label">Readers</p>
+          <p class="reader-count"><span id="reader-count">Loading...</span></p>
+          <p class="reader-note" id="reader-note">
+            Anonymous reader count updates automatically. No personal information is collected.
+          </p>
+        </div>
+        <a class="hub-link" href="../">All topics</a>
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="primary-nav"
+        >
+          Menu
+        </button>
+        <nav class="primary-nav" id="primary-nav" aria-label="Primary">
+          <a href="#intro">Intro</a>
+          <a href="#types">Types</a>
+          <a href="#workflow">How to perform it</a>
+          <a href="#chemistries">SYBR vs TaqMan</a>
+          <a href="#takeaways">Takeaways</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero section pcr-hero" id="intro">
+          <div class="hero-copy reveal">
+            <span class="section-chip">Rapid nucleic acid detection</span>
+            <h1>Real-Time PCR: A Practical Beginner Guide</h1>
+            <p class="hero-lead">
+              This page explains the main real-time PCR formats, the basic workflow for
+              performing an experiment, and the practical difference between
+              <strong>SYBR Green</strong> and <strong>TaqMan</strong>.
+            </p>
+
+            <div class="author-panel">
+              <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="author-logo" />
+              <div>
+                <p class="meta-label">Prepared by</p>
+                <h2>Mahmood Al-Mualm</h2>
+                <p>CEO of Wahj Al-DNA</p>
+                <p class="author-link">
+                  <a href="https://wahj-dna.com.iq/en/home/" target="_blank" rel="noreferrer"
+                    >wahj-dna.com.iq/en/home</a
+                  >
+                </p>
+              </div>
+            </div>
+
+            <p>
+              Real-time PCR is used because it does more than amplify DNA. It measures the
+              signal during amplification, which allows students to estimate how much target
+              nucleic acid was present and to judge assay behavior while the run is still
+              being generated.
+            </p>
+          </div>
+
+          <div class="hero-visual reveal">
+            <figure class="figure-card diagram-hero">
+              <div class="figure-heading">
+                <p class="figure-label">Figure 1</p>
+                <h3>Real-time PCR assay types</h3>
+              </div>
+              <div class="diagram-scroll">
+                <img
+                  src="../assets/real-time-pcr/rt_pcr_types.svg"
+                  alt="Diagram showing major real-time PCR assay types"
+                  class="diagram-image diagram-image-wide"
+                />
+              </div>
+              <figcaption>
+                The main formats include DNA-targeted qPCR, one-step RT-qPCR, and two-step
+                RT-qPCR depending on whether RNA must first be converted into cDNA.
+              </figcaption>
+              <p class="interpretation">
+                <strong>What students should notice:</strong> the first decision is usually
+                whether the starting material is DNA or RNA. If it is RNA, reverse
+                transcription must happen before or during amplification.
+              </p>
+            </figure>
+          </div>
+        </section>
+
+        <section class="section" id="types">
+          <div class="section-heading reveal">
+            <span class="section-chip">1. Core concept</span>
+            <h2>What real-time PCR measures</h2>
+            <p>
+              Standard PCR tells you whether amplification happened after the reaction ends.
+              Real-time PCR tracks fluorescence during cycling, so you can follow product
+              accumulation across cycles.
+            </p>
+          </div>
+
+          <div class="card-grid three-column reveal">
+            <article class="info-card">
+              <span class="card-badge">A</span>
+              <h3>qPCR on DNA</h3>
+              <p>
+                Used when the starting template is already DNA, such as genomic DNA,
+                plasmids, or amplicons.
+              </p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">B</span>
+              <h3>One-step RT-qPCR</h3>
+              <p>
+                Reverse transcription and PCR happen in one tube. It is common when speed
+                and reduced handling are important.
+              </p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">C</span>
+              <h3>Two-step RT-qPCR</h3>
+              <p>
+                RNA is first converted to cDNA, then the cDNA is used in separate PCR
+                reactions. It gives more flexibility for testing multiple targets.
+              </p>
+            </article>
+          </div>
+
+          <div class="callout-box reveal">
+            <h3>Student takeaway</h3>
+            <p>
+              The instrument is not reading DNA letters one by one. It is reading a
+              fluorescent signal that rises as the target sequence is amplified.
+            </p>
+          </div>
+        </section>
+
+        <section class="section" id="workflow">
+          <div class="section-heading reveal">
+            <span class="section-chip">2. Practical workflow</span>
+            <h2>How to perform a real-time PCR experiment</h2>
+            <p>
+              A successful run depends on clean template, correct reaction setup, careful
+              plate layout, and clear interpretation of amplification behavior.
+            </p>
+          </div>
+
+          <div class="pcr-steps reveal">
+            <article class="pcr-step-card">
+              <h3>1. Prepare the nucleic acid</h3>
+              <p>
+                Extract DNA or RNA carefully. If working with RNA, preserve it from
+                degradation and remove inhibitors.
+              </p>
+            </article>
+            <article class="pcr-step-card">
+              <h3>2. Build the reaction mix</h3>
+              <p>
+                Combine master mix, primers, optional probe, template, and nuclease-free
+                water using clean pipetting practice.
+              </p>
+            </article>
+            <article class="pcr-step-card">
+              <h3>3. Arrange controls</h3>
+              <p>
+                Include positive controls, no-template controls, and when needed
+                reverse-transcription negative controls.
+              </p>
+            </article>
+            <article class="pcr-step-card">
+              <h3>4. Run the thermal program</h3>
+              <p>
+                The instrument cycles through denaturation, annealing, and extension while
+                recording fluorescence after defined steps.
+              </p>
+            </article>
+            <article class="pcr-step-card">
+              <h3>5. Inspect amplification and melt behavior</h3>
+              <p>
+                Review curves, threshold crossing, replicate consistency, and for dye-based
+                assays check whether a clean melt peak is present.
+              </p>
+            </article>
+            <article class="pcr-step-card">
+              <h3>6. Interpret the result in context</h3>
+              <p>
+                Decide whether the run answers the biological or diagnostic question and
+                whether the controls support the conclusion.
+              </p>
+            </article>
+          </div>
+
+          <div class="figure-stack reveal">
+            <figure class="figure-card">
+              <div class="figure-heading">
+                <p class="figure-label">Figure 2</p>
+                <h3>Workflow overview</h3>
+              </div>
+              <div class="diagram-scroll">
+                <img
+                  src="../assets/real-time-pcr/qpcr_workflow.svg"
+                  alt="Diagram showing the real-time PCR workflow from sample to interpretation"
+                  class="diagram-image diagram-image-wide"
+                />
+              </div>
+              <figcaption>
+                This workflow summarizes the order of sample preparation, assay setup,
+                cycling, and data review.
+              </figcaption>
+              <p class="interpretation">
+                <strong>What this means:</strong> weak results are often caused by upstream
+                problems such as poor template quality or plate setup errors, not just by
+                the machine itself.
+              </p>
+            </figure>
+
+            <figure class="figure-card">
+              <div class="figure-heading">
+                <p class="figure-label">Figure 3</p>
+                <h3>Thermal cycling logic</h3>
+              </div>
+              <div class="diagram-scroll">
+                <img
+                  src="../assets/real-time-pcr/thermal_cycle.svg"
+                  alt="Diagram showing denaturation, annealing, and extension in a thermal cycle"
+                  class="diagram-image"
+                />
+              </div>
+              <figcaption>
+                Each cycle separates DNA strands, allows primers to bind, and extends new
+                product while fluorescence is recorded.
+              </figcaption>
+              <p class="interpretation">
+                <strong>Why this matters:</strong> if temperatures or timings are poorly
+                matched to the assay, specificity and efficiency will both suffer.
+              </p>
+            </figure>
+          </div>
+        </section>
+
+        <section class="section" id="chemistries">
+          <div class="section-heading reveal">
+            <span class="section-chip">3. Detection chemistry</span>
+            <h2>SYBR Green versus TaqMan</h2>
+            <p>
+              Both chemistries measure amplification through fluorescence, but they generate
+              signal in different ways and therefore differ in specificity, cost, and assay
+              design.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Figure 4</p>
+              <h3>How the two major chemistries produce signal</h3>
+            </div>
+            <div class="diagram-scroll">
+              <img
+                src="../assets/real-time-pcr/qpcr_chemistries.svg"
+                alt="Diagram comparing SYBR Green and TaqMan chemistry"
+                class="diagram-image diagram-image-wide"
+              />
+            </div>
+            <figcaption>
+              SYBR Green binds double-stranded DNA, while TaqMan uses a sequence-specific
+              probe that is cleaved during extension.
+            </figcaption>
+            <p class="interpretation">
+              <strong>What students should notice:</strong> SYBR Green reports any
+              double-stranded product, including non-specific products, while TaqMan needs a
+              correct probe-target match before the strongest signal appears.
+            </p>
+          </figure>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Table 1</p>
+              <h3>Practical comparison of SYBR Green and TaqMan</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Feature</th>
+                    <th>SYBR Green</th>
+                    <th>TaqMan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>How signal appears</td>
+                    <td>Fluorescent dye binds double-stranded DNA</td>
+                    <td>Probe is cleaved and releases reporter signal</td>
+                  </tr>
+                  <tr>
+                    <td>Specificity</td>
+                    <td>Lower, because any double-stranded product can contribute</td>
+                    <td>Higher, because primers and probe must all match correctly</td>
+                  </tr>
+                  <tr>
+                    <td>Cost</td>
+                    <td>Usually lower</td>
+                    <td>Usually higher</td>
+                  </tr>
+                  <tr>
+                    <td>Best use cases</td>
+                    <td>Screening, simple assays, teaching labs, preliminary testing</td>
+                    <td>High-specificity detection, multiplexing, clinical-style assays</td>
+                  </tr>
+                  <tr>
+                    <td>Extra check often needed</td>
+                    <td>Melt curve analysis</td>
+                    <td>Probe design validation</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>
+              Neither chemistry is universally better. The correct choice depends on the
+              assay goal, budget, and specificity requirements.
+            </figcaption>
+            <p class="interpretation">
+              <strong>Student takeaway:</strong> if you need a simpler and less expensive
+              assay, SYBR Green may be enough. If you need stronger target specificity,
+              TaqMan is usually the safer choice.
+            </p>
+          </figure>
+        </section>
+
+        <section class="section" id="takeaways">
+          <div class="section-heading reveal">
+            <span class="section-chip">4. Final summary</span>
+            <h2>What students should remember</h2>
+          </div>
+
+          <div class="card-grid three-column reveal">
+            <article class="info-card">
+              <span class="card-badge">1</span>
+              <h3>Real-time PCR follows signal during amplification</h3>
+              <p>
+                It is different from endpoint PCR because the instrument records
+                fluorescence while the reaction is progressing.
+              </p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">2</span>
+              <h3>Good controls are part of the experiment</h3>
+              <p>
+                No-template and positive controls are necessary for interpreting whether a
+                result is trustworthy.
+              </p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">3</span>
+              <h3>Chemistry choice affects specificity</h3>
+              <p>
+                SYBR Green is simpler, while TaqMan adds probe-based target confirmation.
+              </p>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <p><strong>Author:</strong> Mahmood Al-Mualm</p>
+          <p><strong>Title:</strong> CEO of Wahj Al-DNA</p>
+          <p><strong>Organization:</strong> Wahj Al-DNA</p>
+        </div>
+        <div>
+          <p>Educational resource for introductory learning in real-time PCR.</p>
+          <p>
+            The diagrams are displayed in wide frames to keep the text readable on both
+            desktop and mobile screens.
+          </p>
+        </div>
+        <div class="footer-card">
+          <p><strong>Readers:</strong> <span id="footer-reader-count">Loading...</span></p>
+          <p>
+            This anonymous count is stored outside the browser and updates automatically
+            when a new reader opens the page.
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="../script.js"></script>
+  </body>
+</html>
