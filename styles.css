@@ -1255,7 +1255,208 @@ html[dir="rtl"] .comment-actions {
     align-items: stretch;
   }
 
-  html[dir="rtl"] .comment-actions {
-    flex-direction: column;
+html[dir="rtl"] .comment-actions {
+  flex-direction: column;
+}
+}
+
+.site-header-compact {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.hub-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(18, 66, 124, 0.16);
+  background: rgba(255, 255, 255, 0.82);
+  color: #163554;
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: 0 16px 30px rgba(10, 30, 60, 0.08);
+}
+
+.selector-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: clamp(1.5rem, 3vw, 3rem);
+  align-items: center;
+  min-height: calc(100vh - 14rem);
+}
+
+.selector-note {
+  margin-top: 1.5rem;
+  padding: 1.2rem 1.25rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(18, 66, 124, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(230, 241, 252, 0.72));
+}
+
+.selector-note p {
+  margin: 0.2rem 0;
+}
+
+.selector-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.topic-card {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  padding: 1.6rem;
+  border-radius: 2rem;
+  border: 1px solid rgba(18, 66, 124, 0.14);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(231, 241, 251, 0.82));
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 26px 50px rgba(10, 30, 60, 0.11);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.topic-card:hover,
+.topic-card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: 0 34px 60px rgba(10, 30, 60, 0.14);
+  border-color: rgba(15, 112, 193, 0.35);
+}
+
+.topic-card h2 {
+  margin: 0;
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+}
+
+.topic-card p {
+  margin: 0;
+}
+
+.topic-tag {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(17, 101, 176, 0.11);
+  color: #0f70c1;
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.topic-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: auto;
+  color: #1d3554;
+  font-weight: 700;
+}
+
+.topic-card-meta span {
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.topic-card-ngs::after,
+.topic-card-pcr::after {
+  content: "";
+  position: absolute;
+  inset: auto 1.4rem 1.2rem auto;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 1rem;
+  background: radial-gradient(circle at 30% 30%, rgba(15, 112, 193, 0.26), rgba(15, 112, 193, 0.04));
+}
+
+.pcr-hero .hero-visual {
+  align-self: start;
+}
+
+.diagram-hero {
+  margin: 0;
+}
+
+.diagram-scroll {
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+}
+
+.diagram-image {
+  display: block;
+  width: 100%;
+  min-width: 760px;
+  height: auto;
+}
+
+.diagram-image-wide {
+  min-width: 980px;
+}
+
+.figure-stack {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.pcr-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.pcr-step-card {
+  padding: 1.25rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(18, 66, 124, 0.12);
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 16px 35px rgba(10, 30, 60, 0.08);
+}
+
+.pcr-step-card h3 {
+  margin-top: 0;
+  margin-bottom: 0.7rem;
+  font-size: 1.05rem;
+}
+
+.pcr-step-card p {
+  margin: 0;
+}
+
+@media (max-width: 1080px) {
+  .selector-hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .selector-grid,
+  .pcr-steps {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .site-header-compact {
+    grid-template-columns: 1fr;
+  }
+
+  .hub-link {
+    width: fit-content;
+  }
+
+  .selector-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .diagram-image {
+    min-width: 680px;
+  }
+
+  .diagram-image-wide {
+    min-width: 860px;
   }
 }
