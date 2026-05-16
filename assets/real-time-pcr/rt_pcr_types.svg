@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1300" height="820" viewBox="0 0 1300 820" role="img" aria-labelledby="title desc">
+  <title id="title">Types of real-time PCR and RT-PCR assays</title>
+  <desc id="desc">Classification diagram showing qualitative and quantitative real-time PCR, SYBR Green and probe chemistries, and absolute and relative quantification.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2d4059"/>
+    </marker>
+    <style>
+      .bg{fill:#f8fafc}
+      .root{fill:#2d4059;stroke:#2d4059;stroke-width:3;rx:18}
+      .quant{fill:#e9f5f2;stroke:#007f73;stroke-width:3;rx:16}
+      .qual{fill:#fff3df;stroke:#c35a00;stroke-width:3;rx:16}
+      .chem{fill:#ffffff;stroke:#2d4059;stroke-width:2.5;rx:14}
+      .abs{fill:#eef8ff;stroke:#1f77b4;stroke-width:2.5;rx:14}
+      .rel{fill:#f0e8ff;stroke:#7b3fc8;stroke-width:2.5;rx:14}
+      .design{fill:#ffffff;stroke:#b8c2cc;stroke-width:2.5;rx:18}
+      .line{stroke:#2d4059;stroke-width:3;fill:none;marker-end:url(#arrow)}
+      .thin{stroke:#2d4059;stroke-width:2.5;fill:none}
+      .dna{stroke:#2d4059;stroke-width:6;fill:none;stroke-linecap:round}
+      .primer{stroke:#c35a00;stroke-width:7;fill:none;stroke-linecap:round}
+      .probe{stroke:#7b3fc8;stroke-width:8;fill:none;stroke-linecap:round}
+      .dye{fill:#00a676;stroke:#006b54;stroke-width:2}
+      .reporter{fill:#ffbf00;stroke:#9c6b00;stroke-width:2}
+      .quencher{fill:#333333}
+      .white{font-family:Arial,Helvetica,sans-serif;fill:#ffffff;font-size:28px;font-weight:700}
+      .head{font-family:Arial,Helvetica,sans-serif;fill:#17202a;font-size:26px;font-weight:700}
+      .sub{font-family:Arial,Helvetica,sans-serif;fill:#34495e;font-size:17px}
+      .small{font-family:Arial,Helvetica,sans-serif;fill:#34495e;font-size:15px}
+      .label{font-family:Arial,Helvetica,sans-serif;fill:#17202a;font-size:18px;font-weight:700}
+    </style>
+  </defs>
+
+  <rect class="bg" width="1300" height="820"/>
+  <text x="650" y="46" text-anchor="middle" class="head" font-size="34">Types of Real-Time PCR / RT-PCR Assays</text>
+  <text x="650" y="76" text-anchor="middle" class="sub">RT-PCR may mean reverse-transcription PCR; in RNA assays, RNA is first converted to cDNA before PCR detection.</text>
+
+  <rect x="420" y="105" width="460" height="80" class="root"/>
+  <text x="650" y="138" text-anchor="middle" class="white">Real-Time PCR Family</text>
+  <text x="650" y="166" text-anchor="middle" class="white" font-size="20">DNA qPCR or RNA RT-qPCR</text>
+
+  <rect x="120" y="240" width="420" height="88" class="qual"/>
+  <text x="330" y="274" text-anchor="middle" class="head">Qualitative Real-Time PCR</text>
+  <text x="330" y="302" text-anchor="middle" class="sub">Question: is the target detected or not detected?</text>
+
+  <rect x="760" y="240" width="420" height="88" class="quant"/>
+  <text x="970" y="274" text-anchor="middle" class="head">Quantitative Real-Time PCR</text>
+  <text x="970" y="302" text-anchor="middle" class="sub">Question: how much target is present?</text>
+
+  <path class="line" d="M580 185 C485 205, 385 215, 330 240"/>
+  <path class="line" d="M720 185 C815 205, 915 215, 970 240"/>
+
+  <rect x="80" y="380" width="230" height="86" class="chem"/>
+  <text x="195" y="412" text-anchor="middle" class="label">SYBR Green</text>
+  <text x="195" y="438" text-anchor="middle" class="small">Dye binds any</text>
+  <text x="195" y="459" text-anchor="middle" class="small">double-stranded DNA</text>
+
+  <rect x="350" y="380" width="230" height="86" class="chem"/>
+  <text x="465" y="412" text-anchor="middle" class="label">Probe-Based</text>
+  <text x="465" y="438" text-anchor="middle" class="small">Target-specific probe</text>
+  <text x="465" y="459" text-anchor="middle" class="small">adds specificity</text>
+
+  <rect x="680" y="380" width="230" height="86" class="chem"/>
+  <text x="795" y="412" text-anchor="middle" class="label">SYBR Green</text>
+  <text x="795" y="438" text-anchor="middle" class="small">Requires melt curve</text>
+  <text x="795" y="459" text-anchor="middle" class="small">for specificity check</text>
+
+  <rect x="950" y="380" width="230" height="86" class="chem"/>
+  <text x="1065" y="412" text-anchor="middle" class="label">Probe-Based</text>
+  <text x="1065" y="438" text-anchor="middle" class="small">Good for multiplexing</text>
+  <text x="1065" y="459" text-anchor="middle" class="small">and diagnostics-style assays</text>
+
+  <path class="line" d="M270 328 C245 348, 220 360, 195 380"/>
+  <path class="line" d="M390 328 C415 348, 440 360, 465 380"/>
+  <path class="line" d="M910 328 C870 350, 830 360, 795 380"/>
+  <path class="line" d="M1030 328 C1040 350, 1055 360, 1065 380"/>
+
+  <rect x="745" y="525" width="195" height="82" class="abs"/>
+  <text x="842" y="555" text-anchor="middle" class="label">Absolute</text>
+  <text x="842" y="581" text-anchor="middle" class="small">Uses standard curve</text>
+  <text x="842" y="601" text-anchor="middle" class="small">copies or concentration</text>
+
+  <rect x="1000" y="525" width="195" height="82" class="rel"/>
+  <text x="1098" y="555" text-anchor="middle" class="label">Relative</text>
+  <text x="1098" y="581" text-anchor="middle" class="small">Uses reference gene</text>
+  <text x="1098" y="601" text-anchor="middle" class="small">fold change</text>
+
+  <path class="line" d="M970 328 C930 395, 875 465, 842 525"/>
+  <path class="line" d="M970 328 C1010 395, 1065 465, 1098 525"/>
+
+  <rect x="75" y="635" width="525" height="145" class="design"/>
+  <text x="338" y="664" text-anchor="middle" class="label">SYBR Green Assay Design</text>
+  <path class="dna" d="M145 715 C215 665, 285 765, 355 715 C425 665, 495 765, 565 715"/>
+  <path class="dna" d="M145 745 C215 795, 285 695, 355 745 C425 795, 495 695, 565 745"/>
+  <path class="primer" d="M155 692 H240"/>
+  <path class="primer" d="M475 768 H560"/>
+  <circle cx="237" cy="731" r="13" class="dye"/>
+  <circle cx="337" cy="727" r="13" class="dye"/>
+  <circle cx="437" cy="731" r="13" class="dye"/>
+  <text x="337" y="795" text-anchor="middle" class="small">Two primers + dye. Any double-stranded product can fluoresce.</text>
+
+  <rect x="700" y="635" width="525" height="145" class="design"/>
+  <text x="963" y="664" text-anchor="middle" class="label">Hydrolysis Probe Assay Design</text>
+  <path class="dna" d="M770 725 C840 675, 910 775, 980 725 C1050 675, 1120 775, 1190 725"/>
+  <path class="primer" d="M780 755 H870"/>
+  <path class="primer" d="M1100 695 H1190"/>
+  <path class="probe" d="M930 755 H1055"/>
+  <circle cx="918" cy="755" r="15" class="reporter"/>
+  <rect x="1054" y="740" width="30" height="30" rx="5" class="quencher"/>
+  <text x="963" y="795" text-anchor="middle" class="small">Two primers + probe. Reporter separates from quencher when probe is cleaved.</text>
+
+  <text x="650" y="505" text-anchor="middle" class="sub">Both qualitative and quantitative assays can use dye-based or probe-based fluorescence.</text>
+</svg>
