@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Real-Time PCR: A Practical Beginner Guide</title>
+    <title>Real-Time PCR (qPCR): Scientific Teaching Guide and Gene Expression Calculator</title>
     <meta
       name="description"
-      content="A concise educational webpage on real-time PCR for beginners, including assay types, workflow, and SYBR Green versus TaqMan."
+      content="A scientifically grounded real-time PCR teaching page covering Ct interpretation, assay chemistry, quantification strategy, and a built-in 2^-ΔΔCt gene expression calculator."
     />
     <script>
       document.documentElement.classList.add("js");
@@ -41,22 +41,27 @@
         </button>
         <nav class="primary-nav" id="primary-nav" aria-label="Primary">
           <a href="#intro">Intro</a>
-          <a href="#types">Types</a>
-          <a href="#workflow">How to perform it</a>
-          <a href="#chemistries">SYBR vs TaqMan</a>
-          <a href="#takeaways">Takeaways</a>
+          <a href="#ct">Ct</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#chemistries">Chemistry</a>
+          <a href="#quantification">Quantification</a>
+          <a href="#calculator">Calculator</a>
+          <a href="#takeaways">Remember</a>
         </nav>
       </header>
 
       <main>
         <section class="hero section pcr-hero" id="intro">
           <div class="hero-copy reveal">
-            <span class="section-chip">Rapid nucleic acid detection</span>
-            <h1>Real-Time PCR: A Practical Beginner Guide</h1>
+            <span class="section-chip">Quantitative nucleic-acid analysis</span>
+            <h1>Real-Time PCR (qPCR): Scientific Teaching Guide and Gene Expression Calculator</h1>
             <p class="hero-lead">
-              This page explains the main real-time PCR formats, the basic workflow for
-              performing an experiment, and the practical difference between
-              <strong>SYBR Green</strong> and <strong>TaqMan</strong>.
+              This page teaches real-time PCR from a scientifically rigorous but
+              student-readable perspective. It explains what
+              <strong>Ct</strong> means, how fluorescence is generated, why
+              <strong>baseline</strong>, <strong>threshold</strong>, and
+              <strong>efficiency</strong> matter, and how to use the
+              <strong>2<sup>-ΔΔCt</sup></strong> method for relative gene-expression analysis.
             </p>
 
             <div class="author-panel">
@@ -74,10 +79,10 @@
             </div>
 
             <p>
-              Real-time PCR is used because it does more than amplify DNA. It measures the
-              signal during amplification, which allows students to estimate how much target
-              nucleic acid was present and to judge assay behavior while the run is still
-              being generated.
+              The scientific framing of this page is aligned with Thermo Fisher’s real-time
+              PCR learning center pages on qPCR essentials, Ct interpretation, TaqMan probe
+              chemistry, one-step versus two-step RT-qPCR, assay efficiency, and relative
+              versus absolute quantification.
             </p>
           </div>
 
@@ -85,36 +90,87 @@
             <figure class="figure-card diagram-hero">
               <div class="figure-heading">
                 <p class="figure-label">Figure 1</p>
-                <h3>Real-time PCR assay types</h3>
+                <h3>Major real-time PCR assay formats</h3>
               </div>
               <div class="diagram-scroll">
                 <img
                   src="../assets/real-time-pcr/rt_pcr_types.svg"
-                  alt="Diagram showing major real-time PCR assay types"
+                  alt="Diagram showing major real-time PCR and RT-qPCR assay formats"
                   class="diagram-image diagram-image-wide"
                 />
               </div>
               <figcaption>
-                The main formats include DNA-targeted qPCR, one-step RT-qPCR, and two-step
-                RT-qPCR depending on whether RNA must first be converted into cDNA.
+                DNA targets can be measured directly by qPCR, while RNA targets first require
+                reverse transcription to generate cDNA before amplification can be quantified.
               </figcaption>
               <p class="interpretation">
-                <strong>What students should notice:</strong> the first decision is usually
-                whether the starting material is DNA or RNA. If it is RNA, reverse
-                transcription must happen before or during amplification.
+                <strong>What students should notice:</strong> the first scientific decision
+                is whether the starting analyte is DNA or RNA. If it is RNA, reverse
+                transcription must become part of the workflow.
               </p>
             </figure>
           </div>
         </section>
 
+        <section class="section">
+          <article class="callout-box reveal pcr-reference-box">
+            <h3>Scientific reference note</h3>
+            <p>
+              The conceptual structure of this page follows Thermo Fisher educational pages
+              on real-time PCR basics and Ct interpretation rather than marketing language.
+              These are the main reference pages used while preparing this teaching version:
+            </p>
+            <div class="reference-link-list">
+              <a
+                href="https://www.thermofisher.com/iq/en/home/life-science/pcr/real-time-pcr/real-time-pcr-learning-center/real-time-pcr-basics/essentials-real-time-pcr.html"
+                target="_blank"
+                rel="noreferrer"
+                >Essentials of Real-Time PCR</a
+              >
+              <a
+                href="https://www.thermofisher.com/ca/en/home/life-science/pcr/real-time-pcr/real-time-pcr-learning-center/real-time-pcr-basics/real-time-pcr-understanding-ct.html"
+                target="_blank"
+                rel="noreferrer"
+                >Real-Time PCR: Understanding Ct</a
+              >
+              <a
+                href="https://www.thermofisher.com/tr/en/home/life-science/pcr/real-time-pcr/real-time-pcr-learning-center/real-time-pcr-basics/absolute-vs-relative-quantification-real-time-pcr.html"
+                target="_blank"
+                rel="noreferrer"
+                >Absolute vs. Relative Quantification for qPCR</a
+              >
+              <a
+                href="https://www.thermofisher.com/tr/en/home/life-science/pcr/real-time-pcr/real-time-pcr-learning-center/real-time-pcr-basics/one-two-vs-step-real-time-pcr.html"
+                target="_blank"
+                rel="noreferrer"
+                >One-Step vs Two-Step RT-qPCR</a
+              >
+              <a
+                href="https://www.thermofisher.com/au/en/home/life-science/pcr/real-time-pcr/real-time-pcr-learning-center/real-time-pcr-basics/how-taqman-assays-work.html"
+                target="_blank"
+                rel="noreferrer"
+                >How TaqMan Assays Work</a
+              >
+              <a
+                href="https://www.thermofisher.com/ht/en/home/life-science/pcr/real-time-pcr/real-time-pcr-learning-center/real-time-pcr-basics/efficiency-real-time-pcr-qpcr.html"
+                target="_blank"
+                rel="noreferrer"
+                >Efficiency of Real-Time PCR</a
+              >
+            </div>
+          </article>
+        </section>
+
         <section class="section" id="types">
           <div class="section-heading reveal">
-            <span class="section-chip">1. Core concept</span>
-            <h2>What real-time PCR measures</h2>
+            <span class="section-chip">1. Assay logic</span>
+            <h2>What real-time PCR actually measures</h2>
             <p>
-              Standard PCR tells you whether amplification happened after the reaction ends.
-              Real-time PCR tracks fluorescence during cycling, so you can follow product
-              accumulation across cycles.
+              Real-time PCR does not read DNA letters one by one. It monitors a fluorescence
+              signal during the reaction. As more amplicon is produced, the fluorescent
+              signal rises. The cycle at which this signal crosses a defined threshold is
+              used as a relative measure of how much target nucleic acid was present at the
+              start.
             </p>
           </div>
 
@@ -123,177 +179,315 @@
               <span class="card-badge">A</span>
               <h3>qPCR on DNA</h3>
               <p>
-                Used when the starting template is already DNA, such as genomic DNA,
-                plasmids, or amplicons.
+                If the starting template is DNA, amplification can begin directly after the
+                reaction mix is prepared and loaded into the instrument.
               </p>
             </article>
             <article class="info-card">
               <span class="card-badge">B</span>
               <h3>One-step RT-qPCR</h3>
               <p>
-                Reverse transcription and PCR happen in one tube. It is common when speed
-                and reduced handling are important.
+                Reverse transcription and qPCR occur in a single tube. This is faster,
+                reduces handling, and lowers the risk of cross-contamination.
               </p>
             </article>
             <article class="info-card">
               <span class="card-badge">C</span>
               <h3>Two-step RT-qPCR</h3>
               <p>
-                RNA is first converted to cDNA, then the cDNA is used in separate PCR
-                reactions. It gives more flexibility for testing multiple targets.
+                RNA is first converted to cDNA in one reaction, and then the cDNA is used in
+                separate qPCR reactions. This is useful when one cDNA preparation must be
+                tested against many targets.
               </p>
             </article>
           </div>
 
-          <div class="callout-box reveal">
-            <h3>Student takeaway</h3>
+          <div class="insight-grid reveal">
+            <article class="insight-card">
+              <h3>What this means</h3>
+              <p>qPCR is a fluorescence-based measurement of amplification kinetics.</p>
+            </article>
+            <article class="insight-card">
+              <h3>Why this matters</h3>
+              <p>A lower Ct usually means more starting target, but Ct is still assay-dependent.</p>
+            </article>
+            <article class="insight-card">
+              <h3>Student takeaway</h3>
+              <p>Never interpret Ct without also thinking about chemistry, controls, and efficiency.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="ct">
+          <div class="section-heading reveal">
+            <span class="section-chip">2. Understanding Ct</span>
+            <h2>Baseline, threshold, amplification phase, and Ct</h2>
             <p>
-              The instrument is not reading DNA letters one by one. It is reading a
-              fluorescent signal that rises as the target sequence is amplified.
+              Thermo Fisher describes Ct as the intersection between the amplification curve
+              and the threshold line. This is a relative measure of target concentration, but
+              it is also influenced by reaction chemistry, instrument settings, background
+              normalization, and amplification efficiency.
             </p>
           </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Figure 2</p>
+              <h3>How Ct is read from amplification data</h3>
+            </div>
+            <div class="diagram-scroll">
+              <img
+                src="../assets/real-time-pcr/ct_analysis.svg"
+                alt="Original teaching diagram showing baseline, threshold, Ct, and amplification phases in real-time PCR"
+                class="diagram-image diagram-image-wide"
+              />
+            </div>
+            <figcaption>
+              The fluorescence trace remains near baseline in the early cycles, rises during
+              the exponential phase, and eventually enters later phases as reagents become
+              limiting. Ct is assigned where the curve crosses the chosen threshold.
+            </figcaption>
+            <p class="interpretation">
+              <strong>How to interpret this figure:</strong> the threshold should be placed
+              above baseline noise and within the informative amplification region. A Ct
+              value is only meaningful when thresholding and assay behavior are consistent
+              across the compared samples.
+            </p>
+          </figure>
+
+          <div class="card-grid two-column reveal">
+            <article class="info-card">
+              <h3>Key signal terms</h3>
+              <div class="mini-table">
+                <p><strong>Rn:</strong> reporter fluorescence normalized to a passive reference.</p>
+                <p><strong>ΔRn:</strong> normalized reporter signal after baseline subtraction.</p>
+                <p><strong>Baseline:</strong> the early cycles where true product signal is not yet distinguishable.</p>
+                <p><strong>Threshold:</strong> the horizontal decision line used to assign Ct.</p>
+              </div>
+            </article>
+            <article class="info-card">
+              <h3>Why Ct values can shift</h3>
+              <div class="mini-table">
+                <p><strong>More starting target:</strong> Ct becomes lower.</p>
+                <p><strong>Lower efficiency:</strong> Ct becomes higher for the same starting amount.</p>
+                <p><strong>Reaction artifacts:</strong> background and normalization can distort Ct.</p>
+                <p><strong>Different reagents/settings:</strong> Ct values should not be compared blindly across conditions.</p>
+              </div>
+            </article>
+          </div>
+
+          <article class="callout-box reveal">
+            <h3>Scientific caution</h3>
+            <p>
+              Ct is not an absolute biological truth by itself. It is a derived value from
+              an amplification curve. When the assay design, thresholding, fluorescence
+              chemistry, or efficiency changes, the Ct value can change even if the starting
+              template amount did not.
+            </p>
+          </article>
         </section>
 
         <section class="section" id="workflow">
           <div class="section-heading reveal">
-            <span class="section-chip">2. Practical workflow</span>
-            <h2>How to perform a real-time PCR experiment</h2>
+            <span class="section-chip">3. Running the experiment</span>
+            <h2>How to perform a robust real-time PCR workflow</h2>
             <p>
-              A successful run depends on clean template, correct reaction setup, careful
-              plate layout, and clear interpretation of amplification behavior.
+              A scientifically reliable qPCR experiment depends on upstream nucleic-acid
+              quality, correct reaction design, proper controls, and a workflow that matches
+              whether the input material is DNA or RNA.
             </p>
-          </div>
-
-          <div class="pcr-steps reveal">
-            <article class="pcr-step-card">
-              <h3>1. Prepare the nucleic acid</h3>
-              <p>
-                Extract DNA or RNA carefully. If working with RNA, preserve it from
-                degradation and remove inhibitors.
-              </p>
-            </article>
-            <article class="pcr-step-card">
-              <h3>2. Build the reaction mix</h3>
-              <p>
-                Combine master mix, primers, optional probe, template, and nuclease-free
-                water using clean pipetting practice.
-              </p>
-            </article>
-            <article class="pcr-step-card">
-              <h3>3. Arrange controls</h3>
-              <p>
-                Include positive controls, no-template controls, and when needed
-                reverse-transcription negative controls.
-              </p>
-            </article>
-            <article class="pcr-step-card">
-              <h3>4. Run the thermal program</h3>
-              <p>
-                The instrument cycles through denaturation, annealing, and extension while
-                recording fluorescence after defined steps.
-              </p>
-            </article>
-            <article class="pcr-step-card">
-              <h3>5. Inspect amplification and melt behavior</h3>
-              <p>
-                Review curves, threshold crossing, replicate consistency, and for dye-based
-                assays check whether a clean melt peak is present.
-              </p>
-            </article>
-            <article class="pcr-step-card">
-              <h3>6. Interpret the result in context</h3>
-              <p>
-                Decide whether the run answers the biological or diagnostic question and
-                whether the controls support the conclusion.
-              </p>
-            </article>
           </div>
 
           <div class="figure-stack reveal">
             <figure class="figure-card">
               <div class="figure-heading">
-                <p class="figure-label">Figure 2</p>
-                <h3>Workflow overview</h3>
+                <p class="figure-label">Figure 3</p>
+                <h3>Workflow from sample to interpreted qPCR result</h3>
               </div>
               <div class="diagram-scroll">
                 <img
                   src="../assets/real-time-pcr/qpcr_workflow.svg"
-                  alt="Diagram showing the real-time PCR workflow from sample to interpretation"
+                  alt="Workflow overview for a real-time PCR experiment"
                   class="diagram-image diagram-image-wide"
                 />
               </div>
               <figcaption>
-                This workflow summarizes the order of sample preparation, assay setup,
-                cycling, and data review.
+                The analytical quality of a qPCR result is determined long before the Ct
+                values are calculated. Poor extraction, inhibitors, or incorrect controls can
+                make later analysis unreliable.
               </figcaption>
               <p class="interpretation">
-                <strong>What this means:</strong> weak results are often caused by upstream
-                problems such as poor template quality or plate setup errors, not just by
-                the machine itself.
+                <strong>What students should notice:</strong> the instrument is only one
+                part of the experiment. Extraction quality, reaction setup, and data review
+                are equally important.
               </p>
             </figure>
 
             <figure class="figure-card">
               <div class="figure-heading">
-                <p class="figure-label">Figure 3</p>
-                <h3>Thermal cycling logic</h3>
+                <p class="figure-label">Figure 4</p>
+                <h3>Thermal cycle logic</h3>
               </div>
               <div class="diagram-scroll">
                 <img
                   src="../assets/real-time-pcr/thermal_cycle.svg"
-                  alt="Diagram showing denaturation, annealing, and extension in a thermal cycle"
+                  alt="Thermal cycling steps used in qPCR"
                   class="diagram-image"
                 />
               </div>
               <figcaption>
-                Each cycle separates DNA strands, allows primers to bind, and extends new
-                product while fluorescence is recorded.
+                Each cycle denatures duplex DNA, allows primers and probes to anneal, and
+                extends product so the fluorescence signal can be measured repeatedly over time.
               </figcaption>
               <p class="interpretation">
-                <strong>Why this matters:</strong> if temperatures or timings are poorly
-                matched to the assay, specificity and efficiency will both suffer.
+                <strong>Why this matters:</strong> suboptimal temperatures or timings change
+                assay specificity and can alter Ct through efficiency loss rather than true
+                biology.
               </p>
             </figure>
           </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Table 1</p>
+              <h3>One-step vs two-step RT-qPCR</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Question</th>
+                    <th>One-step RT-qPCR</th>
+                    <th>Two-step RT-qPCR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Where do RT and qPCR happen?</td>
+                    <td>In one tube</td>
+                    <td>In separate steps</td>
+                  </tr>
+                  <tr>
+                    <td>Main advantage</td>
+                    <td>Fewer steps, faster turnaround, lower contamination risk</td>
+                    <td>Stored cDNA can be tested against many targets</td>
+                  </tr>
+                  <tr>
+                    <td>Best use case</td>
+                    <td>Many samples with one or few targets</td>
+                    <td>Fewer samples with many targets</td>
+                  </tr>
+                  <tr>
+                    <td>Main limitation</td>
+                    <td>cDNA is not retained as a reusable stock</td>
+                    <td>More handling and more pipetting steps</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>
+              Thermo Fisher’s one-step versus two-step guide emphasizes that the correct
+              workflow depends on whether throughput or target flexibility matters more.
+            </figcaption>
+            <p class="interpretation">
+              <strong>Student takeaway:</strong> choose one-step when you need speed and low
+              handling; choose two-step when one cDNA preparation must support many gene
+              measurements.
+            </p>
+          </figure>
+
+          <div class="pcr-steps reveal">
+            <article class="pcr-step-card">
+              <h3>Template integrity</h3>
+              <p>RNA degradation, carryover phenol, salts, or other inhibitors can shift Ct upward.</p>
+            </article>
+            <article class="pcr-step-card">
+              <h3>Controls</h3>
+              <p>Use positive controls, no-template controls, and for RT workflows no-RT controls when appropriate.</p>
+            </article>
+            <article class="pcr-step-card">
+              <h3>Replicates</h3>
+              <p>Technical replicates assess pipetting/run precision; biological replicates support biological interpretation.</p>
+            </article>
+            <article class="pcr-step-card">
+              <h3>Endogenous control</h3>
+              <p>Reference genes normalize for input and workflow variability in relative quantification.</p>
+            </article>
+            <article class="pcr-step-card">
+              <h3>Threshold consistency</h3>
+              <p>Comparative Ct analysis is safest when thresholding logic is consistent across the compared samples.</p>
+            </article>
+            <article class="pcr-step-card">
+              <h3>Post-run review</h3>
+              <p>Inspect amplification curves, control behavior, and for SYBR assays melt curves before trusting the numbers.</p>
+            </article>
+          </div>
         </section>
 
-        <section class="section" id="chemistries">
+        <section class="section section-alt" id="chemistries">
           <div class="section-heading reveal">
-            <span class="section-chip">3. Detection chemistry</span>
-            <h2>SYBR Green versus TaqMan</h2>
+            <span class="section-chip">4. Detection chemistry</span>
+            <h2>SYBR Green versus TaqMan: what changes scientifically</h2>
             <p>
-              Both chemistries measure amplification through fluorescence, but they generate
-              signal in different ways and therefore differ in specificity, cost, and assay
-              design.
+              Thermo Fisher emphasizes one central distinction: SYBR Green detects any
+              double-stranded DNA, while TaqMan requires target-specific probe binding before
+              strong signal generation occurs. This difference strongly affects specificity
+              and assay design.
             </p>
           </div>
 
           <figure class="figure-card reveal">
             <div class="figure-heading">
-              <p class="figure-label">Figure 4</p>
-              <h3>How the two major chemistries produce signal</h3>
+              <p class="figure-label">Figure 5</p>
+              <h3>TaqMan probe cleavage during amplification</h3>
             </div>
             <div class="diagram-scroll">
               <img
-                src="../assets/real-time-pcr/qpcr_chemistries.svg"
-                alt="Diagram comparing SYBR Green and TaqMan chemistry"
+                src="../assets/real-time-pcr/taqman_cleavage.svg"
+                alt="Original teaching diagram showing TaqMan probe cleavage during real-time PCR"
                 class="diagram-image diagram-image-wide"
               />
             </div>
             <figcaption>
-              SYBR Green binds double-stranded DNA, while TaqMan uses a sequence-specific
-              probe that is cleaved during extension.
+              The reporter dye is quenched while the probe is intact. When polymerase reaches
+              the bound probe, its 5' nuclease activity cleaves the probe, separating the
+              reporter from the quencher and increasing fluorescence.
             </figcaption>
             <p class="interpretation">
-              <strong>What students should notice:</strong> SYBR Green reports any
-              double-stranded product, including non-specific products, while TaqMan needs a
-              correct probe-target match before the strongest signal appears.
+              <strong>How to interpret this figure:</strong> signal generation in TaqMan
+              depends on correct target-probe hybridization plus polymerase progression. That
+              is why TaqMan is usually more specific than intercalating-dye chemistry.
             </p>
           </figure>
 
           <figure class="figure-card reveal">
             <div class="figure-heading">
-              <p class="figure-label">Table 1</p>
+              <p class="figure-label">Figure 6</p>
+              <h3>Signal logic in the two major qPCR chemistries</h3>
+            </div>
+            <div class="diagram-scroll">
+              <img
+                src="../assets/real-time-pcr/qpcr_chemistries.svg"
+                alt="Comparison of SYBR Green and TaqMan detection logic"
+                class="diagram-image diagram-image-wide"
+              />
+            </div>
+            <figcaption>
+              SYBR Green fluorescence increases whenever more double-stranded product is
+              present. TaqMan fluorescence increases when probe cleavage releases reporter
+              dye from quenching.
+            </figcaption>
+            <p class="interpretation">
+              <strong>Student takeaway:</strong> SYBR Green is simpler and cheaper, but it
+              will also report primer-dimers or nonspecific duplexes if they form. TaqMan
+              usually gives cleaner specificity because the probe adds another layer of
+              sequence recognition.
+            </p>
+          </figure>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Table 2</p>
               <h3>Practical comparison of SYBR Green and TaqMan</h3>
             </div>
             <div class="table-wrap">
@@ -307,76 +501,394 @@
                 </thead>
                 <tbody>
                   <tr>
-                    <td>How signal appears</td>
-                    <td>Fluorescent dye binds double-stranded DNA</td>
-                    <td>Probe is cleaved and releases reporter signal</td>
+                    <td>What creates signal?</td>
+                    <td>Binding of dye to any double-stranded DNA</td>
+                    <td>Cleavage of a target-specific fluorogenic probe</td>
                   </tr>
                   <tr>
                     <td>Specificity</td>
-                    <td>Lower, because any double-stranded product can contribute</td>
-                    <td>Higher, because primers and probe must all match correctly</td>
+                    <td>Lower if nonspecific products form</td>
+                    <td>Higher because probe hybridization is required</td>
                   </tr>
                   <tr>
-                    <td>Cost</td>
-                    <td>Usually lower</td>
-                    <td>Usually higher</td>
+                    <td>Probe required?</td>
+                    <td>No</td>
+                    <td>Yes</td>
                   </tr>
                   <tr>
-                    <td>Best use cases</td>
-                    <td>Screening, simple assays, teaching labs, preliminary testing</td>
-                    <td>High-specificity detection, multiplexing, clinical-style assays</td>
+                    <td>Typical extra validation</td>
+                    <td>Melt-curve review for product specificity</td>
+                    <td>Probe design verification and dye compatibility</td>
                   </tr>
                   <tr>
-                    <td>Extra check often needed</td>
-                    <td>Melt curve analysis</td>
-                    <td>Probe design validation</td>
+                    <td>Multiplex potential</td>
+                    <td>Limited</td>
+                    <td>Better, because different reporter dyes can be used</td>
+                  </tr>
+                  <tr>
+                    <td>Typical teaching interpretation</td>
+                    <td>Good for simple assay development and inexpensive screening</td>
+                    <td>Good when you need stronger target specificity</td>
                   </tr>
                 </tbody>
               </table>
             </div>
             <figcaption>
-              Neither chemistry is universally better. The correct choice depends on the
-              assay goal, budget, and specificity requirements.
+              The scientific tradeoff is not simply cost. The choice affects how vulnerable
+              the assay is to nonspecific amplification and how easily multiplex detection
+              can be achieved.
+            </figcaption>
+          </figure>
+        </section>
+
+        <section class="section" id="quantification">
+          <div class="section-heading reveal">
+            <span class="section-chip">5. Quantification strategy</span>
+            <h2>Absolute quantification, relative quantification, and 2<sup>-ΔΔCt</sup></h2>
+            <p>
+              Thermo Fisher separates qPCR quantification into two main logic paths. In
+              <strong>absolute quantification</strong>, unknown samples are compared against a
+              known standard curve. In <strong>relative quantification</strong>, expression is
+              compared to a calibrator such as an untreated control.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Figure 7</p>
+              <h3>Comparative Ct workflow for relative gene expression</h3>
+            </div>
+            <div class="diagram-scroll">
+              <img
+                src="../assets/real-time-pcr/ddct_workflow.svg"
+                alt="Original teaching diagram showing comparative Ct and 2 to the power minus delta delta Ct workflow"
+                class="diagram-image diagram-image-wide"
+              />
+            </div>
+            <figcaption>
+              Relative expression by the comparative Ct method proceeds from Ct values to
+              ΔCt, then to ΔΔCt, and finally to fold change using
+              2<sup>-ΔΔCt</sup>.
             </figcaption>
             <p class="interpretation">
-              <strong>Student takeaway:</strong> if you need a simpler and less expensive
-              assay, SYBR Green may be enough. If you need stronger target specificity,
-              TaqMan is usually the safer choice.
+              <strong>How to interpret this figure:</strong> the reference gene corrects for
+              within-sample variation, while the calibrator sample sets the comparison
+              baseline. Fold change is therefore a normalized and comparative result, not a
+              raw Ct result.
             </p>
           </figure>
+
+          <div class="card-grid two-column reveal">
+            <article class="info-card">
+              <h3>Absolute quantification</h3>
+              <p>
+                The unknown sample is interpolated from a standard curve made from known
+                template quantities. This is useful when the actual copy number or absolute
+                amount is required.
+              </p>
+              <p>
+                Examples include viral copy number estimation or measuring exact target
+                abundance when calibrated standards are available.
+              </p>
+            </article>
+            <article class="info-card">
+              <h3>Relative quantification</h3>
+              <p>
+                Expression in a test sample is expressed relative to a calibrator, often an
+                untreated control. Normalization is usually performed using an endogenous
+                reference gene such as GAPDH, ACTB, or rRNA.
+              </p>
+              <p>
+                This is the common logic for gene-expression experiments, drug-response
+                studies, and many academic qPCR comparisons.
+              </p>
+            </article>
+          </div>
+
+          <article class="callout-box reveal formula-callout">
+            <h3>Comparative Ct formula set</h3>
+            <div class="formula-grid">
+              <p><strong>ΔCt</strong> = Ct(target) − Ct(reference)</p>
+              <p><strong>ΔΔCt</strong> = ΔCt(treated or patient) − ΔCt(control or calibrator)</p>
+              <p><strong>Relative expression</strong> = 2<sup>-ΔΔCt</sup></p>
+              <p><strong>log<sub>2</sub> fold change</strong> = −ΔΔCt</p>
+            </div>
+            <p>
+              Thermo Fisher notes that the comparative Ct method is valid when target and
+              endogenous-control amplifications have approximately equal efficiency. That
+              assumption is also built into the calculator below.
+            </p>
+          </article>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Table 3</p>
+              <h3>How to choose a qPCR quantification approach</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Goal</th>
+                    <th>Preferred approach</th>
+                    <th>Main scientific requirement</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Know exact copy number or amount</td>
+                    <td>Absolute quantification</td>
+                    <td>A reliable standard curve with known quantities</td>
+                  </tr>
+                  <tr>
+                    <td>Compare expression against a control sample</td>
+                    <td>Relative quantification</td>
+                    <td>A stable endogenous reference and a defined calibrator</td>
+                  </tr>
+                  <tr>
+                    <td>Use comparative Ct without standard curves</td>
+                    <td>2<sup>-ΔΔCt</sup> method</td>
+                    <td>Approximately equal target/reference efficiency</td>
+                  </tr>
+                  <tr>
+                    <td>Evaluate assay performance</td>
+                    <td>Standard curve efficiency check</td>
+                    <td>Slope near −3.32 and strong linearity (R² close to 1)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>
+              A scientifically sound qPCR analysis begins by matching the biological
+              question to the correct quantification logic.
+            </figcaption>
+          </figure>
+
+          <div class="card-grid three-column reveal">
+            <article class="info-card">
+              <span class="card-badge">E</span>
+              <h3>Efficiency</h3>
+              <p>
+                In the geometric phase, amplification efficiency is approximately constant.
+                Thermo Fisher notes that a theoretical standard-curve slope of −3.32
+                corresponds to 100% efficiency.
+              </p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">R²</span>
+              <h3>Linearity</h3>
+              <p>
+                R² describes how well Ct predicts quantity over a dilution series. Strong
+                linearity increases confidence in quantitative interpretation.
+              </p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">QC</span>
+              <h3>Interpretation rule</h3>
+              <p>
+                A number alone is not enough. Curve shape, controls, efficiency, and assay
+                specificity must all support the calculation.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="calculator">
+          <div class="section-heading reveal">
+            <span class="section-chip">6. Interactive tool</span>
+            <h2>Gene expression calculator using 2<sup>-ΔΔCt</sup></h2>
+            <p>
+              This calculator is designed for a common teaching scenario: one calibrator
+              (control) group, one treated or patient group, one reference gene, and one
+              target gene. It uses a plate-based setup so the assigned wells and imported Ct
+              values remain easy to audit.
+            </p>
+          </div>
+
+          <section class="calculator-shell reveal" id="pcr-expression-tool" aria-label="Gene expression calculator">
+            <div class="calculator-intro">
+              <article class="callout-box">
+                <h3>What this calculator assumes</h3>
+                <p>
+                  The calculation follows the comparative Ct method. That means the target
+                  and reference assays should have approximately equal amplification
+                  efficiency, and the Ct values should come from a consistent thresholding
+                  strategy.
+                </p>
+                <p>
+                  The result is most meaningful when control wells, treated/patient wells,
+                  target wells, and reference wells were all run on the same plate or in a
+                  directly comparable setup.
+                </p>
+              </article>
+
+              <div class="calculator-labels">
+                <label class="field">
+                  <span>Control / calibrator label</span>
+                  <input id="control-label" type="text" value="Control" maxlength="50" />
+                </label>
+                <label class="field">
+                  <span>Treated / patient label</span>
+                  <input id="treated-label" type="text" value="Treated" maxlength="50" />
+                </label>
+                <label class="field">
+                  <span>Reference gene label</span>
+                  <input id="reference-gene-label" type="text" value="Reference gene" maxlength="50" />
+                </label>
+                <label class="field">
+                  <span>Target gene label</span>
+                  <input id="target-gene-label" type="text" value="Target gene" maxlength="50" />
+                </label>
+              </div>
+            </div>
+
+            <div class="calculator-grid">
+              <article class="figure-card calculator-panel">
+                <div class="figure-heading">
+                  <p class="figure-label">Step 1</p>
+                  <h3>Assign the 96-well plate</h3>
+                </div>
+                <p class="calculator-help">
+                  Choose a category below, then click the wells you want to mark. Only
+                  assigned wells are used in the calculation.
+                </p>
+                <div class="assignment-palette" id="assignment-palette" role="toolbar" aria-label="Plate assignment options">
+                  <button type="button" class="assignment-chip is-active" data-assignment-key="control-reference">Control + Reference</button>
+                  <button type="button" class="assignment-chip" data-assignment-key="control-target">Control + Target</button>
+                  <button type="button" class="assignment-chip" data-assignment-key="treated-reference">Treated + Reference</button>
+                  <button type="button" class="assignment-chip" data-assignment-key="treated-target">Treated + Target</button>
+                  <button type="button" class="assignment-chip assignment-chip-clear" data-assignment-key="clear">Clear wells</button>
+                </div>
+
+                <div class="plate-actions">
+                  <button type="button" class="secondary-action" id="plate-example-layout">Load example layout</button>
+                  <button type="button" class="secondary-action" id="plate-clear-all">Clear plate</button>
+                </div>
+
+                <div class="plate-summary" id="plate-summary" aria-live="polite"></div>
+
+                <div class="plate-wrap">
+                  <div class="plate-grid" id="plate-grid" aria-label="96-well plate"></div>
+                </div>
+              </article>
+
+              <article class="figure-card calculator-panel">
+                <div class="figure-heading">
+                  <p class="figure-label">Step 2</p>
+                  <h3>Import Ct values</h3>
+                </div>
+                <p class="calculator-help">
+                  Upload a <strong>CSV</strong>, <strong>TSV</strong>, or plain-text table
+                  containing at least a <code>Well</code> column and a <code>Ct</code>
+                  column. Header names such as <code>Cq</code>, <code>Well Position</code>,
+                  or <code>Ct Mean</code> are also recognized.
+                </p>
+
+                <label class="file-drop field">
+                  <span>Attach Ct table</span>
+                  <input id="ct-file" type="file" accept=".csv,.tsv,.txt" />
+                </label>
+
+                <label class="field">
+                  <span>Or paste the Ct table here</span>
+                  <textarea
+                    id="ct-table-text"
+                    rows="8"
+                    placeholder="Well,Ct&#10;A1,18.10&#10;A2,18.22&#10;A3,18.05"
+                  ></textarea>
+                </label>
+
+                <div class="plate-actions">
+                  <button type="button" class="secondary-action" id="load-example-data">Load example Ct table</button>
+                  <button type="button" class="primary-action" id="calculate-expression">Calculate 2^-ΔΔCt</button>
+                </div>
+
+                <p class="calculator-status" id="ct-upload-status" aria-live="polite">
+                  No Ct table loaded yet.
+                </p>
+
+                <div class="calculator-template">
+                  <h4>Accepted minimum table format</h4>
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Well</th>
+                          <th>Ct</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>A1</td>
+                          <td>18.10</td>
+                        </tr>
+                        <tr>
+                          <td>A2</td>
+                          <td>18.22</td>
+                        </tr>
+                        <tr>
+                          <td>B4</td>
+                          <td>21.61</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <article class="figure-card calculator-results" id="calculator-results" hidden>
+              <div class="figure-heading">
+                <p class="figure-label">Step 3</p>
+                <h3>Calculated gene-expression results</h3>
+              </div>
+              <div class="calculator-output" id="calculator-output"></div>
+            </article>
+          </section>
         </section>
 
         <section class="section" id="takeaways">
           <div class="section-heading reveal">
-            <span class="section-chip">4. Final summary</span>
-            <h2>What students should remember</h2>
+            <span class="section-chip">7. Final memory map</span>
+            <h2>What students should remember about real-time PCR</h2>
           </div>
 
           <div class="card-grid three-column reveal">
             <article class="info-card">
               <span class="card-badge">1</span>
-              <h3>Real-time PCR follows signal during amplification</h3>
+              <h3>Ct is a curve-derived quantity</h3>
               <p>
-                It is different from endpoint PCR because the instrument records
-                fluorescence while the reaction is progressing.
+                Ct comes from threshold crossing, so it depends on real amplification plus
+                how the signal was processed.
               </p>
             </article>
             <article class="info-card">
               <span class="card-badge">2</span>
-              <h3>Good controls are part of the experiment</h3>
+              <h3>Specificity depends on chemistry</h3>
               <p>
-                No-template and positive controls are necessary for interpreting whether a
-                result is trustworthy.
+                SYBR Green reports all double-stranded DNA, while TaqMan requires
+                probe-target recognition and cleavage.
               </p>
             </article>
             <article class="info-card">
               <span class="card-badge">3</span>
-              <h3>Chemistry choice affects specificity</h3>
+              <h3>Quantification requires design logic</h3>
               <p>
-                SYBR Green is simpler, while TaqMan adds probe-based target confirmation.
+                Relative expression is not just a formula. It requires valid controls,
+                suitable reference genes, and comparable efficiency.
               </p>
             </article>
           </div>
+
+          <article class="closing-note reveal">
+            <h3>Student takeaway</h3>
+            <p>
+              Learn qPCR as a chain of reasoning: sample quality, reverse transcription
+              logic, fluorescence chemistry, amplification curve interpretation, and
+              quantification method. Once those pieces are linked together, Ct values and
+              fold-change outputs become much easier to interpret correctly.
+            </p>
+          </article>
         </section>
       </main>
 
@@ -387,10 +899,10 @@
           <p><strong>Organization:</strong> Wahj Al-DNA</p>
         </div>
         <div>
-          <p>Educational resource for introductory learning in real-time PCR.</p>
+          <p>Educational resource for introductory and early-postgraduate learning in real-time PCR.</p>
           <p>
-            The diagrams are displayed in wide frames to keep the text readable on both
-            desktop and mobile screens.
+            The page combines a scientific teaching narrative with an applied
+            gene-expression calculator for the comparative Ct method.
           </p>
         </div>
         <div class="footer-card">
@@ -405,5 +917,6 @@
 
     <script src="../config.js"></script>
     <script src="../script.js"></script>
+    <script src="../pcr-calculator.js"></script>
   </body>
 </html>
