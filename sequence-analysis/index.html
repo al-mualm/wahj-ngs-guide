@@ -235,9 +235,70 @@ Sbjct   26  AGAGTTTGATCCTGGCTCAGGATGAACGCTGGCGGCGTGCCTAATACATGCAA  85</pre>
                 </button>
               </div>
 
+              <div class="analysis-actions analysis-actions-secondary">
+                <button class="action-button" type="button" id="find-organism">
+                  Find organism in NCBI Taxonomy
+                </button>
+                <button class="action-button action-button-primary" type="button" id="run-blast">
+                  Run BLAST alignment
+                </button>
+                <button class="action-button" type="button" id="check-blast-status" disabled>
+                  Check BLAST status
+                </button>
+                <button class="action-button" type="button" id="load-blast-result" disabled>
+                  Load result
+                </button>
+              </div>
+
               <div class="form-status" id="analysis-status" aria-live="polite">
                 The page is ready. Clean a sequence or load the built-in demo result.
               </div>
+
+              <section class="inline-panel" id="taxonomy-panel">
+                <div class="inline-panel-header">
+                  <div>
+                    <p class="eyebrow">NCBI Taxonomy candidates</p>
+                    <h4>Organism search and TaxId selection</h4>
+                  </div>
+                  <span class="inline-panel-badge" id="taxonomy-badge">Awaiting search</span>
+                </div>
+                <p class="inline-panel-status" id="taxonomy-status">
+                  Search for an organism to load possible taxonomy matches from NCBI.
+                </p>
+                <div class="taxonomy-candidates" id="taxonomy-candidates"></div>
+              </section>
+
+              <section class="inline-panel" id="blast-panel">
+                <div class="inline-panel-header">
+                  <div>
+                    <p class="eyebrow">BLAST session</p>
+                    <h4>RID tracking and backend status</h4>
+                  </div>
+                  <span class="inline-panel-badge" id="blast-badge">Demo mode available</span>
+                </div>
+                <p class="inline-panel-status" id="blast-session-status">
+                  No live BLAST request has been submitted yet. Demo mode remains available for
+                  teaching even before the backend is deployed.
+                </p>
+                <div class="blast-session-grid">
+                  <article>
+                    <span>RID</span>
+                    <strong id="blast-rid">—</strong>
+                  </article>
+                  <article>
+                    <span>Selected TaxId</span>
+                    <strong id="selected-taxid">—</strong>
+                  </article>
+                  <article>
+                    <span>Next status check</span>
+                    <strong id="next-status-check">Not scheduled</strong>
+                  </article>
+                  <article>
+                    <span>Backend URL</span>
+                    <strong id="backend-url-state">Checking config</strong>
+                  </article>
+                </div>
+              </section>
             </form>
 
             <aside class="analysis-card quality-card reveal">
