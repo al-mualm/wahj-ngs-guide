@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="780" viewBox="0 0 1400 780" role="img" aria-labelledby="title desc">
+  <title id="title">Comparative Ct and 2 to the power minus delta delta Ct workflow</title>
+  <desc id="desc">Teaching diagram showing how control and treated Ct values are converted into delta Ct, delta delta Ct, and relative expression using the comparative Ct method.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="14" markerHeight="14" refX="10" refY="7" orient="auto">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#0f70c1"/>
+    </marker>
+    <style>
+      .box{fill:#ffffff;stroke:#cbd9e6;stroke-width:2}
+      .soft{fill:#eef6fb;stroke:#9fc7e6}
+      .soft2{fill:#fff1e9;stroke:#e5b58e}
+      .formula{fill:#f8fbfd;stroke:#d9e6f1}
+      .arrow{stroke:#0f70c1;stroke-width:4;marker-end:url(#arrow)}
+      .label{font:700 30px 'Avenir Next','Segoe UI',sans-serif;fill:#163554}
+      .h2{font:700 22px 'Avenir Next','Segoe UI',sans-serif;fill:#163554}
+      .txt{font:18px 'Avenir Next','Segoe UI',sans-serif;fill:#24445f}
+      .small{font:16px 'Avenir Next','Segoe UI',sans-serif;fill:#47627a}
+      .strong{font:700 24px 'Avenir Next','Segoe UI',sans-serif;fill:#0e4f74}
+    </style>
+  </defs>
+
+  <rect width="1400" height="780" fill="#f8fbfd"/>
+  <text x="60" y="58" class="label">Comparative Ct method for relative gene expression</text>
+  <text x="60" y="90" class="txt">The calibrator (control) defines the 1x reference point, and the reference gene normalizes within-sample variation.</text>
+
+  <rect x="70" y="140" width="300" height="150" rx="26" class="soft"/>
+  <rect x="1030" y="140" width="300" height="150" rx="26" class="soft2"/>
+  <text x="102" y="180" class="h2">1. Control / calibrator sample</text>
+  <text x="102" y="220" class="txt">Mean Ct(target)</text>
+  <text x="260" y="220" class="strong">Ct(T,C)</text>
+  <text x="102" y="255" class="txt">Mean Ct(reference)</text>
+  <text x="260" y="255" class="strong">Ct(R,C)</text>
+
+  <text x="1062" y="180" class="h2">2. Treated or patient sample</text>
+  <text x="1062" y="220" class="txt">Mean Ct(target)</text>
+  <text x="1218" y="220" class="strong">Ct(T,S)</text>
+  <text x="1062" y="255" class="txt">Mean Ct(reference)</text>
+  <text x="1218" y="255" class="strong">Ct(R,S)</text>
+
+  <rect x="445" y="130" width="510" height="175" rx="28" class="box"/>
+  <text x="476" y="172" class="h2">3. Normalize within each sample</text>
+  <text x="476" y="220" class="strong">DeltaCt(control) = Ct(T,C) - Ct(R,C)</text>
+  <text x="476" y="260" class="strong">DeltaCt(sample) = Ct(T,S) - Ct(R,S)</text>
+  <text x="476" y="292" class="small">This corrects for sample-to-sample differences measured by the endogenous reference.</text>
+
+  <line x1="370" y1="215" x2="440" y2="215" class="arrow"/>
+  <line x1="955" y1="215" x2="1020" y2="215" class="arrow"/>
+
+  <rect x="290" y="385" width="820" height="124" rx="28" class="formula"/>
+  <text x="322" y="428" class="h2">4. Compare the normalized sample to the normalized control</text>
+  <text x="322" y="470" class="strong">DeltaDeltaCt = DeltaCt(sample) - DeltaCt(control)</text>
+
+  <line x1="700" y1="305" x2="700" y2="370" class="arrow"/>
+
+  <rect x="360" y="580" width="680" height="130" rx="28" class="box"/>
+  <text x="390" y="622" class="h2">5. Convert the Ct difference into relative expression</text>
+  <text x="390" y="664" class="strong">Relative expression = 2^(-DeltaDeltaCt)</text>
+  <text x="390" y="694" class="small">If DeltaDeltaCt is negative, expression is above the control. If it is positive, expression is below the control.</text>
+
+  <line x1="700" y1="510" x2="700" y2="565" class="arrow"/>
+
+  <rect x="80" y="580" width="220" height="130" rx="24" class="soft"/>
+  <text x="106" y="624" class="h2">Interpretation</text>
+  <text x="106" y="658" class="txt">Control group</text>
+  <text x="106" y="687" class="strong">1.0x baseline</text>
+
+  <rect x="1100" y="580" width="220" height="130" rx="24" class="soft2"/>
+  <text x="1124" y="624" class="h2">Validity rule</text>
+  <text x="1124" y="658" class="txt">Target and reference</text>
+  <text x="1124" y="687" class="txt">efficiencies should be similar</text>
+</svg>
