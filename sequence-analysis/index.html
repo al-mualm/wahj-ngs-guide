@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sanger Sequence Analysis &amp; BLAST Alignment | Wahj Al-DNA</title>
+    <meta
+      name="description"
+      content="An educational Wahj page for cleaning Sanger reads, reviewing sequence quality, and interpreting BLAST-style alignments for teaching and research training."
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="sequence-analysis.css" />
+  </head>
+  <body class="sequence-analysis-page">
+    <div class="site-shell">
+      <header class="site-header site-header-compact" id="top">
+        <div class="brand-lockup">
+          <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Educational Hub</p>
+            <p class="brand-title">Wahj Al-DNA</p>
+          </div>
+        </div>
+        <div class="reader-badge" aria-live="polite">
+          <p class="reader-label">Readers</p>
+          <p class="reader-count"><span id="reader-count">Loading...</span></p>
+          <p class="reader-note" id="reader-note">
+            Anonymous reader count updates automatically. No personal information is collected.
+          </p>
+        </div>
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="primary-nav"
+        >
+          Menu
+        </button>
+        <nav class="primary-nav" id="primary-nav" aria-label="Primary">
+          <a href="../">Hub</a>
+          <a href="#overview">Overview</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#sequence-form-panel">Input</a>
+          <a href="#results">Results</a>
+          <a href="../ngs/">NGS guide</a>
+          <a href="../real-time-pcr/">Real-Time PCR</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="section sequence-hero" id="overview">
+          <div class="sequence-hero-copy reveal">
+            <span class="section-chip">Sanger sequencing + NCBI interpretation</span>
+            <h1>Sanger Sequence Analysis &amp; BLAST Alignment</h1>
+            <p class="hero-lead">
+              Paste a Sanger sequencing read, check its quality, compare it with NCBI
+              sequences, and learn how to interpret BLAST alignment results.
+            </p>
+
+            <div class="ethics-note">
+              <p class="eyebrow">Safety and ethics note</p>
+              <p>
+                This educational tool sends submitted sequences to public NCBI services when
+                BLAST is used. Do not submit private clinical, human-identifiable,
+                confidential, or unpublished sensitive sequences. This page is for teaching
+                and research training only, not clinical diagnosis.
+              </p>
+            </div>
+
+            <div class="sequence-badge-row">
+              <span>Sanger sequencing</span>
+              <span>BLAST</span>
+              <span>NCBI</span>
+              <span>Alignment</span>
+              <span>16S rRNA</span>
+            </div>
+          </div>
+
+          <div class="sequence-hero-panel reveal">
+            <div class="hero-panel-header">
+              <p class="eyebrow">What students practice here</p>
+              <h2>From raw read to evidence-based interpretation</h2>
+            </div>
+            <div class="hero-panel-grid">
+              <article class="hero-panel-card">
+                <strong>Sequence cleaning</strong>
+                <p>
+                  Remove FASTA headers, spaces, line breaks, and non-sequence characters
+                  before interpretation.
+                </p>
+              </article>
+              <article class="hero-panel-card">
+                <strong>BLAST-style output</strong>
+                <p>
+                  Review accession IDs, identities, E-values, gaps, and Query/Sbjct
+                  alignments in a familiar teaching layout.
+                </p>
+              </article>
+              <article class="hero-panel-card">
+                <strong>Student interpretation</strong>
+                <p>
+                  Learn why high identity does not always prove species identity, especially
+                  with conserved markers such as 16S rRNA.
+                </p>
+              </article>
+            </div>
+
+            <div class="mini-alignment-preview">
+              <p class="mini-alignment-label">Preview of the alignment output style</p>
+              <pre>Query   28  AGAGTTTGATCCTGGCTCAGGATGAACGCTGGCGGCGTGCCTAATACATGCAA  87
+            |||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Sbjct   26  AGAGTTTGATCCTGGCTCAGGATGAACGCTGGCGGCGTGCCTAATACATGCAA  85</pre>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="workflow">
+          <div class="section-heading">
+            <span class="section-chip">Learning workflow</span>
+            <h2>How the page guides a beginner through Sanger sequence analysis</h2>
+            <p>
+              The workflow below mirrors how a student would move from a finished PCR product
+              to a teaching-focused BLAST interpretation.
+            </p>
+          </div>
+
+          <div class="sequence-workflow-grid">
+            <article class="workflow-card reveal">
+              <span>1</span>
+              <h3>PCR product</h3>
+              <p>Start with the amplicon that was selected for Sanger sequencing.</p>
+            </article>
+            <article class="workflow-card reveal">
+              <span>2</span>
+              <h3>Sanger sequencing</h3>
+              <p>Obtain a forward or reverse read from the capillary sequencing output.</p>
+            </article>
+            <article class="workflow-card reveal">
+              <span>3</span>
+              <h3>Sequence cleaning</h3>
+              <p>Remove headers and formatting noise so the nucleotide string is usable.</p>
+            </article>
+            <article class="workflow-card reveal">
+              <span>4</span>
+              <h3>BLAST search</h3>
+              <p>Compare the cleaned read with public database sequences from NCBI.</p>
+            </article>
+            <article class="workflow-card reveal">
+              <span>5</span>
+              <h3>Alignment result</h3>
+              <p>Review the top hit table plus local alignment details for each match.</p>
+            </article>
+            <article class="workflow-card reveal">
+              <span>6</span>
+              <h3>Interpretation</h3>
+              <p>Judge identity, coverage, E-value, and gaps without making diagnostic claims.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="analysis-tool">
+          <div class="section-heading">
+            <span class="section-chip">Interactive teaching tool</span>
+            <h2>Clean a Sanger read and inspect a BLAST-style result</h2>
+            <p>
+              Start by preparing the sequence. The tool accepts plain sequence text or FASTA
+              input, then builds a clean sequence plus a preview FASTA entry for teaching use.
+            </p>
+          </div>
+
+          <div class="analysis-layout">
+            <form class="analysis-card input-card reveal" id="sequence-form-panel">
+              <div class="input-grid">
+                <label class="field">
+                  <span>Sample number</span>
+                  <input type="text" id="sample-number" placeholder="5" />
+                </label>
+                <label class="field">
+                  <span>Wahj sample ID</span>
+                  <input type="text" id="wahj-sample-id" placeholder="S5" />
+                </label>
+                <label class="field">
+                  <span>Sequence title</span>
+                  <input
+                    type="text"
+                    id="sequence-title"
+                    placeholder="Bacterial isolate 5 forward read"
+                  />
+                </label>
+                <label class="field">
+                  <span>Organism name <strong>*</strong></span>
+                  <input
+                    type="text"
+                    id="organism-name"
+                    placeholder="Bacillus pumilus"
+                    required
+                  />
+                </label>
+                <label class="field">
+                  <span>Gene / marker</span>
+                  <input type="text" id="gene-marker" placeholder="16S rRNA" />
+                </label>
+              </div>
+
+              <label class="field field-textarea">
+                <span>Sequence input</span>
+                <textarea
+                  id="sequence-input"
+                  rows="12"
+                  placeholder="Paste a Sanger read or FASTA record here. Accepted symbols: A C G T U R Y S W K M B D H V N"
+                ></textarea>
+              </label>
+
+              <p class="field-help">
+                Accepted codes: <code>A C G T U R Y S W K M B D H V N</code>. FASTA headers
+                are removed automatically. Lowercase letters become uppercase. <code>U</code>
+                is converted to <code>T</code>.
+              </p>
+
+              <div class="analysis-actions">
+                <button class="action-button action-button-primary" type="button" id="clean-sequence">
+                  Clean sequence
+                </button>
+                <button class="action-button" type="button" id="reverse-complement">
+                  Reverse complement
+                </button>
+                <button class="action-button" type="button" id="copy-fasta">
+                  Copy FASTA
+                </button>
+                <button class="action-button" type="button" id="load-demo-result">
+                  Load demo result
+                </button>
+                <button class="action-button action-button-ghost" type="reset" id="clear-form">
+                  Clear form
+                </button>
+              </div>
+
+              <div class="form-status" id="analysis-status" aria-live="polite">
+                The page is ready. Clean a sequence or load the built-in demo result.
+              </div>
+            </form>
+
+            <aside class="analysis-card quality-card reveal">
+              <div class="quality-header">
+                <div>
+                  <p class="eyebrow">Sequence quality panel</p>
+                  <h3>Cleaned sequence summary</h3>
+                </div>
+                <span class="quality-badge is-pending" id="quality-badge">Awaiting sequence</span>
+              </div>
+
+              <div class="quality-grid">
+                <article class="quality-metric">
+                  <span>Length</span>
+                  <strong id="metric-length">0 bp</strong>
+                </article>
+                <article class="quality-metric">
+                  <span>A count</span>
+                  <strong id="metric-a">0</strong>
+                </article>
+                <article class="quality-metric">
+                  <span>T count</span>
+                  <strong id="metric-t">0</strong>
+                </article>
+                <article class="quality-metric">
+                  <span>G count</span>
+                  <strong id="metric-g">0</strong>
+                </article>
+                <article class="quality-metric">
+                  <span>C count</span>
+                  <strong id="metric-c">0</strong>
+                </article>
+                <article class="quality-metric">
+                  <span>N count</span>
+                  <strong id="metric-n">0</strong>
+                </article>
+                <article class="quality-metric">
+                  <span>Ambiguous bases</span>
+                  <strong id="metric-ambiguous">0</strong>
+                </article>
+                <article class="quality-metric">
+                  <span>GC%</span>
+                  <strong id="metric-gc">0.0%</strong>
+                </article>
+              </div>
+
+              <div class="quality-message" id="quality-message">
+                No cleaned sequence yet. The panel will update after you clean the input.
+              </div>
+
+              <div class="preview-panel">
+                <div class="preview-header">
+                  <h4>FASTA preview</h4>
+                  <p>Wrapped to 60 bases per line for readability.</p>
+                </div>
+                <pre id="fasta-preview">></pre>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="section" id="results">
+          <div class="section-heading">
+            <span class="section-chip">BLAST-style teaching output</span>
+            <h2>Summary table and alignment view</h2>
+            <p>
+              The demo below shows the kind of information students should inspect after a
+              BLAST comparison: accession, source, identities, E-value, gaps, and alignment
+              details.
+            </p>
+          </div>
+
+          <div class="results-stack">
+            <section class="analysis-card results-card reveal">
+              <div class="results-card-header">
+                <div>
+                  <p class="eyebrow">Result table</p>
+                  <h3>Top sequence comparison result</h3>
+                </div>
+                <p class="results-note" id="results-note">
+                  Load the demo result to see a complete educational example.
+                </p>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>No. of Sample</th>
+                      <th>No. of Wahj</th>
+                      <th>Sequence ID / Compare</th>
+                      <th>Source</th>
+                      <th>Identities</th>
+                      <th>E-value</th>
+                      <th>Gaps</th>
+                      <th>Interpretation</th>
+                    </tr>
+                  </thead>
+                  <tbody id="blast-results-body">
+                    <tr>
+                      <td colspan="8" class="placeholder-row">
+                        No result loaded yet. Use <strong>Load demo result</strong> to render
+                        the example table and alignment card.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="analysis-card alignment-card reveal">
+              <div class="alignment-card-header">
+                <div>
+                  <p class="eyebrow">Alignment details</p>
+                  <h3 id="alignment-title">BLAST-style alignment card</h3>
+                </div>
+                <span class="alignment-status" id="alignment-status">Demo or live result will appear here</span>
+              </div>
+
+              <div class="alignment-meta-grid" id="alignment-meta">
+                <article>
+                  <span>Sequence ID</span>
+                  <strong>Not loaded</strong>
+                </article>
+                <article>
+                  <span>Length</span>
+                  <strong>—</strong>
+                </article>
+                <article>
+                  <span>Score</span>
+                  <strong>—</strong>
+                </article>
+                <article>
+                  <span>Expect</span>
+                  <strong>—</strong>
+                </article>
+                <article>
+                  <span>Identities</span>
+                  <strong>—</strong>
+                </article>
+                <article>
+                  <span>Gaps</span>
+                  <strong>—</strong>
+                </article>
+              </div>
+
+              <div class="alignment-links" id="alignment-links"></div>
+
+              <div class="alignment-block-wrap">
+                <pre class="alignment-block" id="alignment-block">Query/Sbjct alignment block will appear here after a demo or live BLAST result is loaded.</pre>
+              </div>
+            </section>
+
+            <section class="analysis-card interpretation-card reveal">
+              <div class="results-card-header">
+                <div>
+                  <p class="eyebrow">Student interpretation panel</p>
+                  <h3>How to read the evidence without over-claiming</h3>
+                </div>
+              </div>
+
+              <div class="interpretation-grid">
+                <article class="interpretation-item">
+                  <h4>Percent identity</h4>
+                  <p>
+                    Identity describes how many aligned nucleotides match exactly. Higher
+                    identity usually means closer similarity, but it does not automatically
+                    prove species identity.
+                  </p>
+                </article>
+                <article class="interpretation-item">
+                  <h4>Query coverage</h4>
+                  <p>
+                    Coverage describes how much of your sequence participates in the match. A
+                    high identity with low coverage can still be incomplete evidence.
+                  </p>
+                </article>
+                <article class="interpretation-item">
+                  <h4>E-value</h4>
+                  <p>
+                    The E-value estimates how likely a match of this quality could appear by
+                    chance. Lower values support stronger evidence.
+                  </p>
+                </article>
+                <article class="interpretation-item">
+                  <h4>Gaps and mismatches</h4>
+                  <p>
+                    Gaps and mismatches can reflect real divergence, sequencing noise, or poor
+                    trimming. They should be reviewed alongside sequence quality.
+                  </p>
+                </article>
+                <article class="interpretation-item">
+                  <h4>16S rRNA limitation</h4>
+                  <p>
+                    Many bacteria share highly similar 16S sequences. A strong 16S hit may
+                    support a genus or species group, but it may not be enough to prove a
+                    single exact species.
+                  </p>
+                </article>
+                <article class="interpretation-item">
+                  <h4>When to review carefully</h4>
+                  <p>
+                    Low identity, short alignment ranges, low coverage, or many ambiguous bases
+                    mean the result should be treated as uncertain and reviewed again.
+                  </p>
+                </article>
+              </div>
+
+              <div class="interpretation-scale">
+                <span class="scale-pill is-strong">Strong match</span>
+                <span class="scale-pill is-probable">Probable match</span>
+                <span class="scale-pill is-moderate">Moderate match</span>
+                <span class="scale-pill is-review">Needs review</span>
+                <span class="scale-pill is-weak">Weak or uncertain match</span>
+              </div>
+
+              <div class="interpretation-callout" id="interpretation-callout">
+                Load the demo result to see how the tool translates alignment metrics into a
+                careful educational interpretation.
+              </div>
+            </section>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <p><strong>Author:</strong> Mahmood Al-Mualm</p>
+          <p><strong>Title:</strong> CEO of Wahj Al-DNA</p>
+          <p><strong>Organization:</strong> Wahj Al-DNA</p>
+        </div>
+        <div>
+          <p>Educational resource for introductory learning in molecular biology.</p>
+          <p>
+            This page teaches how to inspect Sanger sequencing output and interpret BLAST
+            evidence in a non-diagnostic academic setting.
+          </p>
+        </div>
+        <div class="footer-card">
+          <p><strong>Readers:</strong> <span id="footer-reader-count">Loading...</span></p>
+          <p>
+            Anonymous reader count is maintained separately from the sequence analysis data
+            workflow.
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="../script.js"></script>
+    <script src="sequence-analysis.js"></script>
+  </body>
+</html>
