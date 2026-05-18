@@ -10,6 +10,19 @@ const BLAST_CACHE_SECONDS = 21600;
 const BLAST_DEFAULT_DATABASE = "core_nt";
 const BLAST_DEFAULT_HITLIST_SIZE = 10;
 const BLAST_MAX_SEQUENCE_LENGTH = 2000;
+const SEQUENCE_ANALYSIS_ACTIONS = [
+  "sequenceAnalysisHealth",
+  "taxonomySearch",
+  "blastSubmit",
+  "blastStatus",
+  "blastResult",
+];
+const SUPPORTED_ACTIONS = [
+  "visit",
+  "stats",
+  "comments",
+  "comment",
+].concat(SEQUENCE_ANALYSIS_ACTIONS);
 
 const READER_HEADERS = [
   "visitor_id",
@@ -35,7 +48,8 @@ const COMMENT_HEADERS = [
 
 function doGet(e) {
   const params = e && e.parameter ? e.parameter : {};
-  const action = normalizeActionName_(params.action || "stats");
+  const requestedAction = String(params.action || "stats").trim();
+  const action = normalizeActionName_(requestedAction);
   return outputResponse_(dispatchAction_(action, params), params.callback);
 }
 
@@ -51,7 +65,8 @@ function doPost(e) {
     });
   }
 
-  const action = normalizeActionName_(payload.action);
+  const requestedAction = String(payload.action || "").trim();
+  const action = normalizeActionName_(requestedAction);
   return jsonOutput_(dispatchAction_(action, payload));
 }
 
@@ -175,10 +190,7 @@ function dispatchAction_(action, params) {
       return blastResult_(params);
     }
 
-    return {
-      ok: false,
-      error: "Unsupported action.",
-    };
+    return buildUnsupportedActionResponse_(action);
   } catch (error) {
     return {
       ok: false,
@@ -202,6 +214,15 @@ function normalizeActionName_(actionValue) {
   };
 
   return aliases[normalized] || sanitizeText_(actionValue);
+}
+
+function buildUnsupportedActionResponse_(action) {
+  return {
+    ok: false,
+    error: "Unsupported action.",
+    requestedAction: sanitizeText_(action),
+    supportedActions: SUPPORTED_ACTIONS.slice(),
+  };
 }
 
 function registerReaderVisit_(input) {
@@ -326,13 +347,7 @@ function sequenceAnalysisHealth_() {
   return {
     ok: true,
     feature: "sequence-analysis",
-    supportedActions: [
-      "sequenceAnalysisHealth",
-      "taxonomySearch",
-      "blastSubmit",
-      "blastStatus",
-      "blastResult",
-    ],
+    supportedActions: SEQUENCE_ANALYSIS_ACTIONS.slice(),
     message: "Sequence Analysis backend is available.",
   };
 }
@@ -834,7 +849,7 @@ function cleanSequenceInput_(sequenceInput) {
     });
   const cleanedSequence = payloadLines
     .join("")
-    .replace(/[\s0-9]+/g, "")
+    .replace(/[^A-Za-z]+/g, "")
     .toUpperCase()
     .replace(/U/g, "T");
 

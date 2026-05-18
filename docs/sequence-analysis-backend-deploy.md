@@ -21,11 +21,12 @@ Use this guide after updating the Apps Script code in `backend/google-apps-scrip
 ## Test order
 
 1. Test `sequenceAnalysisHealth`.
-2. Test `taxonomySearch` with a safe organism name such as `Bacillus pumilus`.
-3. Test `blastSubmit` with a short teaching sequence that is safe for public NCBI submission.
-4. Wait before polling for status.
-5. Test `blastStatus`.
-6. Test `blastResult`.
+2. Test `taxonomySearch` with `Homo sapiens`.
+3. Test `taxonomySearch` with `Bacillus pumilus`.
+4. Test `blastSubmit` with a short teaching sequence that is safe for public NCBI submission.
+5. Wait before polling for status.
+6. Test `blastStatus`.
+7. Test `blastResult`.
 
 ## Troubleshooting
 
@@ -47,13 +48,19 @@ Fix:
 6. Deploy the updated version.
 7. Test:
    - `?action=sequenceAnalysisHealth`
+   - `?action=taxonomySearch&organismName=Homo%20sapiens`
    - `?action=taxonomySearch&organismName=Bacillus%20pumilus`
 8. If the deployment URL changed, update `sequenceAnalysisApiUrl` in [config.js](</Users/mahmoodalmoalm/Documents/New project/wahj-ngs-guide/config.js>).
+
+Expected examples:
+
+- `Homo sapiens` should return a species-level candidate with TaxId `9606`.
+- `Bacillus pumilus` should return a species-level candidate with TaxId `1408`.
 
 ## Required cautions
 
 - NCBI receives submitted sequences during live BLAST use.
-- Do not submit confidential, clinical, or unpublished sensitive sequences.
+- Do not submit private clinical, human-identifiable, confidential, or unpublished sensitive sequences.
 - This page is for teaching and research training, not diagnosis.
 - Respect NCBI public-service limits and avoid repeated rapid submissions.
 
