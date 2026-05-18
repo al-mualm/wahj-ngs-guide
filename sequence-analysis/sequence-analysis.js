@@ -1,6 +1,13 @@
 const sequenceConfig = window.WAHJ_NGS_CONFIG || {};
 const demoEnabled = sequenceConfig.sequenceAnalysisDemoEnabled !== false;
 const sequenceApiUrl = (sequenceConfig.sequenceAnalysisApiUrl || "").trim();
+const requiredSequenceActions = [
+  "sequenceAnalysisHealth",
+  "taxonomySearch",
+  "blastSubmit",
+  "blastStatus",
+  "blastResult",
+];
 
 const allowedSequencePattern = /^[ACGTRYSWKMBDHVN]+$/;
 const allowedSequenceCharacters = new Set("ACGTRYSWKMBDHVN".split(""));
@@ -136,9 +143,96 @@ const state = {
   selectedResultIndex: 0,
   nextAllowedStatusAt: 0,
   blastReady: false,
+  backendReady: false,
+  backendHealthChecked: false,
+  backendStatusMessage: "",
+  lastLiveError: "",
   activeButtons: new Map(),
   timerId: 0,
 };
+
+function getBackendLogLabel() {
+  if (!sequenceApiUrl) {
+    return "not-configured";
+  }
+
+  try {
+    const parsed = new URL(sequenceApiUrl);
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch (error) {
+    return "invalid-url";
+  }
+}
+
+function logSequenceEvent(eventName, details = {}) {
+  console.info("[SequenceAnalysis]", {
+    event: eventName,
+    backend: getBackendLogLabel(),
+    mode: state.backendReady ? "live" : "demo-only",
+    ...details,
+  });
+}
+
+function getBackendNotReadyMessage() {
+  return "Backend not ready. Demo mode is available. Deploy the updated Apps Script backend to enable live NCBI search.";
+}
+
+function getUnsupportedActionMessage() {
+  return "The Apps Script backend is not updated or the action name does not match. Redeploy the backend and verify sequenceAnalysisHealth.";
+}
+
+function explainBackendError(error) {
+  const rawMessage = String(error && error.message ? error.message : error || "").trim();
+
+  if (!rawMessage) {
+    return {
+      rawMessage: "",
+      userMessage: getBackendNotReadyMessage(),
+      taxonomyMessage: "Live taxonomy search failed. Demo mode is still available.",
+      isRoutingIssue: false,
+      shouldDisableLiveMode: true,
+    };
+  }
+
+  if (rawMessage.includes("Unsupported action")) {
+    return {
+      rawMessage,
+      userMessage: getUnsupportedActionMessage(),
+      taxonomyMessage: "Live taxonomy search failed. Demo mode is still available.",
+      isRoutingIssue: true,
+      shouldDisableLiveMode: true,
+    };
+  }
+
+  if (rawMessage.includes("backend URL is not configured")) {
+    return {
+      rawMessage,
+      userMessage: getBackendNotReadyMessage(),
+      taxonomyMessage: "Live taxonomy search failed. Demo mode is still available.",
+      isRoutingIssue: false,
+      shouldDisableLiveMode: true,
+    };
+  }
+
+  if (rawMessage.includes("could not be reached")) {
+    return {
+      rawMessage,
+      userMessage:
+        "The Sequence Analysis backend could not be reached. Demo mode is still available while the live backend is unavailable.",
+      taxonomyMessage: "Live taxonomy search failed. Demo mode is still available.",
+      isRoutingIssue: false,
+      shouldDisableLiveMode: true,
+    };
+  }
+
+  return {
+    rawMessage,
+    userMessage: rawMessage,
+    taxonomyMessage: "Live taxonomy search failed. Demo mode is still available.",
+    isRoutingIssue: false,
+    shouldDisableLiveMode: false,
+  };
+}
 
 function setStatus(message, tone = "") {
   analysisStatus.textContent = message;
@@ -210,6 +304,10 @@ async function requestSequenceApi(action, params = {}) {
     );
   }
 
+  logSequenceEvent("request:start", {
+    action,
+  });
+
   const callbackName = `wahjSequenceAnalysis_${Date.now()}_${Math.random()
     .toString(36)
     .slice(2, 9)}`;
@@ -225,9 +323,18 @@ async function requestSequenceApi(action, params = {}) {
 
   const payload = await loadJsonp(url.toString(), callbackName);
   if (!payload || !payload.ok) {
+    logSequenceEvent("request:error", {
+      action,
+      ok: false,
+      error: payload?.error || "Unknown backend error",
+    });
     throw new Error(payload?.error || "Sequence Analysis backend request failed.");
   }
 
+  logSequenceEvent("request:success", {
+    action,
+    ok: true,
+  });
   return payload;
 }
 
@@ -670,16 +777,31 @@ function clearResults() {
   renderResultTable(null);
 }
 
-function renderTaxonomyCandidates(candidates) {
+function clearTaxonomyCandidates(message, badgeLabel = "Awaiting search", tone = "") {
+  state.taxonomyCandidates = [];
+  state.selectedTaxId = "";
+  taxonomyCandidates.innerHTML = "";
+  selectedTaxid.textContent = "—";
+  setInlineBadge(taxonomyBadge, badgeLabel, tone);
+  taxonomyStatus.textContent =
+    message ||
+    "Search for an organism to load possible taxonomy matches from NCBI.";
+}
+
+function renderTaxonomyCandidates(candidates, options = {}) {
+  const source = options.source || "live";
   state.taxonomyCandidates = candidates;
   state.selectedTaxId = candidates.length ? String(candidates[0].taxId || "") : "";
   selectedTaxid.textContent = state.selectedTaxId || "—";
 
   if (!candidates.length) {
-    taxonomyCandidates.innerHTML = "";
-    setInlineBadge(taxonomyBadge, "No candidates", "is-review");
-    taxonomyStatus.textContent =
-      "No taxonomy candidates were returned. You can still use demo mode or try a broader organism name.";
+    clearTaxonomyCandidates(
+      source === "demo"
+        ? "No demo taxonomy candidates are available."
+        : "No taxonomy candidates were returned. You can still use demo mode or try a broader organism name.",
+      "No candidates",
+      "is-review"
+    );
     return;
   }
 
@@ -704,6 +826,13 @@ function renderTaxonomyCandidates(candidates) {
       `;
     })
     .join("");
+
+  if (source === "demo") {
+    setInlineBadge(taxonomyBadge, "Demo candidate", "is-review");
+    taxonomyStatus.textContent =
+      "Demo candidate shown for teaching. Live taxonomy search was not used for this card.";
+    return;
+  }
 
   setInlineBadge(taxonomyBadge, `${candidates.length} candidate(s)`, "is-success");
   taxonomyStatus.textContent =
@@ -738,13 +867,19 @@ function updateBlastControls() {
     state.activeButtons.has(runBlastButton) ||
     state.activeButtons.has(checkStatusButton) ||
     state.activeButtons.has(loadResultButton);
+  const liveDisabled = !state.backendReady;
   const now = Date.now();
   const secondsRemaining = Math.max(
     0,
     Math.ceil((state.nextAllowedStatusAt - now) / 1000)
   );
-  const canCheckStatus = Boolean(state.lastRid) && secondsRemaining <= 0 && !busy;
-  const canLoadResult = Boolean(state.lastRid) && (state.blastReady || secondsRemaining <= 0) && !busy;
+  const canCheckStatus =
+    state.backendReady && Boolean(state.lastRid) && secondsRemaining <= 0 && !busy;
+  const canLoadResult =
+    state.backendReady &&
+    Boolean(state.lastRid) &&
+    (state.blastReady || secondsRemaining <= 0) &&
+    !busy;
 
   if (!state.activeButtons.has(checkStatusButton)) {
     checkStatusButton.disabled = !canCheckStatus;
@@ -753,10 +888,10 @@ function updateBlastControls() {
     loadResultButton.disabled = !canLoadResult;
   }
   if (!state.activeButtons.has(runBlastButton)) {
-    runBlastButton.disabled = busy;
+    runBlastButton.disabled = busy || liveDisabled;
   }
   if (!state.activeButtons.has(findOrganismButton)) {
-    findOrganismButton.disabled = busy;
+    findOrganismButton.disabled = busy || liveDisabled;
   }
 
   nextStatusCheck.textContent = state.lastRid
@@ -778,15 +913,87 @@ function ensureTimer() {
   }, 1000);
 }
 
-function ensureBackendConfigured() {
-  if (!sequenceApiUrl) {
-    backendUrlState.textContent = "Not configured";
-    throw new Error(
-      "Sequence Analysis backend URL is not configured. Demo mode remains available."
+function setBackendMode(isReady, message, urlStateLabel) {
+  state.backendReady = isReady;
+  state.backendHealthChecked = true;
+  state.backendStatusMessage = message;
+  backendUrlState.textContent = urlStateLabel;
+
+  if (isReady) {
+    setBlastState(
+      "Sequence Analysis backend is available. Live taxonomy search and BLAST actions are enabled.",
+      "Live backend ready",
+      "is-success",
+      0
     );
+    return;
   }
 
-  backendUrlState.textContent = "Configured";
+  state.blastReady = false;
+  state.lastRid = "";
+  state.nextAllowedStatusAt = 0;
+  blastRid.textContent = "—";
+  nextStatusCheck.textContent = "Not scheduled";
+  setBlastState(message, "Backend not ready", "is-error", 0);
+}
+
+function ensureLiveBackendReady() {
+  if (!sequenceApiUrl) {
+    backendUrlState.textContent = "Not configured";
+    throw new Error(getBackendNotReadyMessage());
+  }
+
+  if (!state.backendReady) {
+    throw new Error(state.backendStatusMessage || getBackendNotReadyMessage());
+  }
+}
+
+async function runBackendHealthCheck() {
+  if (!sequenceApiUrl) {
+    logSequenceEvent("health:missing-url");
+    clearTaxonomyCandidates(getBackendNotReadyMessage(), "Backend not ready", "is-error");
+    setBackendMode(false, getBackendNotReadyMessage(), "Not configured");
+    setStatus(getBackendNotReadyMessage(), "error");
+    return;
+  }
+
+  backendUrlState.textContent = "Checking";
+
+  try {
+    const payload = await requestSequenceApi("sequenceAnalysisHealth");
+    const supportedActions = Array.isArray(payload.supportedActions)
+      ? payload.supportedActions
+      : [];
+    const missingActions = requiredSequenceActions.filter(
+      (actionName) => !supportedActions.includes(actionName)
+    );
+
+    if (!payload.ok || payload.feature !== "sequence-analysis" || missingActions.length) {
+      throw new Error(getUnsupportedActionMessage());
+    }
+
+    clearTaxonomyCandidates();
+    setBackendMode(true, payload.message || "Sequence Analysis backend is available.", "Ready");
+    setStatus(payload.message || "Sequence Analysis backend is available.", "success");
+    logSequenceEvent("health:ready", {
+      supportedActions: supportedActions.join(","),
+    });
+  } catch (error) {
+    const details = explainBackendError(error);
+    clearTaxonomyCandidates(getBackendNotReadyMessage(), "Backend not ready", "is-error");
+    setBackendMode(
+      false,
+      details.userMessage === getUnsupportedActionMessage()
+        ? getBackendNotReadyMessage()
+        : details.userMessage,
+      details.isRoutingIssue ? "Old deployment" : "Unavailable"
+    );
+    setStatus(details.userMessage, "error");
+    state.lastLiveError = details.rawMessage;
+    logSequenceEvent("health:error", {
+      error: details.rawMessage || details.userMessage,
+    });
+  }
 }
 
 function populateDemoSequence() {
@@ -813,12 +1020,12 @@ async function handleFindOrganism() {
   }
 
   try {
-    ensureBackendConfigured();
+    ensureLiveBackendReady();
     setButtonBusy(findOrganismButton, true, "Searching organism...");
     setInlineBadge(taxonomyBadge, "Searching", "is-review");
     taxonomyStatus.textContent = "Searching NCBI Taxonomy for matching organism records...";
     const payload = await requestSequenceApi("taxonomySearch", { organismName });
-    renderTaxonomyCandidates(payload.candidates || []);
+    renderTaxonomyCandidates(payload.candidates || [], { source: "live" });
     setStatus(
       payload.candidates && payload.candidates.length
         ? "Taxonomy candidates loaded. Select the best match before BLAST if you want organism-aware interpretation."
@@ -826,9 +1033,12 @@ async function handleFindOrganism() {
       payload.candidates && payload.candidates.length ? "success" : ""
     );
   } catch (error) {
-    setInlineBadge(taxonomyBadge, "Search failed", "is-error");
-    taxonomyStatus.textContent = error.message;
-    setStatus(error.message, "error");
+    const details = explainBackendError(error);
+    clearTaxonomyCandidates(details.taxonomyMessage, "Search failed", "is-error");
+    setStatus(details.userMessage, "error");
+    if (details.shouldDisableLiveMode) {
+      setBackendMode(false, getBackendNotReadyMessage(), details.isRoutingIssue ? "Old deployment" : "Unavailable");
+    }
   } finally {
     setButtonBusy(findOrganismButton, false);
   }
@@ -841,7 +1051,7 @@ async function handleRunBlast() {
   }
 
   try {
-    ensureBackendConfigured();
+    ensureLiveBackendReady();
     const taxonomyCandidate = getSelectedTaxonomy();
     setButtonBusy(runBlastButton, true, "Submitting BLAST...");
     state.blastReady = false;
@@ -871,8 +1081,12 @@ async function handleRunBlast() {
       "success"
     );
   } catch (error) {
-    setBlastState(error.message, "Submission failed", "is-error", 0);
-    setStatus(error.message, "error");
+    const details = explainBackendError(error);
+    setBlastState(details.userMessage, "Submission failed", "is-error", 0);
+    setStatus(details.userMessage, "error");
+    if (details.shouldDisableLiveMode) {
+      setBackendMode(false, getBackendNotReadyMessage(), details.isRoutingIssue ? "Old deployment" : "Unavailable");
+    }
   } finally {
     setButtonBusy(runBlastButton, false);
   }
@@ -885,7 +1099,7 @@ async function handleCheckBlastStatus() {
   }
 
   try {
-    ensureBackendConfigured();
+    ensureLiveBackendReady();
     setButtonBusy(checkStatusButton, true, "Checking status...");
     const payload = await requestSequenceApi("blastStatus", { rid: state.lastRid });
     if (payload.status === "READY") {
@@ -916,8 +1130,12 @@ async function handleCheckBlastStatus() {
     );
     setStatus(payload.message || "BLAST is still processing.", "");
   } catch (error) {
-    setBlastState(error.message, "Status failed", "is-error", 0);
-    setStatus(error.message, "error");
+    const details = explainBackendError(error);
+    setBlastState(details.userMessage, "Status failed", "is-error", 0);
+    setStatus(details.userMessage, "error");
+    if (details.shouldDisableLiveMode) {
+      setBackendMode(false, getBackendNotReadyMessage(), details.isRoutingIssue ? "Old deployment" : "Unavailable");
+    }
   } finally {
     setButtonBusy(checkStatusButton, false);
   }
@@ -930,7 +1148,7 @@ async function handleLoadBlastResult() {
   }
 
   try {
-    ensureBackendConfigured();
+    ensureLiveBackendReady();
     const taxonomyCandidate = getSelectedTaxonomy();
     setButtonBusy(loadResultButton, true, "Loading result...");
     const payload = await requestSequenceApi("blastResult", {
@@ -967,8 +1185,12 @@ async function handleLoadBlastResult() {
       "success"
     );
   } catch (error) {
-    setBlastState(error.message, "Load failed", "is-error", 0);
-    setStatus(error.message, "error");
+    const details = explainBackendError(error);
+    setBlastState(details.userMessage, "Load failed", "is-error", 0);
+    setStatus(details.userMessage, "error");
+    if (details.shouldDisableLiveMode) {
+      setBackendMode(false, getBackendNotReadyMessage(), details.isRoutingIssue ? "Old deployment" : "Unavailable");
+    }
   } finally {
     setButtonBusy(loadResultButton, false);
   }
@@ -1045,16 +1267,12 @@ demoButton?.addEventListener("click", () => {
       commonName: "",
       lineage: "Bacteria; Bacillota; Bacilli; Bacillales; Bacillaceae; Bacillus",
     },
-  ]);
+  ], { source: "demo" });
   renderPayload(demoResult);
-  setBlastState(
-    sequenceApiUrl
-      ? "Demo result loaded. Live backend controls are available when the Apps Script deployment supports the new actions."
-      : "Demo result loaded. Sequence Analysis backend is not configured, so only demo mode is available right now.",
-    "Demo result",
-    "is-success",
-    0
-  );
+  const demoMessage = state.backendReady
+    ? "Demo result loaded. Live backend controls are also available."
+    : "Demo result loaded. Live backend is not ready, so only demo mode is available right now.";
+  setBlastState(demoMessage, "Demo result", "is-success", 0);
   setStatus("Demo result loaded successfully.", "success");
 });
 
@@ -1070,16 +1288,21 @@ clearFormButton?.addEventListener("click", () => {
     state.nextAllowedStatusAt = 0;
     state.blastReady = false;
     updateQualityPanel("");
-    taxonomyCandidates.innerHTML = "";
-    setInlineBadge(taxonomyBadge, "Awaiting search");
-    taxonomyStatus.textContent =
-      "Search for an organism to load possible taxonomy matches from NCBI.";
+    clearTaxonomyCandidates(
+      state.backendReady
+        ? "Search for an organism to load possible taxonomy matches from NCBI."
+        : getBackendNotReadyMessage(),
+      state.backendReady ? "Awaiting search" : "Backend not ready",
+      state.backendReady ? "" : "is-error"
+    );
     blastRid.textContent = "—";
     selectedTaxid.textContent = "—";
     setBlastState(
-      "No live BLAST request has been submitted yet. Demo mode remains available for teaching even before the backend is deployed.",
-      "Demo mode available",
-      "",
+      state.backendReady
+        ? "No live BLAST request has been submitted yet. Live backend is ready when you want to search NCBI."
+        : getBackendNotReadyMessage(),
+      state.backendReady ? "Live backend ready" : "Backend not ready",
+      state.backendReady ? "is-success" : "is-error",
       0
     );
     clearResults();
@@ -1116,6 +1339,6 @@ form?.addEventListener("submit", (event) => {
 
 updateQualityPanel("");
 clearResults();
-backendUrlState.textContent = sequenceApiUrl ? "Configured" : "Not configured";
 ensureTimer();
 updateBlastControls();
+runBackendHealthCheck();

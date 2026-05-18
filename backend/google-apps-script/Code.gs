@@ -35,7 +35,7 @@ const COMMENT_HEADERS = [
 
 function doGet(e) {
   const params = e && e.parameter ? e.parameter : {};
-  const action = sanitizeText_(params.action || "stats").toLowerCase();
+  const action = normalizeActionName_(params.action || "stats");
   return outputResponse_(dispatchAction_(action, params), params.callback);
 }
 
@@ -51,7 +51,7 @@ function doPost(e) {
     });
   }
 
-  const action = sanitizeText_(payload.action).toLowerCase();
+  const action = normalizeActionName_(payload.action);
   return jsonOutput_(dispatchAction_(action, payload));
 }
 
@@ -155,19 +155,23 @@ function dispatchAction_(action, params) {
       return registerComment_(params);
     }
 
-    if (action === "taxonomysearch") {
+    if (action === "sequenceAnalysisHealth") {
+      return sequenceAnalysisHealth_();
+    }
+
+    if (action === "taxonomySearch") {
       return taxonomySearch_(params);
     }
 
-    if (action === "blastsubmit") {
+    if (action === "blastSubmit") {
       return blastSubmit_(params);
     }
 
-    if (action === "blaststatus") {
+    if (action === "blastStatus") {
       return blastStatus_(params);
     }
 
-    if (action === "blastresult") {
+    if (action === "blastResult") {
       return blastResult_(params);
     }
 
@@ -181,6 +185,23 @@ function dispatchAction_(action, params) {
       error: String(error && error.message ? error.message : error),
     };
   }
+}
+
+function normalizeActionName_(actionValue) {
+  const normalized = sanitizeText_(actionValue).toLowerCase();
+  const aliases = {
+    visit: "visit",
+    stats: "stats",
+    comments: "comments",
+    comment: "comment",
+    sequenceanalysishealth: "sequenceAnalysisHealth",
+    taxonomysearch: "taxonomySearch",
+    blastsubmit: "blastSubmit",
+    blaststatus: "blastStatus",
+    blastresult: "blastResult",
+  };
+
+  return aliases[normalized] || sanitizeText_(actionValue);
 }
 
 function registerReaderVisit_(input) {
@@ -299,6 +320,21 @@ function registerComment_(input) {
   } finally {
     lock.releaseLock();
   }
+}
+
+function sequenceAnalysisHealth_() {
+  return {
+    ok: true,
+    feature: "sequence-analysis",
+    supportedActions: [
+      "sequenceAnalysisHealth",
+      "taxonomySearch",
+      "blastSubmit",
+      "blastStatus",
+      "blastResult",
+    ],
+    message: "Sequence Analysis backend is available.",
+  };
 }
 
 function taxonomySearch_(input) {

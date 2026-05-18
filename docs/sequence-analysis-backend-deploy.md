@@ -20,11 +20,35 @@ Use this guide after updating the Apps Script code in `backend/google-apps-scrip
 
 ## Test order
 
-1. Test `taxonomySearch` with a safe organism name such as `Bacillus pumilus`.
-2. Test `blastSubmit` with a short teaching sequence that is safe for public NCBI submission.
-3. Wait before polling for status.
-4. Test `blastStatus`.
-5. Test `blastResult`.
+1. Test `sequenceAnalysisHealth`.
+2. Test `taxonomySearch` with a safe organism name such as `Bacillus pumilus`.
+3. Test `blastSubmit` with a short teaching sequence that is safe for public NCBI submission.
+4. Wait before polling for status.
+5. Test `blastStatus`.
+6. Test `blastResult`.
+
+## Troubleshooting
+
+Problem:
+`Unsupported action.`
+
+Meaning:
+The frontend reached an Apps Script endpoint, but that deployed endpoint does not support the requested Sequence Analysis action yet.
+
+Fix:
+
+1. Copy the updated `Code.gs` from the repo into the Apps Script project.
+2. Set or verify Script Properties:
+   - `NCBI_CONTACT_EMAIL`
+   - `NCBI_TOOL_NAME`
+3. Open `Deploy` → `Manage deployments`.
+4. Edit the active Web App deployment.
+5. Select `New version`.
+6. Deploy the updated version.
+7. Test:
+   - `?action=sequenceAnalysisHealth`
+   - `?action=taxonomySearch&organismName=Bacillus%20pumilus`
+8. If the deployment URL changed, update `sequenceAnalysisApiUrl` in [config.js](</Users/mahmoodalmoalm/Documents/New project/wahj-ngs-guide/config.js>).
 
 ## Required cautions
 
