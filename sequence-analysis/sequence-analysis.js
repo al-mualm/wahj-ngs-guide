@@ -46,7 +46,7 @@ const demoResult = {
       title: "Bacillus pumilus strain IHB B 2692 16S ribosomal RNA gene, partial sequence",
       source: "Bacillus pumilus strain IHB B 2692 16S ribosomal RNA gene, partial sequence",
       organism: "Bacillus pumilus",
-      taxId: "1404",
+      taxId: "1408",
       sequenceLength: 417,
       score: "706 bits (382)",
       expect: "0.0",
@@ -137,9 +137,11 @@ const state = {
   cleanedSequence: "",
   fastaText: "",
   taxonomyCandidates: [],
+  taxonomySource: "none",
   selectedTaxId: "",
   lastRid: "",
   lastPayload: null,
+  resultSource: "none",
   selectedResultIndex: 0,
   nextAllowedStatusAt: 0,
   blastReady: false,
@@ -392,7 +394,7 @@ function sanitizeSequence(rawInput) {
     .split(/\r?\n/)
     .filter((line) => !line.trim().startsWith(">"));
   let cleaned = payloadLines.join("");
-  cleaned = cleaned.replace(/[\s0-9]+/g, "");
+  cleaned = cleaned.replace(/[^A-Za-z]+/g, "");
   cleaned = cleaned.toUpperCase().replace(/U/g, "T");
 
   if (!cleaned) {
@@ -501,10 +503,15 @@ function updateQualityPanel(sequence) {
     metricElements.ambiguous.textContent = "0";
     metricElements.gc.textContent = "0.0%";
     fastaPreview.textContent = ">";
+    state.fastaText = ">";
+    if (copyFastaButton) {
+      copyFastaButton.disabled = true;
+    }
     setQualityBadge("Awaiting sequence", "is-pending");
     setQualityMessage(
       "No cleaned sequence yet. The panel will update after you clean the input."
     );
+    updateBlastControls();
     return null;
   }
 
@@ -523,19 +530,14 @@ function updateQualityPanel(sequence) {
   const fastaText = `${buildFastaHeader()}\n${formatSequence(sequence)}`;
   fastaPreview.textContent = fastaText;
   state.fastaText = fastaText;
+  if (copyFastaButton) {
+    copyFastaButton.disabled = false;
+  }
+  updateBlastControls();
   return summary;
 }
 
 function cleanCurrentSequence(showSuccessMessage = true) {
-  if (!organismNameInput.value.trim()) {
-    setStatus(
-      "Enter the organism name before cleaning the sequence so the FASTA preview and teaching context stay informative.",
-      "error"
-    );
-    organismNameInput.focus();
-    return null;
-  }
-
   const result = sanitizeSequence(sequenceInput.value);
   if (!result.ok) {
     state.cleanedSequence = "";
@@ -565,6 +567,39 @@ function reverseComplement(sequence) {
     .reverse()
     .map((base) => complementMap[base] || base)
     .join("");
+}
+
+function getDefaultTaxonomyState() {
+  if (state.backendReady) {
+    return {
+      message: "Search for an organism to load possible taxonomy matches from NCBI.",
+      badge: "Awaiting search",
+      tone: "",
+    };
+  }
+
+  return {
+    message: getBackendNotReadyMessage(),
+    badge: "Backend not ready",
+    tone: "is-error",
+  };
+}
+
+function getDefaultBlastState() {
+  if (state.backendReady) {
+    return {
+      message:
+        "No live BLAST request has been submitted yet. Live backend is ready when you want to search NCBI.",
+      badge: "Live backend ready",
+      tone: "is-success",
+    };
+  }
+
+  return {
+    message: getBackendNotReadyMessage(),
+    badge: "Backend not ready",
+    tone: "is-error",
+  };
 }
 
 function classifyInterpretation(result) {
@@ -634,6 +669,7 @@ function normalizePayload(payload) {
     geneMarker: payload.geneMarker || geneMarkerInput.value.trim(),
     queryLength: payload.queryLength || state.cleanedSequence.length,
     queryTitle: payload.queryTitle || sequenceTitleInput.value.trim(),
+    sourceType: payload.sourceType || "live",
     rid: payload.rid || state.lastRid,
     results: Array.isArray(payload.results) ? payload.results : [],
   };
@@ -684,6 +720,7 @@ function renderResultTable(payload) {
 
 function renderAlignmentCard(payload, index = 0) {
   const normalized = normalizePayload(payload);
+  const isDemoResult = normalized.sourceType === "demo";
   const result = normalized.results[index];
   if (!result) {
     alignmentTitle.textContent = "BLAST-style alignment card";
@@ -707,8 +744,12 @@ function renderAlignmentCard(payload, index = 0) {
 
   const interpretation = classifyInterpretation(result);
   alignmentTitle.textContent = `SAMPLE ${normalized.sampleNumber || "—"} | ${result.source || result.title || "BLAST result"}`;
-  alignmentStatus.textContent = interpretation.label;
-  alignmentStatus.className = `alignment-status interpretation-tag ${interpretation.className}`;
+  alignmentStatus.textContent = isDemoResult
+    ? "DEMO RESULT — not from NCBI"
+    : interpretation.label;
+  alignmentStatus.className = `alignment-status interpretation-tag ${
+    isDemoResult ? "is-review" : interpretation.className
+  }`;
 
   alignmentMeta.innerHTML = `
     <article>
@@ -758,19 +799,25 @@ function renderAlignmentCard(payload, index = 0) {
   `;
 
   alignmentBlock.textContent = result.alignmentText || "Alignment text was not available for this hit.";
-  interpretationCallout.textContent = interpretation.description;
+  interpretationCallout.textContent = isDemoResult
+    ? "This demo result is built into the page for teaching the table, alignment layout, and interpretation language. It was not retrieved from a live NCBI request."
+    : interpretation.description;
 }
 
 function renderPayload(payload) {
   state.lastPayload = normalizePayload(payload);
+  state.resultSource = state.lastPayload.sourceType;
   renderResultTable(state.lastPayload);
   renderAlignmentCard(state.lastPayload, state.selectedResultIndex);
   resultsNote.textContent =
-    "The table below uses the same interpretation language as the alignment card. Use Show alignment to switch the detailed panel between hits.";
+    state.lastPayload.sourceType === "demo"
+      ? "DEMO RESULT — not from NCBI. This example is built into the page for teaching the summary table and alignment card layout."
+      : "Live NCBI BLAST result loaded. Use Show alignment to switch the detailed panel between hits.";
 }
 
 function clearResults() {
   state.lastPayload = null;
+  state.resultSource = "none";
   state.selectedResultIndex = 0;
   resultsNote.textContent = "Load the demo result to see a complete educational example.";
   renderAlignmentCard(null, 0);
@@ -779,6 +826,7 @@ function clearResults() {
 
 function clearTaxonomyCandidates(message, badgeLabel = "Awaiting search", tone = "") {
   state.taxonomyCandidates = [];
+  state.taxonomySource = "none";
   state.selectedTaxId = "";
   taxonomyCandidates.innerHTML = "";
   selectedTaxid.textContent = "—";
@@ -791,6 +839,7 @@ function clearTaxonomyCandidates(message, badgeLabel = "Awaiting search", tone =
 function renderTaxonomyCandidates(candidates, options = {}) {
   const source = options.source || "live";
   state.taxonomyCandidates = candidates;
+  state.taxonomySource = source;
   state.selectedTaxId = candidates.length ? String(candidates[0].taxId || "") : "";
   selectedTaxid.textContent = state.selectedTaxId || "—";
 
@@ -878,8 +927,9 @@ function updateBlastControls() {
   const canLoadResult =
     state.backendReady &&
     Boolean(state.lastRid) &&
-    (state.blastReady || secondsRemaining <= 0) &&
-    !busy;
+      (state.blastReady || secondsRemaining <= 0) &&
+      !busy;
+  const canRunBlast = state.backendReady && Boolean(state.cleanedSequence) && !busy;
 
   if (!state.activeButtons.has(checkStatusButton)) {
     checkStatusButton.disabled = !canCheckStatus;
@@ -888,7 +938,7 @@ function updateBlastControls() {
     loadResultButton.disabled = !canLoadResult;
   }
   if (!state.activeButtons.has(runBlastButton)) {
-    runBlastButton.disabled = busy || liveDisabled;
+    runBlastButton.disabled = !canRunBlast;
   }
   if (!state.activeButtons.has(findOrganismButton)) {
     findOrganismButton.disabled = busy || liveDisabled;
@@ -901,6 +951,48 @@ function updateBlastControls() {
         ? "Result can be loaded"
         : "Ready to check"
     : "Not scheduled";
+}
+
+function resetSequenceOutputsForDirtyInput() {
+  if (!state.cleanedSequence && state.fastaText === ">") {
+    return;
+  }
+
+  state.cleanedSequence = "";
+  state.fastaText = ">";
+  updateQualityPanel("");
+}
+
+function resetDisplayedAnalysisOutputs(reason = "") {
+  const hadDisplayedOutput =
+    state.resultSource !== "none" ||
+    state.taxonomySource !== "none" ||
+    Boolean(state.lastRid) ||
+    Boolean(state.lastPayload);
+
+  if (!hadDisplayedOutput) {
+    return;
+  }
+
+  const taxonomyState = getDefaultTaxonomyState();
+  const blastState = getDefaultBlastState();
+
+  state.taxonomyCandidates = [];
+  state.selectedTaxId = "";
+  state.lastRid = "";
+  state.lastPayload = null;
+  state.selectedResultIndex = 0;
+  state.nextAllowedStatusAt = 0;
+  state.blastReady = false;
+  clearTaxonomyCandidates(taxonomyState.message, taxonomyState.badge, taxonomyState.tone);
+  blastRid.textContent = "—";
+  selectedTaxid.textContent = "—";
+  clearResults();
+  setBlastState(blastState.message, blastState.badge, blastState.tone, 0);
+
+  if (reason) {
+    setStatus(reason);
+  }
 }
 
 function ensureTimer() {
@@ -994,21 +1086,6 @@ async function runBackendHealthCheck() {
       error: details.rawMessage || details.userMessage,
     });
   }
-}
-
-function populateDemoSequence() {
-  sampleNumberInput.value = demoResult.sampleNumber;
-  wahjSampleIdInput.value = demoResult.wahjSampleId;
-  sequenceTitleInput.value = demoResult.sequenceTitle;
-  organismNameInput.value = demoResult.organismName;
-  geneMarkerInput.value = demoResult.geneMarker;
-  sequenceInput.value = formatSequence(
-    demoResult.results[0].alignmentText
-      .split("\n")
-      .filter((line) => line.startsWith("Query"))
-      .map((line) => line.replace(/^Query\s+\d+\s+/, "").replace(/\s+\d+\s*$/, ""))
-      .join("")
-  );
 }
 
 async function handleFindOrganism() {
@@ -1252,8 +1329,6 @@ demoButton?.addEventListener("click", () => {
     return;
   }
 
-  populateDemoSequence();
-  cleanCurrentSequence(false);
   state.lastRid = demoResult.rid;
   state.blastReady = true;
   blastRid.textContent = demoResult.rid;
@@ -1268,12 +1343,15 @@ demoButton?.addEventListener("click", () => {
       lineage: "Bacteria; Bacillota; Bacilli; Bacillales; Bacillaceae; Bacillus",
     },
   ], { source: "demo" });
-  renderPayload(demoResult);
+  renderPayload({
+    ...demoResult,
+    sourceType: "demo",
+  });
   const demoMessage = state.backendReady
     ? "Demo result loaded. Live backend controls are also available."
     : "Demo result loaded. Live backend is not ready, so only demo mode is available right now.";
-  setBlastState(demoMessage, "Demo result", "is-success", 0);
-  setStatus("Demo result loaded successfully.", "success");
+  setBlastState(demoMessage, "DEMO RESULT — not from NCBI", "is-review", 0);
+  setStatus("Demo result loaded successfully. Your current input was not submitted to NCBI.", "success");
 });
 
 clearFormButton?.addEventListener("click", () => {
@@ -1281,30 +1359,21 @@ clearFormButton?.addEventListener("click", () => {
     state.cleanedSequence = "";
     state.fastaText = "";
     state.taxonomyCandidates = [];
+    state.taxonomySource = "none";
     state.selectedTaxId = "";
     state.lastRid = "";
     state.lastPayload = null;
+    state.resultSource = "none";
     state.selectedResultIndex = 0;
     state.nextAllowedStatusAt = 0;
     state.blastReady = false;
     updateQualityPanel("");
-    clearTaxonomyCandidates(
-      state.backendReady
-        ? "Search for an organism to load possible taxonomy matches from NCBI."
-        : getBackendNotReadyMessage(),
-      state.backendReady ? "Awaiting search" : "Backend not ready",
-      state.backendReady ? "" : "is-error"
-    );
+    const taxonomyState = getDefaultTaxonomyState();
+    const blastState = getDefaultBlastState();
+    clearTaxonomyCandidates(taxonomyState.message, taxonomyState.badge, taxonomyState.tone);
     blastRid.textContent = "—";
     selectedTaxid.textContent = "—";
-    setBlastState(
-      state.backendReady
-        ? "No live BLAST request has been submitted yet. Live backend is ready when you want to search NCBI."
-        : getBackendNotReadyMessage(),
-      state.backendReady ? "Live backend ready" : "Backend not ready",
-      state.backendReady ? "is-success" : "is-error",
-      0
-    );
+    setBlastState(blastState.message, blastState.badge, blastState.tone, 0);
     clearResults();
     setStatus("The form was cleared. Enter a new sequence or load the demo result.");
   }, 0);
@@ -1336,6 +1405,26 @@ taxonomyCandidates?.addEventListener("change", (event) => {
 form?.addEventListener("submit", (event) => {
   event.preventDefault();
 });
+
+sequenceInput?.addEventListener("input", () => {
+  resetSequenceOutputsForDirtyInput();
+  resetDisplayedAnalysisOutputs(
+    "Raw sequence changed. Clean the sequence again before running taxonomy search or BLAST."
+  );
+});
+
+[sampleNumberInput, wahjSampleIdInput, sequenceTitleInput, organismNameInput, geneMarkerInput]
+  .filter(Boolean)
+  .forEach((input) => {
+    input.addEventListener("input", () => {
+      if (state.cleanedSequence) {
+        updateQualityPanel(state.cleanedSequence);
+      }
+      resetDisplayedAnalysisOutputs(
+        "Previous demo or live results were cleared because the form details changed."
+      );
+    });
+  });
 
 updateQualityPanel("");
 clearResults();
