@@ -6,7 +6,7 @@
     <title>Wahj Molecular Biology Learning Hub</title>
     <meta
       name="description"
-      content="Choose between Wahj educational guides for Next-Generation Sequencing, Real-Time PCR, and Sanger sequence analysis with BLAST alignment training."
+      content="Explore the Wahj Molecular Biology Learning Hub with NGS teaching pages, Real-Time PCR training, a gene expression calculator, and Sanger sequence analysis with live BLAST alignment."
     />
     <script>
       document.documentElement.classList.add("js");
@@ -43,6 +43,8 @@
         </button>
         <nav class="primary-nav" id="primary-nav" aria-label="Primary">
           <a href="#intro">Overview</a>
+          <a href="#paths">Learning paths</a>
+          <a href="#tools">Tools</a>
           <a href="./ngs/">NGS guide</a>
           <a href="./real-time-pcr/">Real-Time PCR</a>
           <a href="./sequence-analysis/">Sequence Analysis</a>
@@ -53,68 +55,196 @@
         <section class="selector-hero section" id="intro">
           <div class="selector-copy reveal">
             <span class="section-chip">Scientific training pages</span>
-            <h1>Choose the learning page you want to open</h1>
+            <h1>One hub for sequencing, qPCR, and practical molecular analysis</h1>
             <p class="hero-lead">
-              This Wahj learning hub currently includes three beginner-focused teaching
-              pages. They cover <strong>Next-Generation Sequencing</strong>,
-              <strong>Real-Time PCR</strong>, and a new
-              <strong>Sanger Sequence Analysis &amp; BLAST Alignment</strong> training page.
+              This Wahj learning hub now combines lecture-style pages with directly usable
+              scientific tools. Readers can study <strong>Next-Generation Sequencing</strong>,
+              <strong>Real-Time PCR</strong>, and <strong>Sanger sequence analysis</strong>,
+              then move straight into the <strong>gene expression calculator</strong> or the
+              <strong>live BLAST alignment workflow</strong>.
             </p>
             <div class="selector-note">
               <p><strong>Author:</strong> Mahmood Al-Mualm</p>
               <p><strong>Title:</strong> CEO of Wahj Al-DNA</p>
               <p>
-                <strong>Use:</strong> Select a topic below. Existing old NGS section links
-                still redirect correctly.
+                <strong>Use:</strong> Open a lecture page to learn the topic, or jump
+                directly into one of the practical tools below.
               </p>
+            </div>
+            <div class="selector-actions">
+              <a class="hub-link hub-link-primary" href="#paths">Browse all cards</a>
+              <a class="hub-link" href="./sequence-analysis/#analysis-tool">Open live BLAST tool</a>
             </div>
           </div>
 
-          <div class="selector-grid reveal">
+          <div class="hub-overview reveal">
+            <div class="hub-overview-card">
+              <p class="eyebrow">Available now</p>
+              <h2>Five direct entry points</h2>
+              <div class="selector-kpis">
+                <article>
+                  <strong>3</strong>
+                  <span>lecture pages</span>
+                </article>
+                <article>
+                  <strong>2</strong>
+                  <span>working tools</span>
+                </article>
+                <article>
+                  <strong>24/7</strong>
+                  <span>open online access</span>
+                </article>
+              </div>
+              <div class="hub-feature-list">
+                <div>
+                  <strong>NGS lecture</strong>
+                  <p>Workflow, QC, file formats, platforms, applications, and beginner interpretation.</p>
+                </div>
+                <div>
+                  <strong>Real-Time PCR lecture</strong>
+                  <p>Ct logic, assay chemistry, relative quantification, and experimental design.</p>
+                </div>
+                <div>
+                  <strong>Gene expression calculator</strong>
+                  <p>Plate-based 2^-ΔΔCt calculation with tables, statistics, and graphs.</p>
+                </div>
+                <div>
+                  <strong>Sanger + BLAST</strong>
+                  <p>Sequence cleaning, taxonomy guidance, live NCBI BLAST, ranked hits, and alignments.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="paths">
+          <div class="section-heading">
+            <span class="section-chip">Learning cards</span>
+            <h2>Open the exact lecture or tool you need</h2>
+            <p>
+              The hub now separates lecture pages from practical analysis tools so readers can
+              either study first or go directly to a working page.
+            </p>
+          </div>
+
+          <div class="selector-grid selector-grid-expanded reveal">
             <a class="topic-card topic-card-ngs" href="./ngs/">
-              <span class="topic-tag">Genomics</span>
+              <span class="topic-tag">Lecture</span>
               <h2>Next-Generation Sequencing</h2>
               <p>
-                A full teaching guide covering NGS workflow, platforms, file formats,
-                quality control, bioinformatics, MGI DNA nanoball technology, and teaching
-                notes for beginners.
+                A full teaching guide covering NGS workflow, platforms, file formats, quality
+                control, bioinformatics, and MGI DNA nanoball technology.
               </p>
               <div class="topic-card-meta">
-                <span>Open NGS guide</span>
-                <span>English + Arabic</span>
+                <span>English guide</span>
+                <span>Arabic version available</span>
+              </div>
+              <div class="topic-card-footer">
+                <span class="topic-card-cta">Open NGS lecture</span>
               </div>
             </a>
 
             <a class="topic-card topic-card-pcr" href="./real-time-pcr/">
-              <span class="topic-tag">Molecular diagnostics</span>
-              <h2>Real-Time PCR</h2>
+              <span class="topic-tag">Lecture</span>
+              <h2>Real-Time PCR Lecture</h2>
               <p>
-                A focused teaching page explaining real-time PCR types, how to perform the
-                workflow, and the practical difference between SYBR Green and TaqMan.
+                A scientifically grounded page explaining Ct values, baseline and threshold
+                logic, workflow design, SYBR Green, TaqMan, and quantification strategy.
               </p>
               <div class="topic-card-meta">
-                <span>Open PCR guide</span>
-                <span>Clear diagrams</span>
+                <span>Clear figures</span>
+                <span>Beginner to advanced transition</span>
+              </div>
+              <div class="topic-card-footer">
+                <span class="topic-card-cta">Open RT-PCR lecture</span>
               </div>
             </a>
 
-            <a class="topic-card topic-card-sequence" href="./sequence-analysis/">
-              <span class="topic-tag">Sequence identity</span>
-              <h2>Sanger Sequence Analysis &amp; BLAST Alignment</h2>
+            <a class="topic-card topic-card-pcr" href="./real-time-pcr/#calculator">
+              <span class="topic-tag">Tool</span>
+              <h2>Gene Expression Calculator</h2>
               <p>
-                Paste a Sanger sequencing result, clean and check the sequence, compare it
-                with NCBI sequences using BLAST, and learn how to interpret identity,
-                coverage, E-value, gaps, and alignment results.
+                Open the built-in qPCR analysis tool for 2^-ΔΔCt calculations, plate
+                assignment, Ct import, statistics, and result graphs.
               </p>
               <div class="topic-card-meta">
-                <span>Sanger sequencing</span>
-                <span>BLAST</span>
-                <span>NCBI</span>
-                <span>Alignment</span>
-                <span>16S rRNA</span>
-                <span>Open Sequence Analysis Tool</span>
+                <span>2^-ΔΔCt</span>
+                <span>96-well plate workflow</span>
+              </div>
+              <div class="topic-card-footer">
+                <span class="topic-card-cta">Open calculator</span>
               </div>
             </a>
+
+            <a class="topic-card topic-card-sequence" href="./sequence-analysis/#overview">
+              <span class="topic-tag">Lecture</span>
+              <h2>Sanger Sequence Lecture</h2>
+              <p>
+                Learn the sequence-analysis workflow from raw Sanger read to taxonomy-aware
+                interpretation, including quality cleaning and BLAST reasoning.
+              </p>
+              <div class="topic-card-meta">
+                <span>Sanger workflow</span>
+                <span>Interpretation training</span>
+              </div>
+              <div class="topic-card-footer">
+                <span class="topic-card-cta">Open Sanger lecture</span>
+              </div>
+            </a>
+
+            <a class="topic-card topic-card-sequence" href="./sequence-analysis/#analysis-tool">
+              <span class="topic-tag">Tool</span>
+              <h2>BLAST Alignment Tool</h2>
+              <p>
+                Paste a sequence, clean it, submit a live NCBI BLAST request, and inspect
+                ranked hits by query coverage, identity, E-value, and alignment evidence.
+              </p>
+              <div class="topic-card-meta">
+                <span>Live NCBI BLAST</span>
+                <span>Ranked hit list</span>
+              </div>
+              <div class="topic-card-footer">
+                <span class="topic-card-cta">Open alignment tool</span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="tools">
+          <div class="section-heading">
+            <span class="section-chip">Hub structure</span>
+            <h2>How the hub is organized now</h2>
+            <p>
+              The homepage is now designed as a true portal: lecture pages for structured
+              learning, and tool pages for immediate analysis and calculation.
+            </p>
+          </div>
+
+          <div class="hub-support-grid reveal">
+            <article class="hub-support-card">
+              <p class="eyebrow">Study first</p>
+              <h3>Lecture pages</h3>
+              <p>
+                Use the NGS, RT-PCR, and Sanger pages to study the concepts, figures,
+                terminology, and interpretation rules before using the tools.
+              </p>
+            </article>
+            <article class="hub-support-card">
+              <p class="eyebrow">Work directly</p>
+              <h3>Interactive analysis tools</h3>
+              <p>
+                Open the qPCR calculator for expression analysis or the BLAST page for live
+                sequence comparison and alignment review.
+              </p>
+            </article>
+            <article class="hub-support-card">
+              <p class="eyebrow">Use anywhere</p>
+              <h3>Responsive access</h3>
+              <p>
+                The hub keeps the top-level navigation, cards, and direct links usable on
+                phones, tablets, laptops, and wide desktop screens.
+              </p>
+            </article>
           </div>
         </section>
       </main>
