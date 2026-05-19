@@ -352,6 +352,55 @@ function sequenceAnalysisHealth_() {
   };
 }
 
+function adminEnsureSequenceAnalysisScriptProperties() {
+  const properties = PropertiesService.getScriptProperties();
+  const currentEmail = truncateText_(
+    sanitizeText_(properties.getProperty("NCBI_CONTACT_EMAIL")),
+    200
+  );
+  const currentToolName = truncateText_(
+    sanitizeText_(properties.getProperty("NCBI_TOOL_NAME")),
+    120
+  );
+  const contactEmail = currentEmail || "mahmoodalmoalm@gmail.com";
+  const toolName = currentToolName || "WahjSequenceAnalysis";
+
+  properties.setProperty("NCBI_CONTACT_EMAIL", contactEmail);
+  properties.setProperty("NCBI_TOOL_NAME", toolName);
+
+  return {
+    ok: true,
+    contactEmail: contactEmail,
+    toolName: toolName,
+  };
+}
+
+function adminAuthorizeSequenceAnalysisExternalRequest() {
+  const ensured = adminEnsureSequenceAnalysisScriptProperties();
+  const testUrl = buildUrl_(NCBI_ESEARCH_URL, {
+    db: "taxonomy",
+    term: "Homo sapiens[All Names]",
+    retmax: "1",
+    retmode: "json",
+    tool: ensured.toolName,
+    email: ensured.contactEmail,
+  });
+  const payload = fetchJson_(testUrl);
+  const idList =
+    (payload &&
+      payload.esearchresult &&
+      payload.esearchresult.idlist) ||
+    [];
+
+  return {
+    ok: true,
+    contactEmail: ensured.contactEmail,
+    toolName: ensured.toolName,
+    firstTaxId: idList.length ? String(idList[0]) : "",
+    testedAtUtc: new Date().toISOString(),
+  };
+}
+
 function taxonomySearch_(input) {
   const organismName = truncateText_(sanitizeText_(input.organismName), 160);
   if (!organismName) {
@@ -649,7 +698,7 @@ function blastResult_(input) {
     };
   }
 
-  const jsonText = fetchText_(
+  const jsonResponse = fetchResponse_(
     buildUrl_(NCBI_BLAST_URL, {
       CMD: "Get",
       RID: rid,
@@ -663,11 +712,9 @@ function blastResult_(input) {
     }
   );
 
-  let blastData;
-  try {
-    blastData = JSON.parse(jsonText);
-  } catch (error) {
-    const waitingStatus = parseBlastStatusText_(jsonText);
+  const blastData = extractBlastJsonPayload_(jsonResponse);
+  if (!blastData) {
+    const waitingStatus = parseBlastStatusText_(jsonResponse.getContentText());
     return {
       ok: true,
       status: waitingStatus.status,
@@ -820,6 +867,11 @@ function buildUrl_(baseUrl, params) {
 }
 
 function fetchText_(url, options) {
+  const response = fetchResponse_(url, options);
+  return response.getContentText();
+}
+
+function fetchResponse_(url, options) {
   const response = UrlFetchApp.fetch(url, options || {});
   const statusCode = response.getResponseCode();
   const body = response.getContentText();
@@ -829,7 +881,7 @@ function fetchText_(url, options) {
     );
   }
 
-  return body;
+  return response;
 }
 
 function fetchJson_(url) {
@@ -963,7 +1015,12 @@ function parseBlastStatusText_(statusText) {
 }
 
 function parseBlastJsonResult_(blastData) {
-  const outputArray = blastData && blastData.BlastOutput2 ? blastData.BlastOutput2 : [];
+  const outputNode = blastData && blastData.BlastOutput2 ? blastData.BlastOutput2 : null;
+  const outputArray = Array.isArray(outputNode)
+    ? outputNode
+    : outputNode
+      ? [outputNode]
+      : [];
   const report = outputArray.length && outputArray[0].report ? outputArray[0].report : {};
   const search = report.results && report.results.search ? report.results.search : {};
   const hits = Array.isArray(search.hits) ? search.hits : [];
@@ -1016,6 +1073,54 @@ function parseBlastJsonResult_(blastData) {
       };
     }),
   };
+}
+
+function extractBlastJsonPayload_(response) {
+  if (!response) {
+    return null;
+  }
+
+  const directText = response.getContentText();
+  const directJson = parseBlastJsonObject_(directText);
+  if (directJson) {
+    return directJson;
+  }
+
+  let unzippedBlobs = [];
+  try {
+    unzippedBlobs = Utilities.unzip(response.getBlob());
+  } catch (error) {
+    return null;
+  }
+
+  let fallbackJson = null;
+  for (let index = 0; index < unzippedBlobs.length; index += 1) {
+    const text = unzippedBlobs[index].getDataAsString("UTF-8");
+    const parsed = parseBlastJsonObject_(text);
+    if (!parsed) {
+      continue;
+    }
+
+    if (parsed.BlastOutput2) {
+      return parsed;
+    }
+
+    fallbackJson = parsed;
+  }
+
+  return fallbackJson;
+}
+
+function parseBlastJsonObject_(text) {
+  if (!text) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    return null;
+  }
 }
 
 function parseBlastTextHits_(textReport) {
