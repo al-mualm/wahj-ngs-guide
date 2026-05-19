@@ -365,9 +365,9 @@ Sbjct   26  AGAGTTTGATCCTGGCTCAGGATGAACGCTGGCGGCGTGCCTAATACATGCAA  85</pre>
             <span class="section-chip">BLAST-style teaching output</span>
             <h2>Summary table and alignment view</h2>
             <p>
-              The demo below shows the kind of information students should inspect after a
-              BLAST comparison: accession, source, identities, E-value, gaps, and alignment
-              details.
+              The table below shows the kind of information students should inspect after a
+              BLAST comparison: accession, source, query coverage, percent identity,
+              E-value, gaps, and alignment details.
             </p>
           </div>
 
@@ -376,10 +376,11 @@ Sbjct   26  AGAGTTTGATCCTGGCTCAGGATGAACGCTGGCGGCGTGCCTAATACATGCAA  85</pre>
               <div class="results-card-header">
                 <div>
                   <p class="eyebrow">Result table</p>
-                  <h3>Top sequence comparison result</h3>
+                  <h3>Top sequence comparison results</h3>
                 </div>
                 <p class="results-note" id="results-note">
-                  Load the demo result to see a complete educational example.
+                  Run a BLAST search to load live ranked hits, or use the demo result if you
+                  only want the built-in teaching example.
                 </p>
               </div>
               <div class="table-wrap">
@@ -390,6 +391,8 @@ Sbjct   26  AGAGTTTGATCCTGGCTCAGGATGAACGCTGGCGGCGTGCCTAATACATGCAA  85</pre>
                       <th>No. of Wahj</th>
                       <th>Sequence ID / Compare</th>
                       <th>Source</th>
+                      <th>Query cover</th>
+                      <th>% identity</th>
                       <th>Identities</th>
                       <th>E-value</th>
                       <th>Gaps</th>
@@ -398,9 +401,10 @@ Sbjct   26  AGAGTTTGATCCTGGCTCAGGATGAACGCTGGCGGCGTGCCTAATACATGCAA  85</pre>
                   </thead>
                   <tbody id="blast-results-body">
                     <tr>
-                      <td colspan="8" class="placeholder-row">
-                        No result loaded yet. Use <strong>Load demo result</strong> to render
-                        the example table and alignment card.
+                      <td colspan="10" class="placeholder-row">
+                        No result loaded yet. Run BLAST to load live ranked hits, or use
+                        <strong>Load demo result</strong> to render the built-in example table
+                        and alignment card.
                       </td>
                     </tr>
                   </tbody>

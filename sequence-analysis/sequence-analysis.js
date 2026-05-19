@@ -151,7 +151,10 @@ const state = {
   lastLiveError: "",
   activeButtons: new Map(),
   timerId: 0,
+  autoResultTimerId: 0,
 };
+
+const AUTO_RESULT_DELAY_AFTER_READY_SECONDS = 11;
 
 function getBackendLogLabel() {
   if (!sequenceApiUrl) {
@@ -589,7 +592,7 @@ function getDefaultBlastState() {
   if (state.backendReady) {
     return {
       message:
-        "No live BLAST request has been submitted yet. Live backend is ready when you want to search NCBI.",
+        "No live BLAST request has been submitted yet. Clean a sequence, run BLAST, and the page will automatically load the result when NCBI is ready.",
       badge: "Live backend ready",
       tone: "is-success",
     };
@@ -647,7 +650,70 @@ function classifyInterpretation(result) {
     className: "is-weak",
     description:
       "The match is weak or uncertain. Students should review the sequence, consider contamination or poor trimming, and avoid over-interpreting the result.",
+  };
+}
+
+function parseExpectationValue(value) {
+  const text = String(value || "").trim();
+  if (!text) {
+    return Number.POSITIVE_INFINITY;
   }
+
+  const parsed = Number(text);
+  return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY;
+}
+
+function parseScoreValue(value) {
+  const match = String(value || "").match(/-?\d+(?:\.\d+)?/);
+  return match ? Number(match[0]) : 0;
+}
+
+function compareBlastResults(left, right) {
+  if (Boolean(left.sameOrganism) !== Boolean(right.sameOrganism)) {
+    return Number(Boolean(right.sameOrganism)) - Number(Boolean(left.sameOrganism));
+  }
+
+  const coverageDelta = Number(right.queryCoverage || 0) - Number(left.queryCoverage || 0);
+  if (coverageDelta) {
+    return coverageDelta;
+  }
+
+  const identityDelta = Number(right.percentIdentity || 0) - Number(left.percentIdentity || 0);
+  if (identityDelta) {
+    return identityDelta;
+  }
+
+  const eValueDelta = parseExpectationValue(left.eValue || left.expect) - parseExpectationValue(right.eValue || right.expect);
+  if (eValueDelta) {
+    return eValueDelta;
+  }
+
+  return parseScoreValue(right.score) - parseScoreValue(left.score);
+}
+
+function clearAutoResultTimer() {
+  if (!state.autoResultTimerId) {
+    return;
+  }
+
+  window.clearTimeout(state.autoResultTimerId);
+  state.autoResultTimerId = 0;
+}
+
+function scheduleAutoResultLoad(seconds) {
+  clearAutoResultTimer();
+
+  if (!state.lastRid || !state.backendReady) {
+    return;
+  }
+
+  const delaySeconds = Math.max(1, Number(seconds || 60));
+  state.autoResultTimerId = window.setTimeout(() => {
+    state.autoResultTimerId = 0;
+    handleLoadBlastResult({ automatic: true }).catch((error) => {
+      console.error("[SequenceAnalysis] auto-result-load failed", error);
+    });
+  }, delaySeconds * 1000);
 }
 
 function normalizePayload(payload) {
@@ -661,6 +727,9 @@ function normalizePayload(payload) {
     };
   }
 
+  const results = Array.isArray(payload.results) ? payload.results.slice() : [];
+  const rankedResults = results.sort(compareBlastResults);
+
   return {
     sampleNumber: payload.sampleNumber || sampleNumberInput.value.trim(),
     wahjSampleId: payload.wahjSampleId || wahjSampleIdInput.value.trim(),
@@ -671,7 +740,7 @@ function normalizePayload(payload) {
     queryTitle: payload.queryTitle || sequenceTitleInput.value.trim(),
     sourceType: payload.sourceType || "live",
     rid: payload.rid || state.lastRid,
-    results: Array.isArray(payload.results) ? payload.results : [],
+    results: rankedResults,
   };
 }
 
@@ -680,8 +749,8 @@ function renderResultTable(payload) {
   if (!normalized.results.length) {
     resultsBody.innerHTML = `
       <tr>
-        <td colspan="8" class="placeholder-row">
-          No BLAST rows are available yet. Use the demo result or load a ready live result.
+        <td colspan="10" class="placeholder-row">
+          No BLAST rows are available yet. Run BLAST and let the page load the live result, or use the demo result if you only want the teaching example.
         </td>
       </tr>
     `;
@@ -703,8 +772,11 @@ function renderResultTable(payload) {
             <button class="result-compare-button ${index === state.selectedResultIndex ? "is-active" : ""}" type="button" data-result-index="${index}">
               Show alignment
             </button>
+            ${index === 0 ? `<div class="taxonomy-meta result-priority-note">Best combined hit by organism context, query coverage, identity, and E-value</div>` : ""}
           </td>
           <td>${result.source || "—"}${sameOrganismLabel}</td>
+          <td>${result.queryCoverage ? `${result.queryCoverage}%` : "—"}</td>
+          <td>${result.percentIdentity ? `${result.percentIdentity}%` : "—"}</td>
           <td>${result.identities || "—"}</td>
           <td>${result.eValue || result.expect || "—"}</td>
           <td>${result.gaps || "—"}</td>
@@ -738,7 +810,7 @@ function renderAlignmentCard(payload, index = 0) {
     alignmentBlock.textContent =
       "Query/Sbjct alignment block will appear here after a demo or live BLAST result is loaded.";
     interpretationCallout.textContent =
-      "Load the demo result to see how the tool translates alignment metrics into a careful educational interpretation.";
+      "Run BLAST to load a live NCBI result automatically, or use the demo result to inspect the teaching layout without submitting a sequence.";
     return;
   }
 
@@ -801,7 +873,7 @@ function renderAlignmentCard(payload, index = 0) {
   alignmentBlock.textContent = result.alignmentText || "Alignment text was not available for this hit.";
   interpretationCallout.textContent = isDemoResult
     ? "This demo result is built into the page for teaching the table, alignment layout, and interpretation language. It was not retrieved from a live NCBI request."
-    : interpretation.description;
+    : `${interpretation.description} In practice, review query coverage first, then percent identity, then E-value and score. A short perfect fragment is usually weaker evidence than a nearly perfect match with broad query coverage.`;
 }
 
 function renderPayload(payload) {
@@ -812,14 +884,14 @@ function renderPayload(payload) {
   resultsNote.textContent =
     state.lastPayload.sourceType === "demo"
       ? "DEMO RESULT — not from NCBI. This example is built into the page for teaching the summary table and alignment card layout."
-      : "Live NCBI BLAST result loaded. Use Show alignment to switch the detailed panel between hits.";
+      : "Live NCBI BLAST result loaded. Rows are ranked by organism context, query coverage, percent identity, and E-value. Use Show alignment to switch the detailed panel between hits.";
 }
 
 function clearResults() {
   state.lastPayload = null;
   state.resultSource = "none";
   state.selectedResultIndex = 0;
-  resultsNote.textContent = "Load the demo result to see a complete educational example.";
+  resultsNote.textContent = "Run BLAST and the page will load the live result automatically when NCBI is ready. Demo mode is optional.";
   renderAlignmentCard(null, 0);
   renderResultTable(null);
 }
@@ -984,6 +1056,7 @@ function resetDisplayedAnalysisOutputs(reason = "") {
   state.selectedResultIndex = 0;
   state.nextAllowedStatusAt = 0;
   state.blastReady = false;
+  clearAutoResultTimer();
   clearTaxonomyCandidates(taxonomyState.message, taxonomyState.badge, taxonomyState.tone);
   blastRid.textContent = "—";
   selectedTaxid.textContent = "—";
@@ -1153,8 +1226,9 @@ async function handleRunBlast() {
       "is-review",
       Number(payload.nextAllowedPollSeconds || 60)
     );
+    scheduleAutoResultLoad(Number(payload.nextAllowedPollSeconds || 60));
     setStatus(
-      `BLAST submitted with RID ${payload.rid}. Wait before checking status so the public NCBI service is not polled too frequently.`,
+      `BLAST submitted with RID ${payload.rid}. The page will automatically load the result after the required NCBI waiting period.`,
       "success"
     );
   } catch (error) {
@@ -1169,7 +1243,8 @@ async function handleRunBlast() {
   }
 }
 
-async function handleCheckBlastStatus() {
+async function handleCheckBlastStatus(options = {}) {
+  const automatic = Boolean(options.automatic);
   if (!state.lastRid) {
     setStatus("Submit a BLAST request first so there is a RID to check.", "error");
     return;
@@ -1181,8 +1256,19 @@ async function handleCheckBlastStatus() {
     const payload = await requestSequenceApi("blastStatus", { rid: state.lastRid });
     if (payload.status === "READY") {
       state.blastReady = true;
-      setBlastState(payload.message || "BLAST results are ready.", "Result ready", "is-success", 0);
-      setStatus("BLAST status is READY. You can load the parsed result now.", "success");
+      setBlastState(
+        payload.message || "BLAST results are ready.",
+        "Result ready",
+        "is-success",
+        0
+      );
+      scheduleAutoResultLoad(AUTO_RESULT_DELAY_AFTER_READY_SECONDS);
+      setStatus(
+        automatic
+          ? "BLAST status is READY. The page will load the parsed result automatically after a short NCBI-safe delay."
+          : "BLAST status is READY. The page will load the parsed result automatically after a short NCBI-safe delay.",
+        "success"
+      );
       return;
     }
 
@@ -1205,7 +1291,13 @@ async function handleCheckBlastStatus() {
       "is-review",
       Number(payload.nextAllowedPollSeconds || 60)
     );
-    setStatus(payload.message || "BLAST is still processing.", "");
+    scheduleAutoResultLoad(Number(payload.nextAllowedPollSeconds || 60));
+    setStatus(
+      automatic
+        ? `${payload.message || "BLAST is still processing."} The page will check again automatically.`
+        : `${payload.message || "BLAST is still processing."} The page will check again automatically.`,
+      ""
+    );
   } catch (error) {
     const details = explainBackendError(error);
     setBlastState(details.userMessage, "Status failed", "is-error", 0);
@@ -1218,7 +1310,8 @@ async function handleCheckBlastStatus() {
   }
 }
 
-async function handleLoadBlastResult() {
+async function handleLoadBlastResult(options = {}) {
+  const automatic = Boolean(options.automatic);
   if (!state.lastRid) {
     setStatus("Submit a BLAST request first so there is a RID to load.", "error");
     return;
@@ -1242,11 +1335,20 @@ async function handleLoadBlastResult() {
         payload.status === "WAITING" ? "is-review" : "is-error",
         Number(payload.nextAllowedPollSeconds || 60)
       );
-      setStatus(payload.message || "BLAST results are not ready yet.", "");
+      if (payload.status === "WAITING") {
+        scheduleAutoResultLoad(Number(payload.nextAllowedPollSeconds || 60));
+      }
+      setStatus(
+        automatic && payload.status === "WAITING"
+          ? `${payload.message || "BLAST results are not ready yet."} The page will try again automatically.`
+          : payload.message || "BLAST results are not ready yet.",
+        ""
+      );
       return;
     }
 
     state.blastReady = true;
+    clearAutoResultTimer();
     state.selectedResultIndex = 0;
     renderPayload(payload);
     setBlastState(
@@ -1367,6 +1469,7 @@ clearFormButton?.addEventListener("click", () => {
     state.selectedResultIndex = 0;
     state.nextAllowedStatusAt = 0;
     state.blastReady = false;
+    clearAutoResultTimer();
     updateQualityPanel("");
     const taxonomyState = getDefaultTaxonomyState();
     const blastState = getDefaultBlastState();

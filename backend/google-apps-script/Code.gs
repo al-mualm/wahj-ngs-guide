@@ -1030,11 +1030,29 @@ function parseBlastJsonResult_(blastData) {
     queryLength: Number(search.query_len) || 0,
     hits: hits.map(function (hit) {
       const description = hit.description && hit.description.length ? hit.description[0] : {};
-      const hsp = hit.hsps && hit.hsps.length ? hit.hsps[0] : {};
+      const hsps = Array.isArray(hit.hsps) ? hit.hsps : [];
+      const hsp = hsps.reduce(function (bestHsp, currentHsp) {
+        const currentBitScore = Number(currentHsp && currentHsp.bit_score) || 0;
+        const bestBitScore = Number(bestHsp && bestHsp.bit_score) || 0;
+        if (!bestHsp || currentBitScore > bestBitScore) {
+          return currentHsp || {};
+        }
+
+        if (currentBitScore === bestBitScore) {
+          const currentAlignLength = Number(currentHsp && currentHsp.align_len) || 0;
+          const bestAlignLength = Number(bestHsp && bestHsp.align_len) || 0;
+          if (currentAlignLength > bestAlignLength) {
+            return currentHsp || {};
+          }
+        }
+
+        return bestHsp || {};
+      }, {});
       const alignLength = Number(hsp.align_len) || 0;
       const identityCount = Number(hsp.identity) || 0;
       const gapCount = Number(hsp.gaps) || 0;
       const accession = sanitizeText_(description.accession || description.id || "");
+      const queryLength = Number(search.query_len) || 0;
 
       return {
         accession: accession,
@@ -1051,10 +1069,7 @@ function parseBlastJsonResult_(blastData) {
         gapsNumerator: gapCount,
         gapsDenominator: alignLength,
         percentGaps: alignLength ? roundNumber_((gapCount / alignLength) * 100, 1) : 0,
-        queryCoverage:
-          search.query_len && alignLength
-            ? roundNumber_((alignLength / Number(search.query_len)) * 100, 1)
-            : 0,
+        queryCoverage: calculateMergedQueryCoverage_(hsps, queryLength),
         range:
           hsp.query_from && hsp.query_to
             ? String(hsp.query_from) + " to " + String(hsp.query_to)
@@ -1073,6 +1088,55 @@ function parseBlastJsonResult_(blastData) {
       };
     }),
   };
+}
+
+function calculateMergedQueryCoverage_(hsps, queryLength) {
+  if (!queryLength || !Array.isArray(hsps) || !hsps.length) {
+    return 0;
+  }
+
+  const intervals = hsps
+    .map(function (hsp) {
+      const from = Number(hsp && hsp.query_from) || 0;
+      const to = Number(hsp && hsp.query_to) || 0;
+      if (!from || !to) {
+        return null;
+      }
+
+      return {
+        start: Math.min(from, to),
+        end: Math.max(from, to),
+      };
+    })
+    .filter(Boolean)
+    .sort(function (left, right) {
+      return left.start - right.start;
+    });
+
+  if (!intervals.length) {
+    return 0;
+  }
+
+  const merged = [intervals[0]];
+  for (let index = 1; index < intervals.length; index += 1) {
+    const current = intervals[index];
+    const last = merged[merged.length - 1];
+    if (current.start <= last.end + 1) {
+      last.end = Math.max(last.end, current.end);
+      continue;
+    }
+
+    merged.push({
+      start: current.start,
+      end: current.end,
+    });
+  }
+
+  const coveredBases = merged.reduce(function (sum, interval) {
+    return sum + (interval.end - interval.start + 1);
+  }, 0);
+
+  return roundNumber_((coveredBases / queryLength) * 100, 1);
 }
 
 function extractBlastJsonPayload_(response) {
