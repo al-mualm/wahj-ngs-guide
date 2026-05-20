@@ -412,6 +412,86 @@ Sbjct   26  AGAGTTTGATCCTGGCTCAGGATGAACGCTGGCGGCGTGCCTAATACATGCAA  85</pre>
               </div>
             </section>
 
+            <section class="analysis-card publication-card reveal" id="publication-report">
+              <div class="publication-header">
+                <div>
+                  <p class="eyebrow">Publication tables</p>
+                  <h3>Selected-hit report tables</h3>
+                </div>
+                <span class="publication-status" id="publication-status">No hit selected</span>
+              </div>
+
+              <div
+                class="publication-tabs no-copy"
+                role="tablist"
+                aria-label="Publication report tabs"
+              >
+                <button
+                  class="publication-tab is-active"
+                  id="publication-tab-alignment-summary"
+                  type="button"
+                  role="tab"
+                  aria-selected="true"
+                  data-publication-tab="alignment-summary"
+                >
+                  Alignment summary
+                </button>
+                <button
+                  class="publication-tab"
+                  id="publication-tab-difference-counts"
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
+                  data-publication-tab="difference-counts"
+                >
+                  Difference counts
+                </button>
+                <button
+                  class="publication-tab"
+                  id="publication-tab-nucleotide-differences"
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
+                  data-publication-tab="nucleotide-differences"
+                >
+                  Nucleotide differences
+                </button>
+                <button
+                  class="publication-tab"
+                  id="publication-tab-top-hit-comparison"
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
+                  data-publication-tab="top-hit-comparison"
+                >
+                  Top-hit comparison
+                </button>
+              </div>
+
+              <p class="publication-note no-copy">
+                Coding/protein effects are not assessed automatically in this educational
+                table.
+              </p>
+
+              <div class="publication-controls no-copy">
+                <button class="action-button" type="button" id="publication-copy-table">
+                  Copy table
+                </button>
+                <button class="action-button" type="button" id="publication-copy-all">
+                  Copy all publication tables
+                </button>
+                <button class="action-button" type="button" id="publication-export-csv">
+                  Export CSV
+                </button>
+              </div>
+
+              <div class="publication-table-shell" id="publication-table-shell">
+                <div class="publication-placeholder">
+                  Select a BLAST hit to generate clean publication tables for that alignment.
+                </div>
+              </div>
+            </section>
+
             <section class="analysis-card alignment-card reveal">
               <div class="alignment-card-header">
                 <div>
@@ -552,6 +632,7 @@ Sbjct   26  AGAGTTTGATCCTGGCTCAGGATGAACGCTGGCGGCGTGCCTAATACATGCAA  85</pre>
 
     <script src="../config.js"></script>
     <script src="../script.js"></script>
+    <script src="publication-tables.js"></script>
     <script src="sequence-analysis.js"></script>
   </body>
 </html>

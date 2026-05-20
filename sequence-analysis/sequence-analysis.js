@@ -1,6 +1,7 @@
 const sequenceConfig = window.WAHJ_NGS_CONFIG || {};
 const demoEnabled = sequenceConfig.sequenceAnalysisDemoEnabled !== false;
 const sequenceApiUrl = (sequenceConfig.sequenceAnalysisApiUrl || "").trim();
+const publicationApi = window.WahjPublicationTables || null;
 const requiredSequenceActions = [
   "sequenceAnalysisHealth",
   "taxonomySearch",
@@ -115,6 +116,15 @@ const nextStatusCheck = document.querySelector("#next-status-check");
 const backendUrlState = document.querySelector("#backend-url-state");
 const resultsNote = document.querySelector("#results-note");
 const resultsBody = document.querySelector("#blast-results-body");
+const publicationReport = document.querySelector("#publication-report");
+const publicationStatus = document.querySelector("#publication-status");
+const publicationTabs = Array.from(
+  document.querySelectorAll("[data-publication-tab]")
+);
+const publicationCopyButton = document.querySelector("#publication-copy-table");
+const publicationCopyAllButton = document.querySelector("#publication-copy-all");
+const publicationExportButton = document.querySelector("#publication-export-csv");
+const publicationTableShell = document.querySelector("#publication-table-shell");
 const alignmentTitle = document.querySelector("#alignment-title");
 const alignmentStatus = document.querySelector("#alignment-status");
 const alignmentMeta = document.querySelector("#alignment-meta");
@@ -152,6 +162,8 @@ const state = {
   activeButtons: new Map(),
   timerId: 0,
   autoResultTimerId: 0,
+  activePublicationTab: "alignment-summary",
+  publicationTables: [],
 };
 
 const AUTO_RESULT_DELAY_AFTER_READY_SECONDS = 11;
@@ -744,6 +756,142 @@ function normalizePayload(payload) {
   };
 }
 
+function escapeHtml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function getQueryMetadata(normalizedPayload, result) {
+  const interpretation = result ? classifyInterpretation(result) : null;
+  return {
+    sampleNumber: normalizedPayload.sampleNumber || "—",
+    wahjSampleId: normalizedPayload.wahjSampleId || "—",
+    sequenceTitle: normalizedPayload.sequenceTitle || "—",
+    queryTitle: normalizedPayload.queryTitle || normalizedPayload.sequenceTitle || "—",
+    organismName: normalizedPayload.organismName || "—",
+    geneMarker: normalizedPayload.geneMarker || "—",
+    matchInterpretation: interpretation ? interpretation.label : "—",
+  };
+}
+
+function setPublicationControlsEnabled(enabled) {
+  if (publicationCopyButton) {
+    publicationCopyButton.disabled = !enabled;
+  }
+  if (publicationCopyAllButton) {
+    publicationCopyAllButton.disabled = !enabled;
+  }
+  if (publicationExportButton) {
+    publicationExportButton.disabled = !enabled;
+  }
+}
+
+function syncPublicationTabs() {
+  publicationTabs.forEach((button) => {
+    const isActive = button.dataset.publicationTab === state.activePublicationTab;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
+}
+
+function renderPublicationPlaceholder(message, statusLabel = "No hit selected") {
+  state.publicationTables = [];
+  if (publicationStatus) {
+    publicationStatus.textContent = statusLabel;
+  }
+  if (publicationTableShell) {
+    publicationTableShell.innerHTML = `
+      <div class="publication-placeholder">${escapeHtml(message)}</div>
+    `;
+  }
+  syncPublicationTabs();
+  setPublicationControlsEnabled(false);
+}
+
+function buildPublicationTableMarkup(tableData) {
+  const isKeyValue = tableData.id === "alignment-summary";
+  const headerMarkup = tableData.columns
+    .map((column) => `<th>${escapeHtml(column)}</th>`)
+    .join("");
+  const rowMarkup = (tableData.rows || [])
+    .map((row) => {
+      const cellTag = isKeyValue ? "th" : "td";
+      return `
+        <tr>
+          <${cellTag} scope="row">${escapeHtml(row[0] ?? "—")}</${cellTag}>
+          ${row
+            .slice(1)
+            .map((cell) => `<td>${escapeHtml(cell ?? "—")}</td>`)
+            .join("")}
+        </tr>
+      `;
+    })
+    .join("");
+
+  return `
+    <article class="publication-table-card">
+      <div class="publication-table-wrap">
+        <table class="publication-table ${
+          isKeyValue ? "publication-table-key-value" : ""
+        }" data-publication-table-id="${tableData.id}">
+          <caption>${escapeHtml(tableData.caption)}</caption>
+          <thead>
+            <tr>${headerMarkup}</tr>
+          </thead>
+          <tbody>${rowMarkup}</tbody>
+        </table>
+      </div>
+    </article>
+  `;
+}
+
+function renderPublicationPanel(payload, index = 0) {
+  if (!publicationApi) {
+    renderPublicationPlaceholder(
+      "Publication table helpers are not available in this build.",
+      "Unavailable"
+    );
+    return;
+  }
+
+  const normalized = normalizePayload(payload);
+  const result = normalized.results[index];
+
+  if (!result) {
+    renderPublicationPlaceholder(
+      "Select a BLAST hit to generate clean publication tables for that alignment."
+    );
+    return;
+  }
+
+  const tables = publicationApi.buildPublicationTables({
+    hit: result,
+    hits: normalized.results,
+    queryMetadata: getQueryMetadata(normalized, result),
+  });
+  const activeTable =
+    tables.find((table) => table.id === state.activePublicationTab) || tables[0];
+
+  state.publicationTables = tables;
+  state.activePublicationTab = activeTable.id;
+
+  if (publicationStatus) {
+    publicationStatus.textContent = `${result.accession || "Selected hit"} | ${
+      activeTable.label
+    }`;
+  }
+  if (publicationTableShell) {
+    publicationTableShell.innerHTML = buildPublicationTableMarkup(activeTable);
+  }
+
+  syncPublicationTabs();
+  setPublicationControlsEnabled(Boolean(tables.length));
+}
+
 function renderResultTable(payload) {
   const normalized = normalizePayload(payload);
   if (!normalized.results.length) {
@@ -769,9 +917,14 @@ function renderResultTable(payload) {
           <td>${normalized.wahjSampleId || "—"}</td>
           <td>
             <a class="result-link" href="${result.genbankUrl}" target="_blank" rel="noreferrer">${result.accession || "—"}</a>
-            <button class="result-compare-button ${index === state.selectedResultIndex ? "is-active" : ""}" type="button" data-result-index="${index}">
-              Show alignment
-            </button>
+            <div class="result-actions">
+              <button class="result-compare-button ${index === state.selectedResultIndex ? "is-active" : ""}" type="button" data-result-index="${index}">
+                Show alignment
+              </button>
+              <button class="result-publication-button ${index === state.selectedResultIndex ? "is-active" : ""}" type="button" data-result-index="${index}">
+                Publication tables
+              </button>
+            </div>
             ${index === 0 ? `<div class="taxonomy-meta result-priority-note">Best combined hit by organism context, query coverage, identity, and E-value</div>` : ""}
           </td>
           <td>${result.source || "—"}${sameOrganismLabel}</td>
@@ -880,6 +1033,7 @@ function renderPayload(payload) {
   state.lastPayload = normalizePayload(payload);
   state.resultSource = state.lastPayload.sourceType;
   renderResultTable(state.lastPayload);
+  renderPublicationPanel(state.lastPayload, state.selectedResultIndex);
   renderAlignmentCard(state.lastPayload, state.selectedResultIndex);
   resultsNote.textContent =
     state.lastPayload.sourceType === "demo"
@@ -891,7 +1045,12 @@ function clearResults() {
   state.lastPayload = null;
   state.resultSource = "none";
   state.selectedResultIndex = 0;
+  state.activePublicationTab = "alignment-summary";
+  state.publicationTables = [];
   resultsNote.textContent = "Run BLAST and the page will load the live result automatically when NCBI is ready. Demo mode is optional.";
+  renderPublicationPlaceholder(
+    "Select a BLAST hit to generate clean publication tables for that alignment."
+  );
   renderAlignmentCard(null, 0);
   renderResultTable(null);
 }
@@ -1483,15 +1642,91 @@ clearFormButton?.addEventListener("click", () => {
 });
 
 resultsBody?.addEventListener("click", (event) => {
-  const button = event.target.closest(".result-compare-button");
+  const compareButton = event.target.closest(".result-compare-button");
+  const publicationButton = event.target.closest(".result-publication-button");
+  const button = compareButton || publicationButton;
   if (!button || !state.lastPayload) {
     return;
   }
 
   const index = Number(button.dataset.resultIndex || 0);
   state.selectedResultIndex = index;
+  if (publicationButton) {
+    state.activePublicationTab = "alignment-summary";
+  }
   renderPayload(state.lastPayload);
+  if (publicationButton) {
+    publicationReport?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setStatus(`Publication tables updated for hit ${index + 1}.`);
+    return;
+  }
+
   setStatus(`Alignment card updated to show hit ${index + 1}.`);
+});
+
+publicationTabs.forEach((button) => {
+  button.addEventListener("click", () => {
+    if (!state.publicationTables.length) {
+      return;
+    }
+    state.activePublicationTab = button.dataset.publicationTab || "alignment-summary";
+    renderPublicationPanel(state.lastPayload, state.selectedResultIndex);
+  });
+});
+
+publicationCopyButton?.addEventListener("click", async () => {
+  const activeTable =
+    state.publicationTables.find((table) => table.id === state.activePublicationTab) || null;
+  if (!activeTable || !publicationApi) {
+    setStatus("Select a BLAST hit first so there is a publication table to copy.", "error");
+    return;
+  }
+
+  try {
+    await publicationApi.copyTableData(activeTable);
+    setStatus(`Copied "${activeTable.caption}" to the clipboard.`, "success");
+  } catch (error) {
+    setStatus(
+      "Clipboard access failed. Try the export button or copy the table manually.",
+      "error"
+    );
+  }
+});
+
+publicationCopyAllButton?.addEventListener("click", async () => {
+  if (!state.publicationTables.length || !publicationApi) {
+    setStatus("Select a BLAST hit first so the report tables can be copied.", "error");
+    return;
+  }
+
+  try {
+    await publicationApi.copyTableCollection(state.publicationTables);
+    setStatus("Copied all publication tables for the selected hit.", "success");
+  } catch (error) {
+    setStatus(
+      "Clipboard access failed. Try exporting the individual tables as CSV files.",
+      "error"
+    );
+  }
+});
+
+publicationExportButton?.addEventListener("click", () => {
+  const activeTable =
+    state.publicationTables.find((table) => table.id === state.activePublicationTab) || null;
+  if (!activeTable || !publicationApi) {
+    setStatus("Select a BLAST hit first so the current publication table can be exported.", "error");
+    return;
+  }
+
+  try {
+    publicationApi.downloadCsv(
+      [activeTable.columns].concat(activeTable.rows || []),
+      activeTable.filename
+    );
+    setStatus(`Exported "${activeTable.filename}" as CSV.`, "success");
+  } catch (error) {
+    setStatus("CSV export failed in this browser.", "error");
+  }
 });
 
 taxonomyCandidates?.addEventListener("change", (event) => {

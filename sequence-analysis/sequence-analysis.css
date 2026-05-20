@@ -573,10 +573,17 @@
   font-weight: 700;
 }
 
-.result-compare-button {
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+
+.result-compare-button,
+.result-publication-button {
   display: inline-flex;
   align-items: center;
-  margin-top: 0.55rem;
   border: 1px solid rgba(14, 79, 116, 0.14);
   border-radius: 999px;
   padding: 0.42rem 0.72rem;
@@ -588,8 +595,137 @@
   cursor: pointer;
 }
 
-.result-compare-button.is-active {
+.result-compare-button.is-active,
+.result-publication-button.is-active {
   background: rgba(0, 157, 205, 0.12);
+}
+
+.publication-card {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.publication-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.publication-header h3 {
+  margin: 0.25rem 0 0;
+  font-size: 1.3rem;
+}
+
+.publication-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(22, 37, 54, 0.08);
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.publication-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.publication-tab {
+  border: 1px solid rgba(14, 79, 116, 0.14);
+  border-radius: 999px;
+  padding: 0.55rem 0.85rem;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--blue-deep);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.publication-tab.is-active {
+  background: rgba(0, 157, 205, 0.12);
+  border-color: rgba(0, 157, 205, 0.3);
+}
+
+.publication-note {
+  margin: 0.9rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.publication-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.publication-table-shell {
+  margin-top: 1rem;
+}
+
+.publication-placeholder {
+  padding: 1rem 1.05rem;
+  border-radius: 1rem;
+  border: 1px dashed rgba(22, 37, 54, 0.18);
+  background: rgba(246, 250, 253, 0.92);
+  color: var(--ink-soft);
+}
+
+.publication-table-card {
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(22, 37, 54, 0.08);
+}
+
+.publication-table-wrap {
+  overflow-x: auto;
+}
+
+.publication-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: 0.94rem;
+  background: #ffffff;
+}
+
+.publication-table caption {
+  padding: 1rem 1rem 0.75rem;
+  font-weight: 700;
+  text-align: left;
+  color: var(--ink);
+  caption-side: top;
+}
+
+.publication-table th,
+.publication-table td {
+  padding: 0.62rem 0.78rem;
+  border: 1px solid rgba(22, 37, 54, 0.12);
+  vertical-align: top;
+  text-align: left;
+}
+
+.publication-table thead th {
+  background: rgba(238, 245, 249, 0.85);
+  font-weight: 800;
+}
+
+.publication-table tbody th {
+  min-width: 12rem;
+  background: rgba(248, 251, 253, 0.92);
+  font-weight: 700;
+}
+
+.publication-table-key-value {
+  min-width: 560px;
 }
 
 .interpretation-tag {
@@ -737,6 +873,10 @@
   .sequence-hero-copy h1 {
     max-width: none;
   }
+
+  .publication-table {
+    min-width: 640px;
+  }
 }
 
 @media (max-width: 560px) {
@@ -749,12 +889,54 @@
   .analysis-actions,
   .alignment-links,
   .interpretation-scale,
-  .sequence-badge-row {
+  .sequence-badge-row,
+  .publication-controls,
+  .publication-tabs,
+  .result-actions {
     gap: 0.55rem;
   }
 
   .action-button {
     width: 100%;
     justify-content: center;
+  }
+
+  .publication-status {
+    width: 100%;
+  }
+
+  .publication-tab,
+  .result-compare-button,
+  .result-publication-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .publication-table {
+    min-width: 560px;
+  }
+}
+
+@media print {
+  .site-header,
+  .section-heading,
+  .publication-tabs,
+  .publication-controls,
+  .publication-note,
+  .no-copy {
+    display: none !important;
+  }
+
+  .publication-card,
+  .publication-table-card,
+  .publication-table {
+    box-shadow: none !important;
+    background: #ffffff !important;
+  }
+
+  .publication-table th,
+  .publication-table td {
+    color: #000000;
+    background: #ffffff !important;
   }
 }
