@@ -7,6 +7,7 @@ const publicationApi = require("../sequence-analysis/publication-tables.js");
 const {
   classifyDifference,
   buildDifferenceRows,
+  buildReferenceBasedChangeTableRows,
   buildPublicationTables,
   buildCopyPayloadFromTableData,
 } = publicationApi;
@@ -128,10 +129,59 @@ function testPublicationTables() {
     },
   });
 
-  assert.equal(tables.length, 4);
+  assert.equal(tables.length, 5);
   assert.equal(tables[0].caption, "Alignment summary for the selected BLAST hit");
-  assert.equal(tables[3].rows.length, 1);
-  assert.equal(tables[3].rows[0][10], "Top selected hit");
+  assert.equal(
+    tables[3].caption,
+    "Reference-based nucleotide change table for the selected BLAST hit"
+  );
+  assert.equal(tables[4].rows.length, 1);
+  assert.equal(tables[4].rows[0][10], "Top selected hit");
+}
+
+function testReferenceBasedChangeTableRows() {
+  const differenceRows = [
+    {
+      subjectPosition: "1139",
+      subjectBase: "G",
+      queryBase: "T",
+      status: "Definite mismatch",
+      differenceType: "Transversion",
+    },
+    {
+      subjectPosition: "1135",
+      subjectBase: "A",
+      queryBase: "G",
+      status: "Definite mismatch",
+      differenceType: "Transition",
+    },
+  ];
+
+  const rows = buildReferenceBasedChangeTableRows(
+    {
+      accession: "MK476070.1",
+      source:
+        "Homo sapiens voucher Bakota_2_1 hemoglobin subunit beta (HBB) gene, complete cds",
+      percentIdentity: 97,
+    },
+    differenceRows,
+    {
+      sampleNumber: "C3",
+      wahjSampleId: "C3",
+      geneMarker: "",
+    },
+    null
+  );
+
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0][0], "C3");
+  assert.equal(rows[0][4], "Annotation unavailable");
+  assert.equal(rows[0][5], "HBB");
+  assert.equal(rows[0][6], "1139\n1135");
+  assert.equal(rows[0][7], "G/T\nA/G");
+  assert.equal(rows[0][8], "Transversion\nTransition");
+  assert.equal(rows[0][9], "97%");
+  assert.match(rows[0][10], /Region classification requires annotated reference features/);
 }
 
 function testCopyPayloadIsClean() {
@@ -151,6 +201,7 @@ testDifferenceClassification();
 testReverseCoordinateHandling();
 testNoDifferences();
 testPublicationTables();
+testReferenceBasedChangeTableRows();
 testCopyPayloadIsClean();
 
 console.log("publication-tables tests passed");

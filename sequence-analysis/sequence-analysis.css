@@ -711,11 +711,13 @@
   border: 1px solid rgba(22, 37, 54, 0.12);
   vertical-align: top;
   text-align: left;
+  white-space: pre-line;
 }
 
 .publication-table thead th {
   background: rgba(238, 245, 249, 0.85);
   font-weight: 800;
+  white-space: normal;
 }
 
 .publication-table tbody th {

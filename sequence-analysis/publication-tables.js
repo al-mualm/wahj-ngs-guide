@@ -559,6 +559,197 @@
     });
   }
 
+  function extractGeneOrFeatureLabel(hit, queryMetadata) {
+    const metadataValue = String(
+      (queryMetadata && queryMetadata.geneMarker) || ""
+    ).trim();
+    if (metadataValue) {
+      return metadataValue;
+    }
+
+    const source = String((hit && (hit.source || hit.title || "")) || "").trim();
+    if (!source) {
+      return "—";
+    }
+
+    const parentheticalMatch = source.match(/\(([A-Za-z0-9._-]{2,30})\)/);
+    if (parentheticalMatch) {
+      return parentheticalMatch[1];
+    }
+
+    const descriptiveMatch = source.match(
+      /\b([A-Za-z0-9._-]{2,40})\s+(gene|mRNA|rRNA|tRNA|transcript|cds)\b/i
+    );
+    if (descriptiveMatch) {
+      return descriptiveMatch[1];
+    }
+
+    return "—";
+  }
+
+  function getReferenceAnnotationAtPosition(subjectPosition, optionalFeatureAnnotations) {
+    if (!optionalFeatureAnnotations || !Array.isArray(optionalFeatureAnnotations.features)) {
+      return null;
+    }
+
+    const numericPosition = Number(subjectPosition);
+    if (!Number.isFinite(numericPosition)) {
+      return null;
+    }
+
+    return (
+      optionalFeatureAnnotations.features.find((feature) => {
+        const start = Number(feature.start);
+        const end = Number(feature.end);
+        if (!Number.isFinite(start) || !Number.isFinite(end)) {
+          return false;
+        }
+        const lower = Math.min(start, end);
+        const upper = Math.max(start, end);
+        return numericPosition >= lower && numericPosition <= upper;
+      }) || null
+    );
+  }
+
+  function classifyRegionType(feature) {
+    if (!feature || !feature.type) {
+      return "Annotation unavailable";
+    }
+
+    const normalizedType = String(feature.type).trim().toLowerCase();
+    if (normalizedType === "cds") {
+      return "Coding region";
+    }
+    if (normalizedType === "rrna") {
+      return "rRNA gene";
+    }
+    if (normalizedType === "trna") {
+      return "tRNA gene";
+    }
+    return feature.type || "Annotated feature";
+  }
+
+  function formatReferenceChangeType(row) {
+    if (!row) {
+      return "—";
+    }
+    if (row.differenceType === "Transition" || row.differenceType === "Transversion") {
+      return row.differenceType;
+    }
+    if (row.status === "Ambiguous compatible") {
+      return "Ambiguous compatible";
+    }
+    if (row.status === "Ambiguous possible mismatch") {
+      return "Ambiguous possible mismatch";
+    }
+    if (row.differenceType === "Insertion") {
+      return "Insertion";
+    }
+    if (row.differenceType === "Deletion") {
+      return "Deletion";
+    }
+    return row.differenceType || row.status || "—";
+  }
+
+  function buildReferenceBasedChangeTableRows(
+    selectedHit,
+    differenceRows,
+    queryMetadata,
+    optionalFeatureAnnotations
+  ) {
+    const metadata = queryMetadata || {};
+    const rows = Array.isArray(differenceRows) ? differenceRows : [];
+    const geneOrFeature = extractGeneOrFeatureLabel(selectedHit, metadata);
+    const percentIdentity =
+      selectedHit && Number.isFinite(Number(selectedHit.percentIdentity))
+        ? `${selectedHit.percentIdentity}%`
+        : "—";
+    const source = getSourceValue(selectedHit);
+
+    const unavailableRow = rows.find(
+      (row) => row.status === "Detailed alignment unavailable for this hit"
+    );
+    if (unavailableRow) {
+      return [
+        [
+          metadata.sampleNumber || "—",
+          metadata.wahjSampleId || "—",
+          (selectedHit && selectedHit.accession) || "—",
+          source,
+          "Annotation unavailable",
+          geneOrFeature,
+          "—",
+          "—",
+          "—",
+          percentIdentity,
+          "Detailed alignment unavailable for this hit",
+        ],
+      ];
+    }
+
+    const noDifferenceRow = rows.find(
+      (row) => row.status === "No nucleotide differences detected in the aligned region"
+    );
+    if (noDifferenceRow) {
+      return [
+        [
+          metadata.sampleNumber || "—",
+          metadata.wahjSampleId || "—",
+          (selectedHit && selectedHit.accession) || "—",
+          source,
+          optionalFeatureAnnotations ? "Intergenic / noncoding" : "Annotation unavailable",
+          geneOrFeature,
+          "—",
+          "—",
+          "—",
+          percentIdentity,
+          optionalFeatureAnnotations
+            ? "No nucleotide differences detected in the aligned region."
+            : "No nucleotide differences detected in the aligned region. Region classification requires annotated reference features.",
+        ],
+      ];
+    }
+
+    const annotatedFeatures = rows.map((row) =>
+      getReferenceAnnotationAtPosition(row.subjectPosition, optionalFeatureAnnotations)
+    );
+    const regionTypeValues = annotatedFeatures.map((feature) => classifyRegionType(feature));
+    const featureValues = annotatedFeatures.map((feature) => {
+      const explicitGene =
+        feature && (feature.gene || feature.locusTag || feature.product || feature.type);
+      return explicitGene || geneOrFeature;
+    });
+
+    const regionType =
+      optionalFeatureAnnotations && regionTypeValues.some((value) => value !== "Annotation unavailable")
+        ? regionTypeValues.join("\n")
+        : "Annotation unavailable";
+    const featureLabel =
+      optionalFeatureAnnotations && featureValues.some((value) => value && value !== "—")
+        ? featureValues.join("\n")
+        : geneOrFeature;
+
+    const annotationComment = optionalFeatureAnnotations
+      ? "Nucleotide-level changes only; coding/protein effect not assessed."
+      : "Region classification requires annotated reference features.";
+
+    return [
+      [
+        metadata.sampleNumber || "—",
+        metadata.wahjSampleId || "—",
+        (selectedHit && selectedHit.accession) || "—",
+        source,
+        regionType,
+        featureLabel || "—",
+        rows.map((row) => row.subjectPosition || "—").join("\n"),
+        rows.map((row) => `${row.subjectBase || "—"}/${row.queryBase || "—"}`).join("\n"),
+        rows.map((row) => formatReferenceChangeType(row)).join("\n"),
+        percentIdentity,
+        annotationComment,
+      ],
+    ];
+  }
+
   function escapeHtml(value) {
     return String(value == null ? "" : value)
       .replace(/&/g, "&amp;")
@@ -598,10 +789,14 @@
 
   function buildCopyPayloadFromTableData(tableData) {
     const headerRows = [tableData.columns].concat(tableData.rows || []);
+    const formatCellHtml = (cell) =>
+      escapeHtml(cell == null ? "" : cell)
+        .split("\n")
+        .join("<br />");
     const htmlRows = (tableData.rows || [])
       .map(
         (row) =>
-          `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`
+          `<tr>${row.map((cell) => `<td>${formatCellHtml(cell)}</td>`).join("")}</tr>`
       )
       .join("");
     const html = [
@@ -705,6 +900,8 @@
     const hit = options && options.hit ? options.hit : null;
     const hits = options && Array.isArray(options.hits) ? options.hits : [];
     const queryMetadata = options && options.queryMetadata ? options.queryMetadata : {};
+    const optionalFeatureAnnotations =
+      options && options.optionalFeatureAnnotations ? options.optionalFeatureAnnotations : null;
     const differenceBundle = buildDifferenceRows(hit);
     const accessionKey = sanitizeFilenamePart(hit && hit.accession ? hit.accession : "selected_hit");
 
@@ -757,6 +954,31 @@
         filename: `wahj_difference_table_${accessionKey}.csv`,
       },
       {
+        id: "reference-based-change-table",
+        label: "Reference-based change table",
+        caption: "Reference-based nucleotide change table for the selected BLAST hit",
+        columns: [
+          "Sample No.",
+          "Lab ID",
+          "Sequence ID / Compare",
+          "Source",
+          "Region type",
+          "Gene / feature",
+          "Location of change",
+          "Nucleotide Subject/Query",
+          "Type of change",
+          "Identity (%)",
+          "Comment",
+        ],
+        rows: buildReferenceBasedChangeTableRows(
+          hit,
+          differenceBundle.rows,
+          queryMetadata,
+          optionalFeatureAnnotations
+        ),
+        filename: `wahj_reference_change_table_${accessionKey}.csv`,
+      },
+      {
         id: "top-hit-comparison",
         label: "Top-hit comparison",
         caption: "Comparison of top BLAST hits for the query sequence",
@@ -787,6 +1009,7 @@
     buildDifferenceRows,
     buildAlignmentSummaryRows,
     buildDifferenceCountRows,
+    buildReferenceBasedChangeTableRows,
     buildTopHitComparisonRows,
     buildPublicationTables,
     tableToTsv,

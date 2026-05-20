@@ -814,6 +814,10 @@ function renderPublicationPlaceholder(message, statusLabel = "No hit selected") 
 
 function buildPublicationTableMarkup(tableData) {
   const isKeyValue = tableData.id === "alignment-summary";
+  const formatCellHtml = (value) =>
+    escapeHtml(value == null ? "—" : value)
+      .split("\n")
+      .join("<br />");
   const headerMarkup = tableData.columns
     .map((column) => `<th>${escapeHtml(column)}</th>`)
     .join("");
@@ -822,10 +826,10 @@ function buildPublicationTableMarkup(tableData) {
       const cellTag = isKeyValue ? "th" : "td";
       return `
         <tr>
-          <${cellTag} scope="row">${escapeHtml(row[0] ?? "—")}</${cellTag}>
+          <${cellTag} scope="row">${formatCellHtml(row[0] ?? "—")}</${cellTag}>
           ${row
             .slice(1)
-            .map((cell) => `<td>${escapeHtml(cell ?? "—")}</td>`)
+            .map((cell) => `<td>${formatCellHtml(cell ?? "—")}</td>`)
             .join("")}
         </tr>
       `;
