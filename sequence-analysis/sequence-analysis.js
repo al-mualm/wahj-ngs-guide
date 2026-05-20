@@ -124,6 +124,7 @@ const publicationTabs = Array.from(
 const publicationCopyButton = document.querySelector("#publication-copy-table");
 const publicationCopyAllButton = document.querySelector("#publication-copy-all");
 const publicationExportButton = document.querySelector("#publication-export-csv");
+const publicationDownloadButton = document.querySelector("#publication-download-report");
 const publicationTableShell = document.querySelector("#publication-table-shell");
 const alignmentTitle = document.querySelector("#alignment-title");
 const alignmentStatus = document.querySelector("#alignment-status");
@@ -787,6 +788,9 @@ function setPublicationControlsEnabled(enabled) {
   }
   if (publicationExportButton) {
     publicationExportButton.disabled = !enabled;
+  }
+  if (publicationDownloadButton) {
+    publicationDownloadButton.disabled = !enabled;
   }
 }
 
@@ -1730,6 +1734,25 @@ publicationExportButton?.addEventListener("click", () => {
     setStatus(`Exported "${activeTable.filename}" as CSV.`, "success");
   } catch (error) {
     setStatus("CSV export failed in this browser.", "error");
+  }
+});
+
+publicationDownloadButton?.addEventListener("click", () => {
+  const activeTable =
+    state.publicationTables.find((table) => table.id === state.activePublicationTab) || null;
+  if (!activeTable || !publicationApi) {
+    setStatus(
+      "Select a BLAST hit first so the current publication table can be downloaded.",
+      "error"
+    );
+    return;
+  }
+
+  try {
+    publicationApi.downloadHtmlReport(activeTable);
+    setStatus(`Downloaded "${activeTable.caption}" as an HTML report block.`, "success");
+  } catch (error) {
+    setStatus("Report download failed in this browser.", "error");
   }
 });
 

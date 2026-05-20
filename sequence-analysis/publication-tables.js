@@ -896,6 +896,51 @@
     URL.revokeObjectURL(href);
   }
 
+  function buildStandaloneHtmlDocument(tableData) {
+    const payload = buildCopyPayloadFromTableData(tableData);
+    return [
+      "<!DOCTYPE html>",
+      '<html lang="en">',
+      "  <head>",
+      '    <meta charset="UTF-8" />',
+      '    <meta name="viewport" content="width=device-width, initial-scale=1.0" />',
+      `    <title>${escapeHtml(tableData.caption || "Publication table")}</title>`,
+      "    <style>",
+      "      body { font-family: Arial, Helvetica, sans-serif; margin: 32px; color: #132232; }",
+      "      table { width: 100%; border-collapse: collapse; font-size: 14px; }",
+      "      caption { caption-side: top; text-align: left; font-weight: 700; margin-bottom: 12px; }",
+      "      th, td { border: 1px solid #cfd8e3; padding: 8px 10px; text-align: left; vertical-align: top; }",
+      "      thead th { background: #eef4f8; }",
+      "      tbody th { background: #f7fafc; font-weight: 700; }",
+      "    </style>",
+      "  </head>",
+      "  <body>",
+      `    ${payload.html}`,
+      "  </body>",
+      "</html>",
+    ].join("\n");
+  }
+
+  function downloadHtmlReport(tableData) {
+    if (typeof document === "undefined") {
+      throw new Error("HTML report download is only available in the browser.");
+    }
+
+    const htmlDocument = buildStandaloneHtmlDocument(tableData);
+    const filename = String(
+      (tableData && tableData.filename) || "wahj_publication_table.csv"
+    ).replace(/\.csv$/i, ".html");
+    const blob = new Blob([htmlDocument], { type: "text/html;charset=utf-8;" });
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(href);
+  }
+
   function buildPublicationTables(options) {
     const hit = options && options.hit ? options.hit : null;
     const hits = options && Array.isArray(options.hits) ? options.hits : [];
@@ -1018,5 +1063,7 @@
     copyTableCollection,
     buildCopyPayloadFromTableData,
     downloadCsv,
+    buildStandaloneHtmlDocument,
+    downloadHtmlReport,
   };
 });

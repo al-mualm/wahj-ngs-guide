@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>بوابة Wahj Al-DNA التعليمية</title>
+    <meta
+      name="description"
+      content="بوابة تعليمية ثنائية اللغة من Wahj Al-DNA تجمع أدلة NGS وReal-Time PCR وتحليل التسلسل وBLAST وحاسبة التعبير الجيني."
+    />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="site-header site-header-compact" id="top">
+        <div class="brand-lockup">
+          <img src="../assets/wahj-logo.png" alt="شعار Wahj Al-DNA" class="brand-logo" />
+          <div>
+            <p class="eyebrow">منصة تعليمية علمية</p>
+            <p class="brand-title">Wahj Al-DNA</p>
+          </div>
+        </div>
+        <div class="language-switch" aria-label="تبديل اللغة">
+          <a class="language-link" href="../">English</a>
+          <a class="language-link is-active" href="./">العربية</a>
+        </div>
+        <div class="reader-badge" aria-live="polite">
+          <p class="reader-label">القرّاء</p>
+          <p class="reader-count"><span id="reader-count">جاري التحميل...</span></p>
+          <p class="reader-note" id="reader-note">
+            يتم تحديث عدد القرّاء المجهول تلقائياً من دون جمع أي معلومات شخصية.
+          </p>
+        </div>
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="primary-nav"
+        >
+          القائمة
+        </button>
+        <nav class="primary-nav" id="primary-nav" aria-label="التنقل الرئيسي">
+          <a href="#overview">نظرة عامة</a>
+          <a href="#learn">تعلّم</a>
+          <a href="#analyze">حلّل</a>
+          <a href="#research">استخدم في البحث</a>
+          <a href="../">English hub</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="portal-hero section" id="overview">
+          <div class="portal-copy reveal">
+            <span class="section-chip">تعلم وتحليل وتقارير في مكان واحد</span>
+            <h1>بوابة Wahj Al-DNA للتعلّم والتحليل الجزيئي</h1>
+            <p class="hero-lead">
+              تجمع هذه البوابة بين الصفحات التعليمية والأدوات العملية ومخرجات التقارير
+              المناسبة للرسائل والأبحاث في مجالات الجينوميات و<span class="term-ltr">PCR</span>
+              وتحليل التسلسلات.
+            </p>
+            <div class="selector-note">
+              <p><strong>إعداد:</strong> Mahmood Al-Mualm</p>
+              <p><strong>الصفة:</strong> CEO of Wahj Al-DNA</p>
+              <p>
+                <strong>طريقة الاستخدام:</strong> ابدأ بالصفحات التعليمية لفهم المفاهيم،
+                ثم انتقل إلى الأدوات العملية عند الحاجة إلى التحليل أو التصدير.
+              </p>
+            </div>
+            <div class="selector-actions">
+              <a class="hub-link hub-link-primary" href="#learn">استعراض المسارات التعليمية</a>
+              <a class="hub-link" href="#analyze">فتح الأدوات العملية</a>
+            </div>
+          </div>
+
+          <div class="portal-visual reveal">
+            <div class="portal-summary-card">
+              <p class="eyebrow">هيكل المنصة</p>
+              <h2>ثلاثة مسارات دخول واضحة</h2>
+              <div class="portal-kpis">
+                <article>
+                  <strong>تعلّم</strong>
+                  <span>صفحات تعليمية تشرح المفاهيم والمنهج العلمي</span>
+                </article>
+                <article>
+                  <strong>حلّل</strong>
+                  <span>أدوات عملية لـ <span class="term-ltr">BLAST</span> والتعبير الجيني</span>
+                </article>
+                <article>
+                  <strong>قدّم النتائج</strong>
+                  <span>جداول ومخرجات أوضح للرسائل والأبحاث والتدريب</span>
+                </article>
+              </div>
+              <div class="portal-preview-list">
+                <div>
+                  <strong>دليل <span class="term-ltr">NGS</span></strong>
+                  <p>سير العمل والمنصات وضبط الجودة وتفسير النتائج للمبتدئين.</p>
+                </div>
+                <div>
+                  <strong><span class="term-ltr">Real-Time PCR</span></strong>
+                  <p>فهم <span class="term-ltr">Ct</span> والكيمياء الكاشفة والقياس النسبي.</p>
+                </div>
+                <div>
+                  <strong>تحليل التسلسل + <span class="term-ltr">BLAST</span></strong>
+                  <p>تنظيف التسلسل، البحث الحيوي، مراجعة التطابقات، وجداول التقارير.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="learn">
+          <div class="section-heading">
+            <span class="section-chip">تعلّم</span>
+            <h2>ابدأ بفهم العلم قبل استخدام الأدوات</h2>
+            <p>
+              هذه الصفحات مصممة كفصول تعليمية متدرجة. الهدف منها هو بناء الفهم
+              المفاهيمي والمصطلحات وخطوات التفسير قبل الانتقال إلى التحليل العملي.
+            </p>
+          </div>
+
+          <div class="portal-group reveal">
+            <div class="portal-group-header">
+              <p class="eyebrow">صفحات تعليمية</p>
+              <h3>المسار الدراسي الأساسي</h3>
+              <p>
+                مناسب للطلاب والمتدربين ومن يريد فهم سير العمل العلمي قبل البدء في
+                الحسابات أو التحليل المقارن.
+              </p>
+            </div>
+            <div class="portal-card-grid">
+              <a class="product-card" href="../ar/">
+                <span class="topic-tag">دليل عربي</span>
+                <h3>دليل <span class="term-ltr">NGS</span> بالعربية</h3>
+                <p>
+                  صفحة عربية مصممة بشكل كامل لشرح <span class="term-ltr">NGS</span>
+                  وخطواته وتطبيقاته وأنواعه وملفاته وضبط الجودة.
+                </p>
+                <div class="product-preview">
+                  <span>سير العمل الكامل</span>
+                  <span>المصطلحات والملفات</span>
+                  <span>اختيار التقنية</span>
+                </div>
+                <div class="topic-card-footer">
+                  <span class="topic-card-cta">فتح الدليل العربي</span>
+                </div>
+              </a>
+
+              <a class="product-card" href="../real-time-pcr/">
+                <span class="topic-tag">Lecture</span>
+                <h3>صفحة <span class="term-ltr">Real-Time PCR</span></h3>
+                <p>
+                  شرح علمي منظم لمفاهيم <span class="term-ltr">Ct</span> والكيمياء
+                  الكاشفة والمنطق الكمي في <span class="term-ltr">qPCR</span>. الواجهة
+                  الحالية باللغة الإنجليزية.
+                </p>
+                <div class="product-preview">
+                  <span><span class="term-ltr">Ct</span> interpretation</span>
+                  <span><span class="term-ltr">SYBR</span> vs <span class="term-ltr">TaqMan</span></span>
+                  <span><span class="term-ltr">2^-ΔΔCt</span></span>
+                </div>
+                <div class="topic-card-footer">
+                  <span class="topic-card-cta">فتح صفحة <span class="term-ltr">RT-PCR</span></span>
+                </div>
+              </a>
+
+              <a class="product-card" href="../sequence-analysis/#overview">
+                <span class="topic-tag">Lecture</span>
+                <h3>شرح تحليل تسلسل <span class="term-ltr">Sanger</span></h3>
+                <p>
+                  صفحة تدريبية تشرح كيف ننتقل من القراءة الخام إلى تفسير واعٍ لنتائج
+                  <span class="term-ltr">BLAST</span>. الواجهة الحالية باللغة الإنجليزية.
+                </p>
+                <div class="product-preview">
+                  <span>تنظيف التسلسل</span>
+                  <span>سياق تصنيفي</span>
+                  <span>قراءة المحاذاة</span>
+                </div>
+                <div class="topic-card-footer">
+                  <span class="topic-card-cta">فتح الشرح</span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="analyze">
+          <div class="section-heading">
+            <span class="section-chip">حلّل</span>
+            <h2>انتقل مباشرة إلى الأدوات العملية</h2>
+            <p>
+              إذا كان هدفك إجراء حساب أو مراجعة محاذاة أو إخراج جداول جاهزة، فهذه
+              الأدوات هي نقطة الدخول الأسرع.
+            </p>
+          </div>
+
+          <div class="portal-group reveal">
+            <div class="portal-group-header">
+              <p class="eyebrow">أدوات عملية</p>
+              <h3>تحليل مباشر من داخل المتصفح</h3>
+              <p>
+                مخصصة للعمل الفعلي على البيانات التعليمية أو البحثية الأولية مع الحفاظ
+                على منطق علمي واضح داخل الواجهة.
+              </p>
+            </div>
+            <div class="portal-card-grid portal-card-grid-tools">
+              <a class="product-card product-card-accent" href="../real-time-pcr/#calculator">
+                <span class="topic-tag">Tool</span>
+                <h3>حاسبة التعبير الجيني</h3>
+                <p>
+                  تعيين الآبار واستيراد قيم <span class="term-ltr">Ct</span> وحساب
+                  <span class="term-ltr">2^-ΔΔCt</span> مع جداول وملخصات ورسوم بيانية.
+                </p>
+                <div class="product-preview">
+                  <span>خريطة 96 بئراً</span>
+                  <span>استيراد <span class="term-ltr">Ct</span></span>
+                  <span>إحصاءات ورسوم</span>
+                </div>
+                <div class="topic-card-footer">
+                  <span class="topic-card-cta">فتح الحاسبة</span>
+                </div>
+              </a>
+
+              <a class="product-card product-card-accent" href="../sequence-analysis/#analysis-tool">
+                <span class="topic-tag">Tool</span>
+                <h3>أداة محاذاة <span class="term-ltr">BLAST</span></h3>
+                <p>
+                  تنظيف تسلسل <span class="term-ltr">Sanger</span> والبحث في
+                  <span class="term-ltr">NCBI</span> ومراجعة التطابقات الأعلى بحسب
+                  التغطية والهوية وقيمة <span class="term-ltr">E-value</span>.
+                </p>
+                <div class="product-preview">
+                  <span><span class="term-ltr">Live BLAST</span></span>
+                  <span>ترتيب التطابقات</span>
+                  <span>جداول تقارير</span>
+                </div>
+                <div class="topic-card-footer">
+                  <span class="topic-card-cta">فتح أداة المحاذاة</span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="research">
+          <div class="section-heading">
+            <span class="section-chip">استخدم في البحث</span>
+            <h2>مخرجات أنظف للرسائل والتقارير والعرض الأكاديمي</h2>
+            <p>
+              تم تصميم الواجهة بحيث تبقى الجداول الرئيسية نظيفة، بينما تنتقل الجداول
+              التفصيلية والتصدير ونسخ النتائج إلى مساحات أكثر ملاءمة للكتابة العلمية.
+            </p>
+          </div>
+
+          <div class="research-grid reveal">
+            <article class="research-card">
+              <p class="eyebrow">جداول رسائل</p>
+              <h3>جداول تقريرية أكثر ترتيباً</h3>
+              <p>
+                صفحة تحليل التسلسل تفصل بين ترتيب التطابقات وبين الجداول المناسبة
+                للنسخ أو التصدير أو الإدراج في العمل الأكاديمي.
+              </p>
+              <div class="product-preview">
+                <span>Alignment summary</span>
+                <span>Nucleotide differences</span>
+                <span>Reference-based table</span>
+              </div>
+              <a class="hub-link" href="../sequence-analysis/#publication-report">فتح جداول التقارير</a>
+            </article>
+
+            <article class="research-card">
+              <p class="eyebrow">جودة التصدير</p>
+              <h3>نسخ وتصدير أوضح</h3>
+              <p>
+                أصبحت الجداول الطويلة أوضح على الهاتف، كما تبقى النسخ إلى
+                <span class="term-ltr">Word</span> أو التصدير إلى
+                <span class="term-ltr">CSV</span> أنظف للاستخدام الأكاديمي.
+              </p>
+              <div class="product-preview">
+                <span>Copy-friendly</span>
+                <span><span class="term-ltr">CSV</span> export</span>
+                <span>Print-aware</span>
+              </div>
+              <a class="hub-link" href="../sequence-analysis/#results">مراجعة النتائج</a>
+            </article>
+
+            <article class="research-card">
+              <p class="eyebrow">هيكل ثنائي اللغة</p>
+              <h3>مسار عربي ومسار إنجليزي</h3>
+              <p>
+                أصبح للمنصة مدخل عربي مستقل يسهّل الوصول إلى الدليل العربي وإلى
+                الصفحات والأدوات الإنجليزية من خلال بنية أوضح وأكثر اتساقاً.
+              </p>
+              <div class="product-preview">
+                <span>Arabic hub</span>
+                <span>Arabic <span class="term-ltr">NGS</span></span>
+                <span>English tools</span>
+              </div>
+              <a class="hub-link" href="../ar/">فتح الدليل العربي</a>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <p><strong>إعداد:</strong> Mahmood Al-Mualm</p>
+          <p><strong>الصفة:</strong> CEO of Wahj Al-DNA</p>
+          <p><strong>الجهة:</strong> Wahj Al-DNA</p>
+        </div>
+        <div>
+          <p>منصة تعليمية للشرح والتحليل والتدريب في الأحياء الجزيئية والجينوميات.</p>
+          <p>
+            هذه البوابة توفّر مساراً عربياً واضحاً مع الحفاظ على المصطلحات العلمية
+            الأساسية مثل <span class="term-ltr">BLAST</span> و<span class="term-ltr">PCR</span>
+            و<span class="term-ltr">FASTA</span> بصورة مقروءة.
+          </p>
+        </div>
+        <div class="footer-card">
+          <p><strong>القرّاء:</strong> <span id="footer-reader-count">جاري التحميل...</span></p>
+          <p>يتم حفظ عدد القرّاء المجهول خارج المتصفح وتحديثه تلقائياً.</p>
+        </div>
+      </footer>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="../script.js"></script>
+  </body>
+</html>

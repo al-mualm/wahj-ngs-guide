@@ -10,6 +10,7 @@ const {
   buildReferenceBasedChangeTableRows,
   buildPublicationTables,
   buildCopyPayloadFromTableData,
+  buildStandaloneHtmlDocument,
 } = publicationApi;
 
 function testDifferenceClassification() {
@@ -197,11 +198,25 @@ function testCopyPayloadIsClean() {
   assert.doesNotMatch(payload.text, /Copy table/i);
 }
 
+function testStandaloneHtmlReport() {
+  const html = buildStandaloneHtmlDocument({
+    caption: "Alignment summary for the selected BLAST hit",
+    columns: ["Parameter", "Value"],
+    rows: [["Sample no.", "5"]],
+  });
+
+  assert.match(html, /<!DOCTYPE html>/);
+  assert.match(html, /Alignment summary for the selected BLAST hit/);
+  assert.match(html, /<table>/);
+  assert.doesNotMatch(html, /Copy table/i);
+}
+
 testDifferenceClassification();
 testReverseCoordinateHandling();
 testNoDifferences();
 testPublicationTables();
 testReferenceBasedChangeTableRows();
 testCopyPayloadIsClean();
+testStandaloneHtmlReport();
 
 console.log("publication-tables tests passed");
