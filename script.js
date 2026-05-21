@@ -8,10 +8,10 @@ const readerIdStorageKey = "wahj-ngs-reader-id";
 const messages = {
   en: {
     readerReady:
-      "Site-wide anonymous reader count updates automatically. No personal information is collected.",
+      "Site-wide visit count updates automatically. No personal information is collected.",
     readerMissing: "Anonymous reader counter is not connected right now.",
     readerFallback:
-      "Site-wide reader count loaded, but this device could not update the counter right now.",
+      "Site-wide visit count loaded, but this device could not update the counter right now.",
     readerError: "The anonymous reader counter is temporarily unavailable.",
     commentLoading: "Loading recent comments...",
     commentReady: "Comments load automatically from the live site backend.",
@@ -26,10 +26,10 @@ const messages = {
   },
   ar: {
     readerReady:
-      "يتم تحديث عداد القرّاء المجهول على مستوى المنصة كلها تلقائياً من دون جمع أي معلومات شخصية.",
+      "يتم تحديث عداد الزيارات المجهول على مستوى المنصة كلها تلقائياً من دون جمع أي معلومات شخصية.",
     readerMissing: "عداد القرّاء غير مرتبط حالياً بالخدمة الخلفية.",
     readerFallback:
-      "تم تحميل عدد القرّاء على مستوى المنصة، لكن هذا الجهاز لم يتمكن من تحديث العداد في هذه اللحظة.",
+      "تم تحميل عدد الزيارات على مستوى المنصة، لكن هذا الجهاز لم يتمكن من تحديث العداد في هذه اللحظة.",
     readerError: "عداد القرّاء المجهول غير متاح مؤقتاً.",
     commentLoading: "يتم الآن تحميل أحدث التعليقات...",
     commentReady: "يتم تحميل التعليقات تلقائياً من الخدمة الخلفية للموقع.",
@@ -54,6 +54,7 @@ const readerCountElements = [
   document.querySelector("#reader-count"),
   document.querySelector("#footer-reader-count"),
 ].filter(Boolean);
+const readerLabelElements = Array.from(document.querySelectorAll(".reader-label"));
 const readerNote = document.querySelector("#reader-note");
 const commentForm = document.querySelector("#comment-form");
 const commentSubmitButton = document.querySelector("#comment-submit");
@@ -68,6 +69,13 @@ function setReaderCount(value) {
   const text = typeof value === "number" ? value.toLocaleString() : String(value);
   readerCountElements.forEach((element) => {
     element.textContent = text;
+  });
+}
+
+function setReaderLabels() {
+  const nextLabel = pageLanguage === "ar" ? "الزيارات" : "Visits";
+  readerLabelElements.forEach((element) => {
+    element.textContent = nextLabel;
   });
 }
 
@@ -135,7 +143,8 @@ function normalizeStats(stats) {
 
 function renderReaderStats(stats) {
   const normalizedStats = normalizeStats(stats);
-  setReaderCount(normalizedStats.uniqueVisitors);
+  setReaderCount(normalizedStats.totalVisits);
+  return normalizedStats;
 }
 
 function loadJsonp(url, callbackName) {
@@ -198,6 +207,8 @@ async function initializeReaderCounter() {
     return;
   }
 
+  setReaderLabels();
+
   if (!backendApiUrl) {
     setReaderCount("N/A");
     setReaderNote(getMessage("readerMissing"), "error");
@@ -213,16 +224,24 @@ async function initializeReaderCounter() {
       site: siteLabel,
     });
 
-    renderReaderStats(visitPayload.stats);
-    setReaderNote(getMessage("readerReady"));
+    const stats = renderReaderStats(visitPayload.stats);
+    setReaderNote(
+      `${
+        getMessage("readerReady")
+      } ${pageLanguage === "ar" ? "عدد القرّاء الفريدين:" : "Unique readers:"} ${stats.uniqueVisitors.toLocaleString()}.`
+    );
   } catch (visitError) {
     try {
       const statsPayload = await requestBackendAction("stats", {
         site: siteLabel,
       });
 
-      renderReaderStats(statsPayload.stats);
-      setReaderNote(getMessage("readerFallback"));
+      const stats = renderReaderStats(statsPayload.stats);
+      setReaderNote(
+        `${
+          getMessage("readerFallback")
+        } ${pageLanguage === "ar" ? "عدد القرّاء الفريدين:" : "Unique readers:"} ${stats.uniqueVisitors.toLocaleString()}.`
+      );
     } catch (statsError) {
       setReaderCount("Unavailable");
       setReaderNote(getMessage("readerError"), "error");
