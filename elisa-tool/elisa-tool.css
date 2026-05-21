@@ -1,0 +1,346 @@
+.elisa-suite-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: clamp(1.4rem, 3vw, 2.8rem);
+  align-items: start;
+}
+
+.elisa-workflow-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.elisa-workflow-list div {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(23, 39, 57, 0.08);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.elisa-workflow-list strong {
+  color: var(--blue-deep);
+}
+
+.elisa-workflow-list span {
+  color: var(--ink-soft);
+}
+
+.elisa-tool-grid,
+.elisa-meta-grid,
+.elisa-results-grid,
+.stats-group-name-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.elisa-tool-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.elisa-meta-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+.elisa-results-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.elisa-tool-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.elisa-choice-stack,
+.curve-choice-grid {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.curve-choice-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.choice-tile,
+.curve-card {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1rem;
+  border-radius: 22px;
+  border: 1px solid rgba(23, 39, 57, 0.1);
+  background: rgba(255, 255, 255, 0.88);
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.choice-tile input,
+.curve-card input,
+.elisa-checkbox input {
+  margin: 0;
+}
+
+.choice-tile span,
+.curve-card strong,
+.curve-card small,
+.elisa-checkbox span {
+  display: block;
+}
+
+.choice-tile strong,
+.curve-card strong {
+  color: var(--ink);
+}
+
+.choice-tile small,
+.curve-card small,
+.table-note {
+  color: var(--ink-soft);
+}
+
+.curve-card-graphic {
+  display: block;
+  min-height: 96px;
+  border-radius: 16px;
+  border: 1px solid rgba(23, 39, 57, 0.09);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(235, 243, 248, 0.92));
+  padding: 0.4rem;
+}
+
+.curve-card-curved {
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(235, 243, 248, 0.92)),
+    radial-gradient(circle at right bottom, rgba(47, 149, 184, 0.08), transparent 38%);
+}
+
+.curve-card-linear {
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(235, 243, 248, 0.92)),
+    radial-gradient(circle at right bottom, rgba(199, 168, 96, 0.08), transparent 38%);
+}
+
+.curve-card-graphic svg {
+  width: 100%;
+  height: 100%;
+}
+
+.curve-card-graphic line {
+  stroke: #7f91a4;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.curve-card-graphic path {
+  fill: none;
+  stroke: #184f67;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.choice-tile:hover,
+.choice-tile:focus-within,
+.curve-card:hover,
+.curve-card:focus-within {
+  border-color: rgba(47, 149, 184, 0.3);
+  box-shadow: 0 18px 34px rgba(16, 34, 52, 0.08);
+  transform: translateY(-2px);
+}
+
+.curve-card input:checked + .curve-card-graphic,
+.choice-tile input:checked + span,
+.elisa-checkbox input:checked + span {
+  outline: 2px solid rgba(47, 149, 184, 0.3);
+}
+
+.curve-card input:checked ~ strong,
+.curve-card input:checked ~ small {
+  color: var(--blue-deep);
+}
+
+.elisa-advanced-details {
+  border-top: 1px dashed rgba(23, 39, 57, 0.15);
+  padding-top: 0.8rem;
+}
+
+.elisa-checkbox {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.8rem;
+  align-items: start;
+}
+
+.tool-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.table-scroller {
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+}
+
+.compact-table th,
+.compact-table td {
+  padding: 0.7rem 0.85rem;
+  white-space: nowrap;
+}
+
+.compact-table td input,
+.compact-table td select {
+  min-width: 6.5rem;
+}
+
+.table-row-action {
+  width: auto;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.88rem;
+}
+
+.elisa-actions-row {
+  margin-top: 0.2rem;
+}
+
+.is-hidden {
+  display: none !important;
+}
+
+.result-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.result-kpi {
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(23, 39, 57, 0.08);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.result-kpi span {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+}
+
+.result-kpi strong {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--blue-deep);
+  font-size: 1.1rem;
+}
+
+.curve-plot-shell {
+  min-height: 360px;
+}
+
+.curve-plot-shell svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.curve-plot-axis {
+  stroke: #6d7f92;
+  stroke-width: 2.6;
+}
+
+.curve-plot-grid {
+  stroke: rgba(23, 39, 57, 0.08);
+  stroke-width: 1;
+}
+
+.curve-plot-line {
+  stroke: #184f67;
+  stroke-width: 4.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.curve-plot-point {
+  fill: #2f95b8;
+  stroke: #ffffff;
+  stroke-width: 2.4;
+}
+
+.curve-plot-text {
+  fill: #172739;
+  font: 600 14px/1.3 "Avenir Next", "Aptos", "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+.curve-plot-note {
+  fill: #57697d;
+  font: 500 12px/1.3 "Avenir Next", "Aptos", "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+.stats-group-name-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.methods-text-card {
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(23, 39, 57, 0.08);
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--ink);
+}
+
+@media (max-width: 1080px) {
+  .elisa-suite-hero,
+  .elisa-tool-grid,
+  .elisa-meta-grid,
+  .elisa-results-grid,
+  .curve-choice-grid,
+  .result-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .tool-bar {
+    flex-direction: column;
+  }
+
+  .selector-actions {
+    width: 100%;
+  }
+
+  .selector-actions .secondary-action,
+  .selector-actions .primary-action,
+  .table-row-action {
+    width: 100%;
+  }
+}
+
+@media print {
+  .site-header,
+  .site-footer,
+  .nav-toggle,
+  .primary-nav,
+  .selector-actions,
+  .tool-bar button,
+  #show-statistics,
+  #load-example,
+  #clear-elisa,
+  #add-standard-row,
+  #add-sample-row,
+  #run-statistics {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+  }
+
+  .callout-box,
+  .figure-card {
+    box-shadow: none !important;
+    border-color: #cfd8e3 !important;
+  }
+}

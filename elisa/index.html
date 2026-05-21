@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ELISA: Beginner Teaching Guide | Wahj Al-DNA</title>
+    <meta
+      name="description"
+      content="A beginner-friendly Wahj Al-DNA teaching guide to ELISA, optical density, standard curves, and concentration calculation."
+    />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="elisa.css" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="site-header site-header-compact" id="top">
+        <div class="brand-lockup">
+          <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Educational handbook</p>
+            <p class="brand-title">Wahj Al-DNA</p>
+          </div>
+        </div>
+        <div class="reader-badge" aria-live="polite">
+          <p class="reader-label">Visits</p>
+          <p class="reader-count"><span id="reader-count">Loading...</span></p>
+          <p class="reader-note" id="reader-note">
+            Site-wide anonymous visit count updates automatically. No personal information is
+            collected.
+          </p>
+        </div>
+        <a class="hub-link" href="../">All topics</a>
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="primary-nav"
+        >
+          Menu
+        </button>
+        <nav class="primary-nav" id="primary-nav" aria-label="Primary">
+          <a href="#intro">Intro</a>
+          <a href="#formats">Formats</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#curves">Curves</a>
+          <a href="#calculation">Calculation</a>
+          <a href="../elisa-tool/">Tool</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero section elisa-hero" id="intro">
+          <div class="hero-copy reveal">
+            <span class="section-chip">Immunoassay teaching guide</span>
+            <h1>ELISA: A Beginner-Friendly Guide to Signal, Standard Curves, and Concentration</h1>
+            <p class="hero-lead">
+              This page explains ELISA from the measurement logic outward. It first shows what
+              creates the signal, then explains what optical density
+              <strong>(OD)</strong> means, and finally shows how OD is converted into
+              concentration through a standard curve.
+            </p>
+
+            <div class="author-panel">
+              <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="author-logo" />
+              <div>
+                <p class="meta-label">Prepared by</p>
+                <h2>Mahmood Al-Mualm</h2>
+                <p>CEO of Wahj Al-DNA</p>
+                <p class="author-link">
+                  <a href="https://wahj-dna.com.iq/en/home/" target="_blank" rel="noreferrer"
+                    >wahj-dna.com.iq/en/home</a
+                  >
+                </p>
+              </div>
+            </div>
+
+            <div class="selector-note">
+              <p>
+                <strong>What students should remember first:</strong> OD is not the
+                concentration itself. OD is the color signal measured by the plate reader. The
+                concentration is estimated only after that signal is compared with standards of
+                known concentration.
+              </p>
+            </div>
+
+            <div class="selector-actions">
+              <a class="primary-action hub-link hub-link-primary" href="../elisa-tool/"
+                >Open ELISA tool</a
+              >
+              <a class="secondary-action" href="#formats">Start the lecture</a>
+            </div>
+          </div>
+
+          <div class="hero-visual reveal">
+            <figure class="figure-card elisa-figure">
+              <div class="figure-heading">
+                <p class="figure-label">Figure 1</p>
+                <h3>The central ELISA idea</h3>
+              </div>
+              <svg viewBox="0 0 680 360" class="elisa-inline-svg" role="img" aria-label="Diagram showing signal creation and standard-curve logic in ELISA">
+                <defs>
+                  <linearGradient id="elisaPlateFill" x1="0%" x2="100%" y1="0%" y2="100%">
+                    <stop offset="0%" stop-color="#ffffff" />
+                    <stop offset="100%" stop-color="#e7f1f7" />
+                  </linearGradient>
+                </defs>
+                <rect x="24" y="36" width="180" height="120" rx="22" fill="url(#elisaPlateFill)" stroke="#b8c7d3" />
+                <text x="114" y="66" text-anchor="middle" class="elisa-figure-text elisa-figure-text-bold">Binding step</text>
+                <circle cx="72" cy="110" r="14" fill="#c96a58" />
+                <circle cx="114" cy="98" r="14" fill="#c96a58" />
+                <circle cx="154" cy="118" r="14" fill="#c96a58" />
+                <path d="M58 132 h110" stroke="#184f67" stroke-width="7" stroke-linecap="round" />
+                <path d="M58 142 h110" stroke="#184f67" stroke-width="7" stroke-linecap="round" opacity="0.55" />
+                <text x="114" y="190" text-anchor="middle" class="elisa-figure-note">More target can mean more bound signal</text>
+
+                <path d="M218 96 h66" stroke="#184f67" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow-end)" />
+
+                <rect x="298" y="36" width="150" height="120" rx="22" fill="#ffffff" stroke="#b8c7d3" />
+                <text x="373" y="66" text-anchor="middle" class="elisa-figure-text elisa-figure-text-bold">Color signal</text>
+                <rect x="326" y="116" width="94" height="22" rx="11" fill="#c7a860" opacity="0.35" />
+                <rect x="326" y="92" width="54" height="22" rx="11" fill="#c7a860" opacity="0.75" />
+                <rect x="326" y="68" width="22" height="22" rx="11" fill="#c7a860" />
+                <text x="373" y="190" text-anchor="middle" class="elisa-figure-note">The enzyme reaction produces measurable color</text>
+
+                <path d="M458 96 h70" stroke="#184f67" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow-end)" />
+
+                <rect x="540" y="36" width="116" height="120" rx="22" fill="#ffffff" stroke="#b8c7d3" />
+                <text x="598" y="66" text-anchor="middle" class="elisa-figure-text elisa-figure-text-bold">OD reading</text>
+                <path d="M564 136 l18 -42 l18 24 l18 -38" fill="none" stroke="#2f95b8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+                <line x1="560" y1="136" x2="632" y2="136" stroke="#7f91a4" stroke-width="3" />
+                <text x="598" y="190" text-anchor="middle" class="elisa-figure-note">The plate reader converts color into OD</text>
+
+                <rect x="80" y="238" width="520" height="88" rx="22" fill="#ffffff" stroke="#b8c7d3" />
+                <text x="104" y="270" class="elisa-figure-text elisa-figure-text-bold">What this means</text>
+                <text x="104" y="298" class="elisa-figure-note">
+                  ELISA quantification always needs standards. The sample OD must be placed onto a
+                  curve built from known concentrations before the concentration is reported.
+                </text>
+
+                <defs>
+                  <marker id="arrow-end" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 z" fill="#184f67" />
+                  </marker>
+                </defs>
+              </svg>
+              <figcaption>
+                ELISA quantification is a sequence of linked steps: binding produces signal, the
+                reader measures OD, and the standards convert OD into concentration.
+              </figcaption>
+              <p class="interpretation">
+                <strong>Student takeaway:</strong> if the standards are poor, the concentration
+                values will also be poor, even if the plate reader produced a clear OD number.
+              </p>
+            </figure>
+          </div>
+        </section>
+
+        <section class="section" id="essentials">
+          <div class="section-heading reveal">
+            <span class="section-chip">1. First principles</span>
+            <h2>What ELISA measures and why it matters</h2>
+            <p>
+              ELISA is an antibody-based method used to detect or quantify a target, such as a
+              protein, hormone, cytokine, antigen, or antibody. In most teaching and research
+              settings, the final quantitative result is estimated from the strength of a color
+              signal read as optical density.
+            </p>
+          </div>
+
+          <div class="card-grid three-column reveal">
+            <article class="info-card">
+              <span class="card-badge">A</span>
+              <h3>It is a binding assay</h3>
+              <p>
+                The target is recognized by an antibody system. The quality of that binding affects
+                everything that follows.
+              </p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">B</span>
+              <h3>It is a signal assay</h3>
+              <p>
+                An enzyme converts a substrate into a detectable color change. That color is what
+                the plate reader measures.
+              </p>
+            </article>
+            <article class="info-card">
+              <span class="card-badge">C</span>
+              <h3>It is a curve-based assay</h3>
+              <p>
+                The unknown concentration is not guessed from OD directly. It is interpolated from a
+                standard curve built from known standards.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="formats">
+          <div class="section-heading reveal">
+            <span class="section-chip">2. Assay formats</span>
+            <h2>The four main ELISA formats beginners should know</h2>
+            <p>
+              Most students understand ELISA more quickly when they learn <strong>sandwich
+              ELISA</strong> first, then compare it with the other formats. Sandwich ELISA is also
+              the easiest format for understanding concentration estimation from a standard curve.
+            </p>
+          </div>
+
+          <div class="card-grid two-column reveal">
+            <article class="info-card elisa-format-card">
+              <div class="topic-selector-meta">
+                <span>Direct</span>
+                <span>Simple setup</span>
+              </div>
+              <h3>Direct ELISA</h3>
+              <p>
+                The target is immobilized and detected directly with a labeled antibody. The setup
+                is simple, but sensitivity is often lower than in sandwich ELISA.
+              </p>
+            </article>
+            <article class="info-card elisa-format-card">
+              <div class="topic-selector-meta">
+                <span>Indirect</span>
+                <span>Antibody measurement</span>
+              </div>
+              <h3>Indirect ELISA</h3>
+              <p>
+                A primary antibody binds the target and a labeled secondary antibody generates the
+                signal. This is common when the assay is measuring antibodies in the sample.
+              </p>
+            </article>
+            <article class="info-card elisa-format-card">
+              <div class="topic-selector-meta">
+                <span>Sandwich</span>
+                <span>Best first model</span>
+              </div>
+              <h3>Sandwich ELISA</h3>
+              <p>
+                A capture antibody binds the analyte and a second antibody detects it. In most
+                kits, more target means more signal and a higher OD.
+              </p>
+            </article>
+            <article class="info-card elisa-format-card">
+              <div class="topic-selector-meta">
+                <span>Competitive</span>
+                <span>Inverse signal</span>
+              </div>
+              <h3>Competitive ELISA</h3>
+              <p>
+                This is the important exception. In competitive ELISA, more target can lead to less
+                signal. Students must remember that the curve direction is reversed.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="workflow">
+          <div class="section-heading reveal">
+            <span class="section-chip">3. Plate workflow</span>
+            <h2>How a quantitative ELISA usually proceeds</h2>
+            <p>
+              Exact steps differ between kits, but the plate logic usually follows the same order.
+            </p>
+          </div>
+
+          <div class="elisa-step-grid">
+            <article class="workflow-card reveal">
+              <span>1</span>
+              <h3>Prepare standards and samples</h3>
+              <p>Standards provide the known concentrations needed to build the curve.</p>
+            </article>
+            <article class="workflow-card reveal">
+              <span>2</span>
+              <h3>Bind the target</h3>
+              <p>Capture chemistry or coated antigen/antibody anchors the assay logic.</p>
+            </article>
+            <article class="workflow-card reveal">
+              <span>3</span>
+              <h3>Wash and block</h3>
+              <p>These steps reduce background and improve signal specificity.</p>
+            </article>
+            <article class="workflow-card reveal">
+              <span>4</span>
+              <h3>Add detection system</h3>
+              <p>The labeled antibody or enzyme-linked step prepares the plate for color formation.</p>
+            </article>
+            <article class="workflow-card reveal">
+              <span>5</span>
+              <h3>Add substrate and stop</h3>
+              <p>The enzyme reaction generates color, which is then stopped at the correct time.</p>
+            </article>
+            <article class="workflow-card reveal">
+              <span>6</span>
+              <h3>Read OD and analyze</h3>
+              <p>OD values are interpreted only after the standard curve is fitted correctly.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="curves">
+          <div class="section-heading reveal">
+            <span class="section-chip">4. Choosing the curve</span>
+            <h2>How a beginner should choose the standard-curve shape</h2>
+            <p>
+              Most readers do not need to think in raw model names first. They should start from
+              the kit leaflet. Look at the standard plot shown by the kit and match the shape.
+            </p>
+          </div>
+
+          <div class="card-grid three-column reveal">
+            <article class="info-card elisa-choice-card">
+              <span class="card-badge">Recommended for most kits</span>
+              <h3>Curved ELISA plot</h3>
+              <svg viewBox="0 0 220 140" class="elisa-mini-plot" aria-hidden="true">
+                <line x1="28" y1="112" x2="194" y2="112" />
+                <line x1="28" y1="18" x2="28" y2="112" />
+                <path d="M32 106 C54 92, 82 68, 112 50 S170 22, 190 20" />
+              </svg>
+              <p>
+                Choose this when the leaflet shows a smooth ELISA-type curve. Behind the scenes,
+                the tool uses a logistic curve that is suitable for most quantitative kits.
+              </p>
+            </article>
+            <article class="info-card elisa-choice-card">
+              <span class="card-badge">Use only when the leaflet looks straight</span>
+              <h3>Straight or nearly straight plot</h3>
+              <svg viewBox="0 0 220 140" class="elisa-mini-plot" aria-hidden="true">
+                <line x1="28" y1="112" x2="194" y2="112" />
+                <line x1="28" y1="18" x2="28" y2="112" />
+                <path d="M36 104 L188 24" />
+              </svg>
+              <p>
+                Choose this only when the leaflet plot is almost straight across the working range.
+                This is common in a limited range or in some simplified teaching examples.
+              </p>
+            </article>
+            <article class="info-card elisa-choice-card">
+              <span class="card-badge">Advanced</span>
+              <h3>Asymmetric curved plot</h3>
+              <svg viewBox="0 0 220 140" class="elisa-mini-plot" aria-hidden="true">
+                <line x1="28" y1="112" x2="194" y2="112" />
+                <line x1="28" y1="18" x2="28" y2="112" />
+                <path d="M32 108 C54 88, 82 56, 116 42 S170 30, 188 18" />
+              </svg>
+              <p>
+                Use this only if the kit documentation explicitly states that an asymmetric
+                five-parameter curve is preferred. Most beginners should leave this option off.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="calculation">
+          <div class="section-heading reveal">
+            <span class="section-chip">5. Calculation logic</span>
+            <h2>How OD becomes concentration</h2>
+            <p>
+              The conversion follows a fixed logic. If a student understands these steps, the
+              calculator becomes much easier to trust and easier to troubleshoot.
+            </p>
+          </div>
+
+          <div class="card-grid two-column reveal">
+            <article class="callout-box formula-callout">
+              <h3>Step-by-step calculation order</h3>
+              <div class="formula-grid">
+                <p>1. Read the standards and unknown sample ODs.</p>
+                <p>2. Apply blank subtraction only if the kit protocol requires it.</p>
+                <p>3. Average duplicate or triplicate wells and inspect variation.</p>
+                <p>4. Fit the standard curve with the shape that matches the kit leaflet.</p>
+                <p>5. Interpolate each unknown sample from that curve.</p>
+                <p>6. Multiply by the dilution factor to obtain the final reported concentration.</p>
+              </div>
+            </article>
+            <article class="callout-box">
+              <h3>Common mistakes students make</h3>
+              <div class="mini-table">
+                <p><strong>Using OD as concentration:</strong> OD is only the signal.</p>
+                <p><strong>Ignoring dilution:</strong> the calculated value must be scaled by the dilution factor.</p>
+                <p><strong>Using the wrong curve shape:</strong> the plot should match the kit leaflet.</p>
+                <p><strong>Ignoring sample range:</strong> values above or below the standard range should be flagged.</p>
+                <p><strong>Forgetting competitive inversion:</strong> some assays have lower OD at higher concentration.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="takeaway">
+          <div class="section-heading reveal">
+            <span class="section-chip">6. Practical handoff</span>
+            <h2>Open the ELISA suite when you are ready to calculate</h2>
+            <p>
+              The practical tool is designed for non-specialists. It lets the reader choose the
+              curve shape in plain language, generate the standard plot, calculate unknown
+              concentrations, and then open a guided statistics section for group comparison.
+            </p>
+          </div>
+
+          <div class="elisa-cta-grid reveal">
+            <article class="callout-box">
+              <h3>Lecture outcome</h3>
+              <p>
+                After this page, the reader should know what ELISA measures, what OD means, why
+                standards are required, and why the curve shape matters.
+              </p>
+            </article>
+            <article class="callout-box">
+              <h3>Tool outcome</h3>
+              <p>
+                The tool converts those concepts into action: standard fitting, concentration
+                calculation, statistical comparison, and methods-ready wording.
+              </p>
+              <div class="selector-actions">
+                <a class="primary-action hub-link hub-link-primary" href="../elisa-tool/"
+                  >Open Wahj ELISA Learning and Analysis Suite</a
+                >
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <p><strong>Author:</strong> Mahmood Al-Mualm</p>
+          <p><strong>Title:</strong> CEO of Wahj Al-DNA</p>
+          <p><strong>Organization:</strong> Wahj Al-DNA</p>
+        </div>
+        <div>
+          <p>Educational resource for introductory ELISA learning and quantitative analysis logic.</p>
+          <p class="home-footer-note">
+            The same site-wide anonymous visit counter is used across the hub, lecture pages, and
+            tool pages.
+          </p>
+        </div>
+        <div class="footer-card">
+          <p><strong>Visits:</strong> <span id="footer-reader-count">Loading...</span></p>
+          <p>This count is stored outside the browser and updates for total site visits.</p>
+        </div>
+      </footer>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="../script.js"></script>
+  </body>
+</html>

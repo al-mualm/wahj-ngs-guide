@@ -6,7 +6,7 @@
     <title>بوابة Wahj Al-DNA التعليمية</title>
     <meta
       name="description"
-      content="بوابة Wahj Al-DNA التعليمية: NGS وSanger sequencing وReal-Time PCR مع مسار واضح بين الشرح والأدوات العملية."
+      content="بوابة Wahj Al-DNA التعليمية: NGS وSanger sequencing وReal-Time PCR وELISA مع مسار واضح بين الشرح والأدوات العملية."
     />
     <script>
       document.documentElement.classList.add("js");
@@ -42,9 +42,10 @@
             <span class="section-chip">اختر الموضوع أولاً ثم افتح صفحة الشرح أو الصفحة العملية</span>
             <h1>بوابة Wahj Al-DNA للتعلّم والتحليل</h1>
             <p class="hero-lead">
-              اختر واحداً من ثلاثة موضوعات رئيسية: <span class="term-ltr">NGS</span>،
-              <span class="term-ltr">Sanger sequencing</span>، أو
-              <span class="term-ltr">Real-Time PCR</span>. بعد الاختيار ستظهر لك بطاقات
+              اختر واحداً من أربعة موضوعات رئيسية: <span class="term-ltr">NGS</span>،
+              <span class="term-ltr">Sanger sequencing</span>،
+              <span class="term-ltr">Real-Time PCR</span>، أو
+              <span class="term-ltr">Wahj ELISA Learning and Analysis Suite</span>. بعد الاختيار ستظهر لك بطاقات
               الدخول المباشر المناسبة لهذا الموضوع.
             </p>
             <div class="selector-note">
@@ -64,7 +65,9 @@
             <h2>اختر الموضوع</h2>
             <p>
               الواجهة الأولى بسيطة عمداً: <strong><span class="term-ltr">Next-Generation Sequencing</span></strong>،
-              <strong><span class="term-ltr">Sanger sequencing</span></strong>، و<strong><span class="term-ltr">Real-Time PCR</span></strong>.
+              <strong><span class="term-ltr">Sanger sequencing</span></strong>،
+              <strong><span class="term-ltr">Real-Time PCR</span></strong>،
+              و<strong><span class="term-ltr">Wahj ELISA Learning and Analysis Suite</span></strong>.
             </p>
           </div>
 
@@ -125,6 +128,25 @@
                 <span><span class="term-ltr">2^-ΔΔCt</span></span>
               </div>
             </button>
+
+            <button
+              class="topic-selector-card"
+              type="button"
+              data-topic-select="elisa"
+              aria-pressed="false"
+            >
+              <span class="topic-tag">Topic</span>
+              <h3><span class="term-ltr">Wahj ELISA Learning and Analysis Suite</span></h3>
+              <p>
+                فهم <span class="term-ltr">ELISA</span> من الإشارة وقراءة
+                <span class="term-ltr">OD</span> إلى المنحنى القياسي وحساب التركيز والتحليل الإحصائي.
+              </p>
+              <div class="topic-selector-meta">
+                <span><span class="term-ltr">OD</span></span>
+                <span>منحنى قياسي</span>
+                <span>إحصاء</span>
+              </div>
+            </button>
           </div>
         </section>
 
@@ -133,7 +155,7 @@
             <span class="section-chip" id="selection-step-chip">الخطوة 2</span>
             <h2 id="selection-title">اختر الموضوع أولاً</h2>
             <p id="selection-copy">
-              بعد الضغط على واحدة من البطاقات الثلاث في الأعلى ستظهر هنا بطاقات الدخول
+              بعد الضغط على واحدة من البطاقات الأربع في الأعلى ستظهر هنا بطاقات الدخول
               المباشر للشرح والصفحة العملية.
             </p>
           </div>
@@ -143,7 +165,8 @@
               <div class="topic-placeholder">
                 اختر <strong><span class="term-ltr">Next-Generation Sequencing</span></strong>
                 أو <strong><span class="term-ltr">Sanger sequencing</span></strong> أو
-                <strong><span class="term-ltr">Real-Time PCR</span></strong> للمتابعة.
+                <strong><span class="term-ltr">Real-Time PCR</span></strong> أو
+                <strong><span class="term-ltr">Wahj ELISA Learning and Analysis Suite</span></strong> للمتابعة.
               </div>
             </div>
           </div>
@@ -165,7 +188,7 @@
         </div>
         <div class="footer-card">
           <p><strong>الزيارات:</strong> <span id="footer-reader-count">جاري التحميل...</span></p>
-          <p>يتم تحديث هذا العداد للمستخدمين الفريدين من دون تخزين بيانات شخصية.</p>
+          <p>يتم تحديث هذا العداد لإجمالي زيارات المنصة من دون تخزين بيانات شخصية.</p>
         </div>
       </footer>
     </div>
@@ -250,6 +273,28 @@
               },
             ],
           },
+          elisa: {
+            title: "Wahj ELISA Learning and Analysis Suite",
+            copy: "افتح صفحة شرح ELISA أو انتقل مباشرة إلى أداة المنحنى القياسي وحساب التركيز. الواجهة الحالية باللغة الإنجليزية.",
+            cards: [
+              {
+                badge: "Lecture",
+                title: "شرح ELISA",
+                description:
+                  "تعرف على معنى OD وكيف يعمل المنحنى القياسي وكيف يتم تحويل الإشارة إلى تركيز. الواجهة الحالية باللغة الإنجليزية.",
+                href: "../elisa/",
+                chips: ["Signal", "OD", "Standard curve"],
+              },
+              {
+                badge: "Tool",
+                title: "Wahj ELISA Learning and Analysis Suite",
+                description:
+                  "أدخل المعايير والعينات المجهولة وأنشئ المعادلة واحسب التركيز ثم افتح قسم الإحصاء الموجّه. الواجهة الحالية باللغة الإنجليزية.",
+                href: "../elisa-tool/",
+                chips: ["Curve fit", "Concentration", "Statistics"],
+              },
+            ],
+          },
         };
 
         function renderTopic(topicKey) {
@@ -291,6 +336,11 @@
             });
           });
         });
+
+        const topicFromHash = window.location.hash.replace("#", "");
+        if (topics[topicFromHash]) {
+          renderTopic(topicFromHash);
+        }
       })();
     </script>
   </body>

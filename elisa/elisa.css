@@ -1,0 +1,76 @@
+.elisa-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+  gap: clamp(1.4rem, 3vw, 2.8rem);
+  align-items: start;
+}
+
+.elisa-inline-svg {
+  width: 100%;
+  height: auto;
+}
+
+.elisa-figure {
+  margin: 0;
+}
+
+.elisa-figure-text {
+  fill: #172739;
+  font: 600 15px/1.3 "Avenir Next", "Aptos", "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+.elisa-figure-text-bold {
+  font-weight: 800;
+}
+
+.elisa-figure-note {
+  fill: #57697d;
+  font: 500 13px/1.35 "Avenir Next", "Aptos", "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+.elisa-format-card,
+.elisa-choice-card {
+  align-content: start;
+}
+
+.elisa-step-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.elisa-choice-card .card-badge {
+  width: fit-content;
+  margin-bottom: 0.45rem;
+}
+
+.elisa-mini-plot {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  margin: 0.25rem 0 0.4rem;
+}
+
+.elisa-mini-plot line,
+.elisa-mini-plot path {
+  stroke: #184f67;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.elisa-cta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 1080px) {
+  .elisa-hero,
+  .elisa-step-grid,
+  .elisa-cta-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

@@ -6,7 +6,7 @@
     <title>Wahj Molecular Biology Learning Hub</title>
     <meta
       name="description"
-      content="A structured Wahj Al-DNA learning hub for Next-Generation Sequencing, Sanger sequencing, Real-Time PCR, BLAST alignment, and gene expression analysis."
+      content="A structured Wahj Al-DNA learning hub for Next-Generation Sequencing, Sanger sequencing, Real-Time PCR, ELISA learning, BLAST alignment, and gene expression analysis."
     />
     <script>
       document.documentElement.classList.add("js");
@@ -18,6 +18,7 @@
         "#ngs",
         "#sanger",
         "#rt-pcr",
+        "#elisa",
       ]);
       if (
         window.location.hash &&
@@ -59,7 +60,7 @@
             <span class="section-chip">Learn first, then open the working page you need</span>
             <h1>Wahj Molecular Biology Learning Hub</h1>
             <p class="hero-lead">
-              Choose one of the three core topics below. After you select a topic, the hub
+              Choose one of the four core topics below. After you select a topic, the hub
               will show the best direct entry cards for that topic, including the lecture page
               and the related practical page when available.
             </p>
@@ -80,7 +81,8 @@
             <h2>Select the topic</h2>
             <p>
               The homepage is intentionally simple: <strong>Next-Generation Sequencing</strong>,
-              <strong>Sanger sequencing</strong>, and <strong>Real-Time PCR</strong>.
+              <strong>Sanger sequencing</strong>, <strong>Real-Time PCR</strong>, and
+              <strong>Wahj ELISA Learning and Analysis Suite</strong>.
             </p>
           </div>
 
@@ -141,6 +143,25 @@
                 <span>2^-ΔΔCt</span>
               </div>
             </button>
+
+            <button
+              class="topic-selector-card"
+              type="button"
+              data-topic-select="elisa"
+              aria-pressed="false"
+            >
+              <span class="topic-tag">Topic</span>
+              <h3>Wahj ELISA Learning and Analysis Suite</h3>
+              <p>
+                Study ELISA from signal generation to OD interpretation, then open the
+                concentration and statistics workflow built around the standard curve.
+              </p>
+              <div class="topic-selector-meta">
+                <span>OD</span>
+                <span>Standard curve</span>
+                <span>Statistics</span>
+              </div>
+            </button>
           </div>
         </section>
 
@@ -149,7 +170,7 @@
             <span class="section-chip" id="selection-step-chip">Step 2</span>
             <h2 id="selection-title">Choose a topic first</h2>
             <p id="selection-copy">
-              After you click one of the three topic cards, the direct lecture and practical
+              After you click one of the four topic cards, the direct lecture and practical
               entry cards will appear here.
             </p>
           </div>
@@ -158,7 +179,8 @@
             <div class="topic-selection-grid" id="selection-options">
               <div class="topic-placeholder">
                 Select <strong>Next-Generation Sequencing</strong>,
-                <strong>Sanger sequencing</strong>, or <strong>Real-Time PCR</strong> to
+                <strong>Sanger sequencing</strong>, <strong>Real-Time PCR</strong>, or
+                <strong>Wahj ELISA Learning and Analysis Suite</strong> to
                 continue.
               </div>
             </div>
@@ -181,7 +203,7 @@
         </div>
         <div class="footer-card">
           <p><strong>Visits:</strong> <span id="footer-reader-count">Loading...</span></p>
-          <p>This count is stored outside the browser and updates for unique readers.</p>
+          <p>This count is stored outside the browser and updates for total site visits.</p>
         </div>
       </footer>
     </div>
@@ -266,6 +288,28 @@
               },
             ],
           },
+          elisa: {
+            title: "Wahj ELISA Learning and Analysis Suite",
+            copy: "Open the ELISA lecture or go directly to the curve-fitting and concentration tool.",
+            cards: [
+              {
+                badge: "Lecture",
+                title: "ELISA lecture",
+                description:
+                  "Learn what ELISA measures, what OD means, how the standard curve works, and how to choose the curve shape from the kit leaflet.",
+                href: "./elisa/",
+                chips: ["Signal", "OD", "Standard curve"],
+              },
+              {
+                badge: "Tool",
+                title: "Wahj ELISA Learning and Analysis Suite",
+                description:
+                  "Enter standards and unknown ODs, generate the fitted equation, calculate concentrations, and open guided statistical analysis.",
+                href: "./elisa-tool/",
+                chips: ["Curve fit", "Concentration", "Statistics"],
+              },
+            ],
+          },
         };
 
         function renderTopic(topicKey) {
@@ -307,6 +351,11 @@
             });
           });
         });
+
+        const topicFromHash = window.location.hash.replace("#", "");
+        if (topics[topicFromHash]) {
+          renderTopic(topicFromHash);
+        }
       })();
     </script>
   </body>
