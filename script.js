@@ -8,9 +8,10 @@ const readerIdStorageKey = "wahj-ngs-reader-id";
 const messages = {
   en: {
     readerReady:
-      "Anonymous reader count updates automatically. No personal information is collected.",
+      "Site-wide anonymous reader count updates automatically. No personal information is collected.",
     readerMissing: "Anonymous reader counter is not connected right now.",
-    readerFallback: "Reader count loaded, but this device could not update the counter right now.",
+    readerFallback:
+      "Site-wide reader count loaded, but this device could not update the counter right now.",
     readerError: "The anonymous reader counter is temporarily unavailable.",
     commentLoading: "Loading recent comments...",
     commentReady: "Comments load automatically from the live site backend.",
@@ -25,10 +26,10 @@ const messages = {
   },
   ar: {
     readerReady:
-      "يتم تحديث عداد القرّاء المجهول تلقائياً من دون جمع أي معلومات شخصية.",
+      "يتم تحديث عداد القرّاء المجهول على مستوى المنصة كلها تلقائياً من دون جمع أي معلومات شخصية.",
     readerMissing: "عداد القرّاء غير مرتبط حالياً بالخدمة الخلفية.",
     readerFallback:
-      "تم تحميل عدد القرّاء، لكن هذا الجهاز لم يتمكن من تحديث العداد في هذه اللحظة.",
+      "تم تحميل عدد القرّاء على مستوى المنصة، لكن هذا الجهاز لم يتمكن من تحديث العداد في هذه اللحظة.",
     readerError: "عداد القرّاء المجهول غير متاح مؤقتاً.",
     commentLoading: "يتم الآن تحميل أحدث التعليقات...",
     commentReady: "يتم تحميل التعليقات تلقائياً من الخدمة الخلفية للموقع.",

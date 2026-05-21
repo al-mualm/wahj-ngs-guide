@@ -6,15 +6,23 @@
     <title>Wahj Molecular Biology Learning Hub</title>
     <meta
       name="description"
-      content="A professional Wahj Al-DNA learning platform for NGS, Real-Time PCR, gene expression analysis, Sanger sequence interpretation, and BLAST-based alignment review."
+      content="A structured Wahj Al-DNA learning hub for Next-Generation Sequencing, Sanger sequencing, Real-Time PCR, BLAST alignment, and gene expression analysis."
     />
     <script>
       document.documentElement.classList.add("js");
-      const hubAnchors = new Set(["#top", "#overview", "#learn", "#analyze", "#research"]);
+      const knownHashes = new Set([
+        "#top",
+        "#overview",
+        "#topics",
+        "#selection-panel",
+        "#ngs",
+        "#sanger",
+        "#rt-pcr",
+      ]);
       if (
         window.location.hash &&
         window.location.hash.length > 1 &&
-        !hubAnchors.has(window.location.hash)
+        !knownHashes.has(window.location.hash)
       ) {
         window.location.replace(`./ngs/${window.location.hash}`);
       }
@@ -23,11 +31,11 @@
   </head>
   <body>
     <div class="site-shell">
-      <header class="site-header site-header-compact" id="top">
+      <header class="site-header home-header" id="top">
         <div class="brand-lockup">
           <img src="assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="brand-logo" />
           <div>
-            <p class="eyebrow">Scientific learning platform</p>
+            <p class="eyebrow">Educational hub</p>
             <p class="brand-title">Wahj Al-DNA</p>
           </div>
         </div>
@@ -39,276 +47,121 @@
           <p class="reader-label">Readers</p>
           <p class="reader-count"><span id="reader-count">Loading...</span></p>
           <p class="reader-note" id="reader-note">
-            Anonymous reader count updates automatically. No personal information is collected.
+            Site-wide anonymous reader count updates automatically. No personal information is
+            collected.
           </p>
         </div>
-        <button
-          class="nav-toggle"
-          type="button"
-          aria-expanded="false"
-          aria-controls="primary-nav"
-        >
-          Menu
-        </button>
-        <nav class="primary-nav" id="primary-nav" aria-label="Primary">
-          <a href="#overview">Overview</a>
-          <a href="#learn">Learn</a>
-          <a href="#analyze">Analyze</a>
-          <a href="#research">Use in research</a>
-          <a href="./hub-ar/">Arabic hub</a>
-        </nav>
       </header>
 
       <main>
-        <section class="portal-hero section" id="overview">
-          <div class="portal-copy reveal">
-            <span class="section-chip">Learning, analysis, and reporting in one place</span>
-            <h1>Wahj Al-DNA Molecular Biology Learning Hub</h1>
+        <section class="section home-hero" id="overview">
+          <div class="home-intro reveal">
+            <span class="section-chip">Learn first, then open the working page you need</span>
+            <h1>Wahj Molecular Biology Learning Hub</h1>
             <p class="hero-lead">
-              This platform brings together structured lectures, working analysis tools,
-              and thesis-ready outputs for students, trainees, and early researchers in
-              molecular biology, genomics, and bioinformatics.
+              Choose one of the three core topics below. After you select a topic, the hub
+              will show the best direct entry cards for that topic, including the lecture page
+              and the related practical page when available.
             </p>
             <div class="selector-note">
               <p><strong>Author:</strong> Mahmood Al-Mualm</p>
               <p><strong>Title:</strong> CEO of Wahj Al-DNA</p>
               <p>
-                <strong>How to use the hub:</strong> study the lecture pages first, then move
-                directly into the calculators and live analysis workflows when you are ready.
+                <strong>Entry logic:</strong> first select the scientific topic, then open the
+                lecture or the practical page from the second step.
               </p>
-            </div>
-            <div class="selector-actions">
-              <a class="hub-link hub-link-primary" href="#learn">Explore learning paths</a>
-              <a class="hub-link" href="#analyze">Open practical tools</a>
-            </div>
-          </div>
-
-          <div class="portal-visual reveal">
-            <div class="portal-summary-card">
-              <p class="eyebrow">Platform structure</p>
-              <h2>Three clear ways to enter the site</h2>
-              <div class="portal-kpis">
-                <article>
-                  <strong>Learn</strong>
-                  <span>Lecture pages with guided scientific explanations</span>
-                </article>
-                <article>
-                  <strong>Analyze</strong>
-                  <span>Working tools for BLAST interpretation and gene expression</span>
-                </article>
-                <article>
-                  <strong>Report</strong>
-                  <span>Tables and exports suitable for academic writing workflows</span>
-                </article>
-              </div>
-              <div class="portal-preview-list">
-                <div>
-                  <strong>NGS guide</strong>
-                  <p>Workflow, platforms, QC, files, and beginner interpretation.</p>
-                </div>
-                <div>
-                  <strong>Real-Time PCR</strong>
-                  <p>Ct logic, chemistry, quantification, and experimental structure.</p>
-                </div>
-                <div>
-                  <strong>Sanger + BLAST</strong>
-                  <p>Sequence cleaning, taxonomy guidance, ranked hits, alignment review, and publication tables.</p>
-                </div>
-              </div>
             </div>
           </div>
         </section>
 
-        <section class="section" id="learn">
+        <section class="section home-topic-stage" id="topics">
           <div class="section-heading">
-            <span class="section-chip">Learn</span>
-            <h2>Study the science before you run the tools</h2>
+            <span class="section-chip">Step 1</span>
+            <h2>Select the topic</h2>
             <p>
-              These pages are designed as structured teaching chapters. Each one explains the
-              workflow, terminology, and interpretation logic before the reader moves into
-              practical analysis.
+              The homepage is intentionally simple: <strong>Next-Generation Sequencing</strong>,
+              <strong>Sanger sequencing</strong>, and <strong>Real-Time PCR</strong>.
             </p>
           </div>
 
-          <div class="portal-group reveal">
-            <div class="portal-group-header">
-              <p class="eyebrow">Lecture pages</p>
-              <h3>Core teaching resources</h3>
+          <div class="topic-selector-grid reveal" role="list" aria-label="Topic selection">
+            <button
+              class="topic-selector-card"
+              type="button"
+              data-topic-select="ngs"
+              aria-pressed="false"
+            >
+              <span class="topic-tag">Topic</span>
+              <h3>Next-Generation Sequencing</h3>
               <p>
-                Start here if the goal is conceptual understanding, exam preparation, or
-                scientific training before practical work.
+                Learn the sequencing workflow, applications, file formats, quality control,
+                and how to choose the right NGS approach.
               </p>
-            </div>
-            <div class="portal-card-grid">
-              <a class="product-card" href="./ngs/">
-                <span class="topic-tag">Lecture</span>
-                <h3>Next-Generation Sequencing Guide</h3>
-                <p>
-                  A full NGS handbook covering workflows, applications, QC, file formats,
-                  platform differences, and beginner decision-making.
-                </p>
-                <div class="product-preview">
-                  <span>Workflow overview</span>
-                  <span>Sanger vs NGS</span>
-                  <span>MGI DNA nanoballs</span>
-                </div>
-                <div class="topic-card-footer">
-                  <span class="topic-card-cta">Open NGS lecture</span>
-                </div>
-              </a>
+              <div class="topic-selector-meta">
+                <span>Genomics</span>
+                <span>QC</span>
+                <span>Decision guide</span>
+              </div>
+            </button>
 
-              <a class="product-card" href="./real-time-pcr/">
-                <span class="topic-tag">Lecture</span>
-                <h3>Real-Time PCR Scientific Guide</h3>
-                <p>
-                  A structured qPCR teaching page covering Ct, threshold logic, assay
-                  chemistry, relative quantification, and experimental interpretation.
-                </p>
-                <div class="product-preview">
-                  <span>Ct interpretation</span>
-                  <span>SYBR vs TaqMan</span>
-                  <span>2^-ΔΔCt logic</span>
-                </div>
-                <div class="topic-card-footer">
-                  <span class="topic-card-cta">Open RT-PCR lecture</span>
-                </div>
-              </a>
+            <button
+              class="topic-selector-card"
+              type="button"
+              data-topic-select="sanger"
+              aria-pressed="false"
+            >
+              <span class="topic-tag">Topic</span>
+              <h3>Sanger Sequencing</h3>
+              <p>
+                Study the sequence-cleaning workflow, BLAST reasoning, ranked hit comparison,
+                alignment review, and publication-oriented tables.
+              </p>
+              <div class="topic-selector-meta">
+                <span>Sequence cleaning</span>
+                <span>BLAST</span>
+                <span>Alignment</span>
+              </div>
+            </button>
 
-              <a class="product-card" href="./sequence-analysis/#overview">
-                <span class="topic-tag">Lecture</span>
-                <h3>Sanger Sequence Interpretation Guide</h3>
-                <p>
-                  Learn how to go from a raw Sanger read to taxonomy-aware BLAST reasoning,
-                  alignment inspection, and careful sequence interpretation.
-                </p>
-                <div class="product-preview">
-                  <span>Sequence cleaning</span>
-                  <span>Taxonomy context</span>
-                  <span>Alignment reading</span>
-                </div>
-                <div class="topic-card-footer">
-                  <span class="topic-card-cta">Open Sanger lecture</span>
-                </div>
-              </a>
-            </div>
+            <button
+              class="topic-selector-card"
+              type="button"
+              data-topic-select="rt-pcr"
+              aria-pressed="false"
+            >
+              <span class="topic-tag">Topic</span>
+              <h3>Real-Time PCR</h3>
+              <p>
+                Review Ct interpretation, assay chemistry, qPCR workflow, relative
+                quantification, and the gene expression calculator.
+              </p>
+              <div class="topic-selector-meta">
+                <span>Ct</span>
+                <span>qPCR</span>
+                <span>2^-ΔΔCt</span>
+              </div>
+            </button>
           </div>
         </section>
 
-        <section class="section section-alt" id="analyze">
+        <section class="section home-selection-stage" id="selection-panel">
           <div class="section-heading">
-            <span class="section-chip">Analyze</span>
-            <h2>Move directly into working scientific tools</h2>
-            <p>
-              These tools are intended for real educational use. They are separated from the
-              lecture pages so the user can jump directly into calculation or alignment work.
+            <span class="section-chip" id="selection-step-chip">Step 2</span>
+            <h2 id="selection-title">Choose a topic first</h2>
+            <p id="selection-copy">
+              After you click one of the three topic cards, the direct lecture and practical
+              entry cards will appear here.
             </p>
           </div>
 
-          <div class="portal-group reveal">
-            <div class="portal-group-header">
-              <p class="eyebrow">Working tools</p>
-              <h3>Interactive analysis pages</h3>
-              <p>
-                Use these pages when the goal is to calculate, compare, inspect, or export
-                results rather than just read background material.
-              </p>
+          <div class="topic-selection-shell reveal">
+            <div class="topic-selection-grid" id="selection-options">
+              <div class="topic-placeholder">
+                Select <strong>Next-Generation Sequencing</strong>,
+                <strong>Sanger sequencing</strong>, or <strong>Real-Time PCR</strong> to
+                continue.
+              </div>
             </div>
-            <div class="portal-card-grid portal-card-grid-tools">
-              <a class="product-card product-card-accent" href="./real-time-pcr/#calculator">
-                <span class="topic-tag">Tool</span>
-                <h3>Gene Expression Calculator</h3>
-                <p>
-                  Assign wells on a 96-well layout, import Ct values, calculate
-                  <strong>2^-ΔΔCt</strong>, and review summary tables, statistics, and plots.
-                </p>
-                <div class="product-preview">
-                  <span>Plate mapping</span>
-                  <span>Ct import</span>
-                  <span>Statistics + graphs</span>
-                </div>
-                <div class="topic-card-footer">
-                  <span class="topic-card-cta">Open calculator</span>
-                </div>
-              </a>
-
-              <a class="product-card product-card-accent" href="./sequence-analysis/#analysis-tool">
-                <span class="topic-tag">Tool</span>
-                <h3>Sanger BLAST Alignment Tool</h3>
-                <p>
-                  Clean a sequence, search NCBI taxonomy, run a live BLAST comparison, rank
-                  hits by coverage and identity, and inspect alignment details.
-                </p>
-                <div class="product-preview">
-                  <span>Live NCBI BLAST</span>
-                  <span>Ranked hit review</span>
-                  <span>Publication tables</span>
-                </div>
-                <div class="topic-card-footer">
-                  <span class="topic-card-cta">Open alignment tool</span>
-                </div>
-              </a>
-            </div>
-          </div>
-        </section>
-
-        <section class="section" id="research">
-          <div class="section-heading">
-            <span class="section-chip">Use in research</span>
-            <h2>Produce cleaner outputs for reports, theses, and teaching sessions</h2>
-            <p>
-              The platform now supports a more report-oriented workflow, where analysis pages
-              can feed into scientific writing, supervision, and classroom use without
-              cluttering the interface.
-            </p>
-          </div>
-
-          <div class="research-grid reveal">
-            <article class="research-card">
-              <p class="eyebrow">Publication workflow</p>
-              <h3>Thesis-ready BLAST tables</h3>
-              <p>
-                The Sequence Analysis page now separates ranked hits from publication tables,
-                making it easier to move from inspection to copyable and exportable report
-                tables.
-              </p>
-              <div class="product-preview">
-                <span>Alignment summary</span>
-                <span>Nucleotide differences</span>
-                <span>Reference-based change table</span>
-              </div>
-              <a class="hub-link" href="./sequence-analysis/#publication-report">Open publication tables</a>
-            </article>
-
-            <article class="research-card">
-              <p class="eyebrow">Export quality</p>
-              <h3>Cleaner table handling</h3>
-              <p>
-                Wide tables now keep horizontal scrolling visible on smaller screens, while
-                copy and CSV outputs remain cleaner for Word, Google Docs, and spreadsheet use.
-              </p>
-              <div class="product-preview">
-                <span>Copy to Word</span>
-                <span>CSV export</span>
-                <span>Print-aware layout</span>
-              </div>
-              <a class="hub-link" href="./sequence-analysis/#results">Review result tables</a>
-            </article>
-
-            <article class="research-card">
-              <p class="eyebrow">Bilingual access</p>
-              <h3>Arabic and English entry paths</h3>
-              <p>
-                The hub now has a dedicated Arabic landing route so Arabic-speaking readers
-                can enter the platform through a mirrored structure instead of a single
-                translated page only.
-              </p>
-              <div class="product-preview">
-                <span>Arabic hub</span>
-                <span>Arabic NGS route</span>
-                <span>English tool access</span>
-              </div>
-              <a class="hub-link" href="./hub-ar/">Open Arabic hub</a>
-            </article>
           </div>
         </section>
       </main>
@@ -320,23 +173,141 @@
           <p><strong>Organization:</strong> Wahj Al-DNA</p>
         </div>
         <div>
-          <p>Educational platform for structured learning and practical molecular analysis.</p>
-          <p>
-            Designed for training, academic sharing, and early-stage scientific reporting in
-            genomics, qPCR, and sequence interpretation.
+          <p>Educational resource for structured learning in genomics, qPCR, and sequence analysis.</p>
+          <p class="home-footer-note">
+            The reader count shown on the site is a single anonymous platform-wide count, so it
+            is expected to be the same on the hub and the lecture/tool pages.
           </p>
         </div>
         <div class="footer-card">
           <p><strong>Readers:</strong> <span id="footer-reader-count">Loading...</span></p>
-          <p>
-            This anonymous count is stored outside the browser and updates automatically for
-            new readers.
-          </p>
+          <p>This count is stored outside the browser and updates for unique readers.</p>
         </div>
       </footer>
     </div>
 
     <script src="config.js"></script>
     <script src="script.js"></script>
+    <script>
+      (() => {
+        const selectorButtons = Array.from(document.querySelectorAll("[data-topic-select]"));
+        const selectionOptions = document.querySelector("#selection-options");
+        const selectionTitle = document.querySelector("#selection-title");
+        const selectionCopy = document.querySelector("#selection-copy");
+
+        if (!selectorButtons.length || !selectionOptions || !selectionTitle || !selectionCopy) {
+          return;
+        }
+
+        const topics = {
+          ngs: {
+            title: "Next-Generation Sequencing",
+            copy: "Open either the full lecture or the practical guide entry page for this topic.",
+            cards: [
+              {
+                badge: "Lecture",
+                title: "NGS lecture",
+                description:
+                  "Open the full NGS teaching page covering workflow, applications, files, platforms, and biological interpretation.",
+                href: "./ngs/",
+                chips: ["Workflow", "Applications", "QC"],
+              },
+              {
+                badge: "Practical guide",
+                title: "NGS workflow and decision sections",
+                description:
+                  "Jump directly into the workflow, quality-control, platform, and decision-guide sections inside the NGS page.",
+                href: "./ngs/#workflow",
+                chips: ["Workflow", "Decision guide", "Study tables"],
+              },
+            ],
+          },
+          sanger: {
+            title: "Sanger Sequencing",
+            copy: "Open the conceptual lecture or go directly to the live BLAST alignment workflow.",
+            cards: [
+              {
+                badge: "Lecture",
+                title: "Sanger sequencing lecture",
+                description:
+                  "Start with sequence cleaning, BLAST interpretation, taxonomy context, and how to read alignment evidence correctly.",
+                href: "./sequence-analysis/#overview",
+                chips: ["Cleaning", "Taxonomy", "Interpretation"],
+              },
+              {
+                badge: "Tool",
+                title: "BLAST alignment tool",
+                description:
+                  "Paste a sequence, clean it, run BLAST, inspect ranked hits, and generate publication-oriented tables.",
+                href: "./sequence-analysis/#analysis-tool",
+                chips: ["Live BLAST", "Ranked hits", "Publication tables"],
+              },
+            ],
+          },
+          "rt-pcr": {
+            title: "Real-Time PCR",
+            copy: "Open the scientific lecture or go directly to the gene expression calculator.",
+            cards: [
+              {
+                badge: "Lecture",
+                title: "Real-Time PCR lecture",
+                description:
+                  "Study Ct, threshold logic, SYBR Green vs TaqMan chemistry, and relative vs absolute quantification.",
+                href: "./real-time-pcr/",
+                chips: ["Ct", "Chemistry", "Quantification"],
+              },
+              {
+                badge: "Tool",
+                title: "Gene expression calculator",
+                description:
+                  "Assign plate wells, import Ct values, calculate 2^-ΔΔCt, and review summary tables, statistics, and graphs.",
+                href: "./real-time-pcr/#calculator",
+                chips: ["96-well plate", "Ct import", "2^-ΔΔCt"],
+              },
+            ],
+          },
+        };
+
+        function renderTopic(topicKey) {
+          const topic = topics[topicKey];
+          if (!topic) {
+            return;
+          }
+
+          selectorButtons.forEach((button) => {
+            const isActive = button.dataset.topicSelect === topicKey;
+            button.classList.toggle("is-active", isActive);
+            button.setAttribute("aria-pressed", isActive ? "true" : "false");
+          });
+
+          selectionTitle.textContent = topic.title;
+          selectionCopy.textContent = topic.copy;
+          selectionOptions.innerHTML = topic.cards
+            .map(
+              (card) => `
+                <a class="topic-entry-card" href="${card.href}">
+                  <span class="topic-entry-badge">${card.badge}</span>
+                  <h3>${card.title}</h3>
+                  <p>${card.description}</p>
+                  <div class="topic-selector-meta">
+                    ${card.chips.map((chip) => `<span>${chip}</span>`).join("")}
+                  </div>
+                </a>
+              `
+            )
+            .join("");
+        }
+
+        selectorButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            renderTopic(button.dataset.topicSelect || "ngs");
+            document.querySelector("#selection-panel")?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          });
+        });
+      })();
+    </script>
   </body>
 </html>
