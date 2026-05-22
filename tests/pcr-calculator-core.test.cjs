@@ -96,4 +96,123 @@ function closeTo(actual, expected, epsilon = 1e-9) {
   closeTo(result.foldChange, 4);
 }
 
+{
+  const significance = core.significanceLabel(0.00009);
+  assert.strictEqual(significance, "****");
+  assert.strictEqual(core.significanceLabel(0.02), "*");
+  assert.strictEqual(core.significanceLabel(0.2), "ns");
+}
+
+{
+  const method = core.chooseStatisticalMethod("two-independent", {
+    autoNormality: true,
+    normalityResult: { available: true, normal: false },
+  });
+  assert.strictEqual(method, "Mann-Whitney U test");
+}
+
+{
+  const method = core.chooseStatisticalMethod("two-paired", {
+    autoNormality: true,
+    normalityResult: { available: true, normal: true },
+  });
+  assert.strictEqual(method, "Paired t-test");
+}
+
+{
+  const stats = core.runStatisticalTest({
+    studyDesign: "two-independent",
+    autoNormality: false,
+    groups: [
+      { name: "Control", values: [5.1, 4.9, 5.0, 5.2] },
+      { name: "Patient", values: [3.1, 3.0, 3.3, 2.9] },
+    ],
+  });
+  assert.strictEqual(stats.testSelected, "Independent samples t-test");
+  assert.ok(stats.pValue < 0.001);
+}
+
+{
+  const stats = core.runStatisticalTest({
+    studyDesign: "two-paired",
+    autoNormality: false,
+    groups: [
+      {
+        name: "Untreated",
+        values: [
+          { pairId: "P1", value: 5.0 },
+          { pairId: "P2", value: 4.0 },
+          { pairId: "P3", value: 6.0 },
+        ],
+      },
+      {
+        name: "Treated",
+        values: [
+          { pairId: "P1", value: 3.0 },
+          { pairId: "P2", value: 3.5 },
+          { pairId: "P3", value: 5.0 },
+        ],
+      },
+    ],
+  });
+  assert.strictEqual(stats.testSelected, "Paired t-test");
+  assert.ok(Number.isFinite(stats.pValue));
+}
+
+{
+  const shapiro = core.shapiroWilkTest([1, 1.2, 0.9, 1.1, 1.05]);
+  assert.strictEqual(shapiro.available, true);
+  assert.ok(Number.isFinite(shapiro.pValue));
+}
+
+{
+  const stats = core.runStatisticalTest({
+    studyDesign: "multi-independent",
+    autoNormality: false,
+    groups: [
+      { name: "Group 1", values: [1, 2, 3] },
+      { name: "Group 2", values: [4, 5, 6] },
+      { name: "Group 3", values: [7, 8, 9] },
+    ],
+  });
+  assert.strictEqual(stats.testSelected, "One-way ANOVA");
+  assert.ok(Number.isFinite(stats.pValue));
+}
+
+{
+  const stats = core.runStatisticalTest({
+    studyDesign: "multi-paired",
+    autoNormality: false,
+    groups: [
+      {
+        name: "Time 1",
+        values: [
+          { pairId: "P1", value: 1 },
+          { pairId: "P2", value: 2 },
+          { pairId: "P3", value: 3 },
+        ],
+      },
+      {
+        name: "Time 2",
+        values: [
+          { pairId: "P1", value: 2 },
+          { pairId: "P2", value: 3 },
+          { pairId: "P3", value: 4 },
+        ],
+      },
+      {
+        name: "Time 3",
+        values: [
+          { pairId: "P1", value: 3 },
+          { pairId: "P2", value: 4 },
+          { pairId: "P3", value: 5 },
+        ],
+      },
+    ],
+  });
+  assert.strictEqual(stats.testSelected, "Repeated-measures one-way ANOVA");
+  assert.ok(Number.isFinite(stats.pValue));
+  assert.ok(stats.pValue <= 0.0001);
+}
+
 console.log("PCR calculator core tests passed.");

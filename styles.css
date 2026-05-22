@@ -2017,6 +2017,11 @@ html[dir="rtl"] .comment-actions {
   fill: var(--ink);
 }
 
+.calc-chart-subtitle {
+  font: 700 16px var(--body-font);
+  fill: var(--ink);
+}
+
 .calc-axis {
   stroke: #23415e;
   stroke-width: 2.4;
@@ -2067,6 +2072,22 @@ html[dir="rtl"] .comment-actions {
   margin: 0.7rem 0 0;
   font-size: 0.95rem;
   color: var(--ink-soft);
+}
+
+.calculator-stats-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.calc-methods-card {
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(22, 37, 54, 0.08);
+  background: rgba(244, 247, 251, 0.9);
+}
+
+.calc-methods-card p {
+  margin: 0;
 }
 
 .calc-table-card {

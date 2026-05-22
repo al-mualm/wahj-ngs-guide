@@ -774,6 +774,950 @@
     return rows.map((row) => row.join(",")).join("\n");
   }
 
+  function dataTypeLabel(dataType) {
+    const labelMap = {
+      deltaCt: "DeltaCt values",
+      deltaDeltaCt: "DeltaDeltaCt values",
+      foldChange: "Fold change values",
+      log2FoldChange: "log2 fold change values",
+    };
+    return labelMap[dataType] || "Sample-level values";
+  }
+
+  function studyDesignLabel(studyDesign) {
+    const labelMap = {
+      "two-independent": "Two independent groups",
+      "two-paired": "Two paired groups",
+      "multi-independent": "More than two independent groups",
+      "multi-paired": "More than two paired or repeated groups",
+    };
+    return labelMap[studyDesign] || studyDesign;
+  }
+
+  function getSampleValue(row, dataType) {
+    if (dataType === "deltaCt") {
+      return row.deltaCt;
+    }
+    if (dataType === "deltaDeltaCt") {
+      return row.deltaDeltaCt;
+    }
+    if (dataType === "foldChange") {
+      return row.foldChange;
+    }
+    if (dataType === "log2FoldChange") {
+      return -row.deltaDeltaCt;
+    }
+    return NaN;
+  }
+
+  function formatPValue(value) {
+    if (!Number.isFinite(value)) {
+      return "N/A";
+    }
+    if (value < 0.0001) {
+      return "< 0.0001";
+    }
+    return value.toFixed(4);
+  }
+
+  function statsSampleKey(row) {
+    return `${row.sampleKey}::${row.sampleId}`;
+  }
+
+  function buildInitialStatisticsState(result) {
+    return {
+      visible: false,
+      studyDesign:
+        result.analysisMode === "paired-matched-control"
+          ? "two-paired"
+          : "two-independent",
+      dataType: "deltaCt",
+      autoNormality: true,
+      annotationMode: "pvalue",
+      errorBarMode: "sd",
+      groupCount: 2,
+      groupNames: [result.labels.control, result.labels.treated],
+      assignments: result.sampleRows.map((row) => ({
+        key: statsSampleKey(row),
+        sampleKey: row.sampleKey,
+        sampleId: row.sampleId,
+        originalGroup: row.sampleKey === "control" ? result.labels.control : result.labels.treated,
+        groupIndex: row.sampleKey === "control" ? 0 : 1,
+        pairId: row.pairId || row.sampleId,
+      })),
+      output: null,
+    };
+  }
+
+  function normalizeStatisticsState(result, statsState) {
+    const isTwoGroup =
+      statsState.studyDesign === "two-independent" ||
+      statsState.studyDesign === "two-paired";
+    const minimumGroups = isTwoGroup ? 2 : 3;
+    statsState.groupCount = Math.max(minimumGroups, Number(statsState.groupCount) || minimumGroups);
+
+    const targetNames = [];
+    for (let index = 0; index < statsState.groupCount; index += 1) {
+      if (isTwoGroup && index === 0) {
+        targetNames.push(result.labels.control);
+        continue;
+      }
+      if (isTwoGroup && index === 1) {
+        targetNames.push(result.labels.treated);
+        continue;
+      }
+      targetNames.push(statsState.groupNames[index] || `Group ${index + 1}`);
+    }
+    statsState.groupNames = targetNames;
+
+    statsState.assignments.forEach((assignment) => {
+      if (assignment.groupIndex >= statsState.groupCount) {
+        assignment.groupIndex = statsState.groupCount - 1;
+      }
+      if (isTwoGroup) {
+        assignment.groupIndex = assignment.sampleKey === "control" ? 0 : 1;
+      }
+      if (!assignment.pairId) {
+        assignment.pairId = assignment.sampleId;
+      }
+    });
+  }
+
+  function buildStatisticsGroups(result, statsState) {
+    normalizeStatisticsState(result, statsState);
+    const paired =
+      statsState.studyDesign === "two-paired" ||
+      statsState.studyDesign === "multi-paired";
+    const groupMap = statsState.groupNames.map((name) => ({
+      name,
+      values: [],
+    }));
+    const rowLookup = new Map(result.sampleRows.map((row) => [statsSampleKey(row), row]));
+
+    statsState.assignments.forEach((assignment) => {
+      const row = rowLookup.get(assignment.key);
+      if (!row) {
+        return;
+      }
+      const value = getSampleValue(row, statsState.dataType);
+      if (!Number.isFinite(value)) {
+        return;
+      }
+      if (paired) {
+        groupMap[assignment.groupIndex].values.push({
+          pairId: String(assignment.pairId || assignment.sampleId || "").trim(),
+          sampleId: assignment.sampleId,
+          value,
+        });
+      } else {
+        groupMap[assignment.groupIndex].values.push(value);
+      }
+    });
+
+    if (groupMap.some((group) => group.values.length === 0)) {
+      throw new Error(
+        "Each selected statistical group must contain at least one analyzable sample-level value."
+      );
+    }
+
+    return groupMap;
+  }
+
+  function buildStatisticsComparisonLabel(groupNames, studyDesign) {
+    if (studyDesign === "two-independent" || studyDesign === "two-paired") {
+      return `${groupNames[0]} vs ${groupNames[1]}`;
+    }
+    return `Overall comparison across ${groupNames.join(", ")}`;
+  }
+
+  function buildStatisticsInterpretation(output) {
+    if (!Number.isFinite(output.testResult.pValue)) {
+      return "The selected test did not produce a valid p-value.";
+    }
+    if (output.testResult.pValue < 0.05) {
+      return `A statistically significant difference was detected in the selected ${dataTypeLabel(
+        output.statsState.dataType
+      ).toLowerCase()}.`;
+    }
+    return `No statistically significant difference was detected in the selected ${dataTypeLabel(
+      output.statsState.dataType
+    ).toLowerCase()} at alpha = 0.05.`;
+  }
+
+  function percentile(sortedValues, probability) {
+    if (!sortedValues.length) {
+      return NaN;
+    }
+    if (sortedValues.length === 1) {
+      return sortedValues[0];
+    }
+    const position = (sortedValues.length - 1) * probability;
+    const lower = Math.floor(position);
+    const upper = Math.ceil(position);
+    if (lower === upper) {
+      return sortedValues[lower];
+    }
+    const weight = position - lower;
+    return sortedValues[lower] * (1 - weight) + sortedValues[upper] * weight;
+  }
+
+  function boxSummary(values) {
+    const clean = values.filter((value) => Number.isFinite(value)).slice().sort((a, b) => a - b);
+    return {
+      min: clean[0],
+      q1: percentile(clean, 0.25),
+      median: percentile(clean, 0.5),
+      q3: percentile(clean, 0.75),
+      max: clean[clean.length - 1],
+    };
+  }
+
+  function escapeXml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+  }
+
+  async function downloadSvgAsPng(fileName, svgMarkup, width, height) {
+    const blob = new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    try {
+      const image = new Image();
+      image.decoding = "async";
+      const loaded = new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = reject;
+      });
+      image.src = url;
+      await loaded;
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d");
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, width, height);
+      context.drawImage(image, 0, 0, width, height);
+      const pngUrl = canvas.toDataURL("image/png");
+      const anchor = document.createElement("a");
+      anchor.href = pngUrl;
+      anchor.download = fileName;
+      anchor.click();
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  function buildStatisticsTableCsv(output) {
+    const rows = [
+      [
+        "Comparison",
+        "Data used",
+        "Test selected",
+        "Test statistic",
+        "p-value",
+        "Significance level",
+        "Interpretation",
+      ],
+      [
+        output.comparisonLabel,
+        dataTypeLabel(output.statsState.dataType),
+        output.testResult.testSelected,
+        `${output.testResult.statisticLabel} = ${formatNumber(output.testResult.statistic, 4)}`,
+        formatPValue(output.testResult.pValue),
+        output.testResult.significance,
+        output.interpretation,
+      ],
+    ];
+    return rows
+      .map((row) =>
+        row
+          .map((cell) => {
+            const value = String(cell ?? "");
+            return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+          })
+          .join(",")
+      )
+      .join("\n");
+  }
+
+  function buildStatisticsMethodsText(output) {
+    const normalityLine = output.statsState.autoNormality
+      ? output.normalitySummary
+      : "Automatic normality testing was disabled, so the default parametric test for the selected design was used.";
+    return [
+      `Statistical analysis was generated with the Wahj Al-DNA RT-qPCR gene expression calculator on the Wahj website.`,
+      `Sample-level ${dataTypeLabel(output.statsState.dataType).toLowerCase()} were used for hypothesis testing.`,
+      normalityLine,
+      `The selected study design was ${studyDesignLabel(output.statsState.studyDesign).toLowerCase()}, so the calculator applied ${output.testResult.testSelected}.`,
+      `Graphs were generated in-browser as SVG figures with mean ± ${output.statsState.errorBarMode.toUpperCase()} for the bar chart, plus a box plot with individual points${output.showPairedPlot ? ", and a paired dot plot with matched lines" : ""}.`,
+      `Mean Ct bars are descriptive only and were not used alone for hypothesis testing.`,
+    ].join(" ");
+  }
+
+  function buildStatisticsFigureLegend(output) {
+    const annotation =
+      output.statsState.annotationMode === "stars"
+        ? `${output.testResult.significance}`
+        : `p = ${formatPValue(output.testResult.pValue)}`;
+    return `Figure. Sample-level ${dataTypeLabel(
+      output.statsState.dataType
+    ).toLowerCase()} are shown for ${output.comparisonLabel}. The bar chart displays mean ± ${output.statsState.errorBarMode.toUpperCase()}, the box plot shows the distribution with individual points, and paired or repeated designs also show matched-sample lines. Statistical testing was performed with ${output.testResult.testSelected}; ${annotation}.`;
+  }
+
+  function buildAnnotationLabel(output) {
+    return output.statsState.annotationMode === "stars"
+      ? output.testResult.significance
+      : `p = ${formatPValue(output.testResult.pValue)}`;
+  }
+
+  function buildStatisticsFigure(output) {
+    const groups = output.groupSummaries;
+    const showPairedPlot = output.showPairedPlot;
+    const width = 1120;
+    const panelHeight = showPairedPlot ? 280 : 0;
+    const height = 680 + panelHeight;
+    const margin = { left: 78, right: 40 };
+    const sections = {
+      bar: { top: 46, height: 220 },
+      box: { top: 338, height: 220 },
+      paired: { top: 620, height: 220 },
+    };
+    const chartLeft = margin.left;
+    const chartRight = width - margin.right;
+    const chartWidth = chartRight - chartLeft;
+    const centers = groups.map(
+      (_, index) => chartLeft + (chartWidth / groups.length) * (index + 0.5)
+    );
+    const barWidth = Math.min(120, chartWidth / Math.max(groups.length * 2, 3));
+    const allValues = groups.flatMap((group) => group.values);
+    const maxValue = Math.max(
+      1,
+      ...groups.flatMap((group) => {
+        const errorAmount =
+          output.statsState.errorBarMode === "sem" ? group.stats.sem : group.stats.sd;
+        return [group.stats.mean + errorAmount, ...group.values];
+      })
+    );
+    const minValue = Math.min(0, ...allValues);
+    const valueScale = (value, top, sectionHeight) => {
+      const span = maxValue - minValue || 1;
+      return top + sectionHeight - ((value - minValue) / span) * sectionHeight;
+    };
+    const annotationLabel = buildAnnotationLabel(output);
+
+    const svg = [
+      `<svg viewBox="0 0 ${width} ${height}" class="calc-chart-svg" role="img" aria-label="Statistical analysis figure">`,
+      `<rect x="0" y="0" width="${width}" height="${height}" rx="24" fill="#ffffff" stroke="#d7e4ef"/>`,
+      `<text x="${width / 2}" y="24" text-anchor="middle" class="calc-chart-title">Statistical analysis figure</text>`,
+    ];
+
+    function drawAxes(top, sectionHeight, title) {
+      svg.push(
+        `<text x="${chartLeft}" y="${top - 14}" class="calc-chart-subtitle">${escapeXml(title)}</text>`
+      );
+      svg.push(
+        `<line x1="${chartLeft}" y1="${top + sectionHeight}" x2="${chartRight}" y2="${top + sectionHeight}" class="calc-axis"/>`
+      );
+      svg.push(
+        `<line x1="${chartLeft}" y1="${top}" x2="${chartLeft}" y2="${top + sectionHeight}" class="calc-axis"/>`
+      );
+      for (let tick = 0; tick <= 5; tick += 1) {
+        const tickValue = minValue + ((maxValue - minValue) * tick) / 5;
+        const y = valueScale(tickValue, top, sectionHeight);
+        svg.push(`<line x1="${chartLeft}" y1="${y}" x2="${chartRight}" y2="${y}" class="calc-grid"/>`);
+        svg.push(
+          `<text x="${chartLeft - 12}" y="${y + 5}" text-anchor="end" class="calc-tick">${tickValue.toFixed(2)}</text>`
+        );
+      }
+    }
+
+    drawAxes(sections.bar.top, sections.bar.height, "Bar chart with mean and error bars");
+    drawAxes(sections.box.top, sections.box.height, "Box plot with individual points");
+    if (showPairedPlot) {
+      drawAxes(sections.paired.top, sections.paired.height, "Paired or repeated dot plot");
+    }
+
+    groups.forEach((group, index) => {
+      const center = centers[index];
+      const x = center - barWidth / 2;
+      const errorAmount =
+        output.statsState.errorBarMode === "sem" ? group.stats.sem : group.stats.sd;
+      const y = valueScale(group.stats.mean, sections.bar.top, sections.bar.height);
+      const errorTop = valueScale(group.stats.mean + errorAmount, sections.bar.top, sections.bar.height);
+      const errorBottom = valueScale(
+        group.stats.mean - errorAmount,
+        sections.bar.top,
+        sections.bar.height
+      );
+      const baseY = valueScale(minValue, sections.bar.top, sections.bar.height);
+      svg.push(`<rect x="${x}" y="${Math.min(y, baseY)}" width="${barWidth}" height="${Math.abs(baseY - y)}" rx="14" fill="${group.color}" opacity="0.84"/>`);
+      svg.push(`<line x1="${center}" y1="${errorTop}" x2="${center}" y2="${errorBottom}" class="calc-error"/>`);
+      svg.push(`<line x1="${center - 12}" y1="${errorTop}" x2="${center + 12}" y2="${errorTop}" class="calc-error"/>`);
+      svg.push(`<line x1="${center - 12}" y1="${errorBottom}" x2="${center + 12}" y2="${errorBottom}" class="calc-error"/>`);
+      svg.push(`<text x="${center}" y="${y - 10}" text-anchor="middle" class="calc-value">${formatNumber(group.stats.mean, 2)}</text>`);
+      svg.push(`<text x="${center}" y="${sections.bar.top + sections.bar.height + 26}" text-anchor="middle" class="calc-label">${escapeXml(group.name)}</text>`);
+
+      const box = group.box;
+      const boxTop = valueScale(box.q3, sections.box.top, sections.box.height);
+      const boxBottom = valueScale(box.q1, sections.box.top, sections.box.height);
+      const medianY = valueScale(box.median, sections.box.top, sections.box.height);
+      const whiskerTop = valueScale(box.max, sections.box.top, sections.box.height);
+      const whiskerBottom = valueScale(box.min, sections.box.top, sections.box.height);
+      svg.push(`<line x1="${center}" y1="${whiskerTop}" x2="${center}" y2="${whiskerBottom}" class="calc-error"/>`);
+      svg.push(`<rect x="${x}" y="${boxTop}" width="${barWidth}" height="${Math.max(2, boxBottom - boxTop)}" rx="12" fill="${group.color}" opacity="0.20" stroke="${group.color}" stroke-width="2"/>`);
+      svg.push(`<line x1="${x}" y1="${medianY}" x2="${x + barWidth}" y2="${medianY}" class="calc-error"/>`);
+      svg.push(`<line x1="${center - 12}" y1="${whiskerTop}" x2="${center + 12}" y2="${whiskerTop}" class="calc-error"/>`);
+      svg.push(`<line x1="${center - 12}" y1="${whiskerBottom}" x2="${center + 12}" y2="${whiskerBottom}" class="calc-error"/>`);
+      group.values.forEach((value, pointIndex) => {
+        const jitter = (pointIndex - (group.values.length - 1) / 2) * 12;
+        const cx = center + jitter;
+        const cy = valueScale(value, sections.box.top, sections.box.height);
+        svg.push(`<circle cx="${cx}" cy="${cy}" r="5.4" fill="#ffffff" stroke="${group.color}" stroke-width="2.6"/>`);
+      });
+
+      if (showPairedPlot) {
+        const pairPoints = output.pairedSeries[index];
+        pairPoints.forEach((entry) => {
+          const cy = valueScale(entry.value, sections.paired.top, sections.paired.height);
+          svg.push(`<circle cx="${center + entry.offset}" cy="${cy}" r="5.4" fill="#ffffff" stroke="${group.color}" stroke-width="2.6"/>`);
+        });
+        svg.push(`<text x="${center}" y="${sections.paired.top + sections.paired.height + 26}" text-anchor="middle" class="calc-label">${escapeXml(group.name)}</text>`);
+      } else {
+        svg.push(`<text x="${center}" y="${sections.box.top + sections.box.height + 26}" text-anchor="middle" class="calc-label">${escapeXml(group.name)}</text>`);
+      }
+    });
+
+    if (showPairedPlot) {
+      output.pairedPaths.forEach((path) => {
+        svg.push(
+          `<polyline fill="none" stroke="#6f8191" stroke-width="1.8" points="${path.points
+            .map(
+              (point) =>
+                `${centers[point.groupIndex] + point.offset},${valueScale(
+                  point.value,
+                  sections.paired.top,
+                  sections.paired.height
+                )}`
+            )
+            .join(" ")}"/>`
+        );
+      });
+    }
+
+    function drawBracket(top, sectionHeight) {
+      const startX = centers[0];
+      const endX = centers[groups.length - 1];
+      const y = top + 18;
+      svg.push(`<path d="M ${startX} ${y + 10} V ${y} H ${endX} V ${y + 10}" class="calc-error" fill="none"/>`);
+      svg.push(`<text x="${(startX + endX) / 2}" y="${y - 6}" text-anchor="middle" class="calc-value">${escapeXml(annotationLabel)}</text>`);
+    }
+
+    drawBracket(sections.bar.top, sections.bar.height);
+    drawBracket(sections.box.top, sections.box.height);
+    if (showPairedPlot) {
+      drawBracket(sections.paired.top, sections.paired.height);
+    }
+
+    svg.push(`<text x="24" y="${sections.bar.top + sections.bar.height / 2}" transform="rotate(-90 24 ${sections.bar.top + sections.bar.height / 2})" class="calc-axis-label">${escapeXml(dataTypeLabel(output.statsState.dataType))}</text>`);
+    svg.push(`<text x="24" y="${sections.box.top + sections.box.height / 2}" transform="rotate(-90 24 ${sections.box.top + sections.box.height / 2})" class="calc-axis-label">${escapeXml(dataTypeLabel(output.statsState.dataType))}</text>`);
+    if (showPairedPlot) {
+      svg.push(`<text x="24" y="${sections.paired.top + sections.paired.height / 2}" transform="rotate(-90 24 ${sections.paired.top + sections.paired.height / 2})" class="calc-axis-label">${escapeXml(dataTypeLabel(output.statsState.dataType))}</text>`);
+    }
+    svg.push("</svg>");
+
+    return {
+      svg: svg.join(""),
+      width,
+      height,
+    };
+  }
+
+  function buildStatisticsOutput(result, statsState) {
+    const groups = buildStatisticsGroups(result, statsState);
+    const numericGroups = groups.map((group) => ({
+      name: group.name,
+      values:
+        statsState.studyDesign === "two-paired" || statsState.studyDesign === "multi-paired"
+          ? group.values
+          : group.values,
+    }));
+    const testResult = core.runStatisticalTest({
+      studyDesign: statsState.studyDesign,
+      autoNormality: statsState.autoNormality,
+      groups: numericGroups,
+    });
+    const groupSummaries = groups.map((group, index) => {
+      const values =
+        statsState.studyDesign === "two-paired" || statsState.studyDesign === "multi-paired"
+          ? group.values.map((entry) => entry.value)
+          : group.values;
+      return {
+        name: group.name,
+        color:
+          index === 0
+            ? assignmentMeta["control-target"].color
+            : index === 1
+              ? assignmentMeta["treated-target"].color
+              : ["#7f5af0", "#2cb67d", "#ef8354", "#5fa7dc"][index % 4],
+        values,
+        stats: calculateStats(values),
+        box: boxSummary(values),
+      };
+    });
+    const showPairedPlot =
+      statsState.studyDesign === "two-paired" || statsState.studyDesign === "multi-paired";
+    const pairedSeries = groupSummaries.map(() => []);
+    const pairedPaths = [];
+    if (showPairedPlot) {
+      const pairIdMap = new Map();
+      groups.forEach((group, groupIndex) => {
+        group.values.forEach((entry, entryIndex) => {
+          if (!pairIdMap.has(entry.pairId)) {
+            pairIdMap.set(entry.pairId, []);
+          }
+          const offset = (entryIndex % 5) * 4 - 8;
+          pairIdMap.get(entry.pairId).push({
+            groupIndex,
+            pairId: entry.pairId,
+            value: entry.value,
+            offset,
+          });
+          pairedSeries[groupIndex].push({ value: entry.value, offset });
+        });
+      });
+      pairIdMap.forEach((points) => {
+        if (points.length > 1) {
+          pairedPaths.push({ pairId: points[0].pairId, points });
+        }
+      });
+    }
+
+    const comparisonLabel = buildStatisticsComparisonLabel(
+      groupSummaries.map((group) => group.name),
+      statsState.studyDesign
+    );
+    const normalitySummary = statsState.autoNormality
+      ? `${testResult.normalityResult.note} ${testResult.normalityResult.details
+          .filter((detail) => detail.available)
+          .map((detail) => `${detail.label}: W = ${formatNumber(detail.statistic, 4)}, p = ${formatPValue(detail.pValue)}`)
+          .join("; ")}`
+      : "Automatic normality testing was disabled.";
+    const output = {
+      statsState: { ...statsState },
+      testResult,
+      groupSummaries,
+      comparisonLabel,
+      interpretation: "",
+      showPairedPlot,
+      pairedSeries,
+      pairedPaths,
+      normalitySummary,
+    };
+    output.interpretation = buildStatisticsInterpretation(output);
+    output.tableCsv = buildStatisticsTableCsv(output);
+    output.methodsText = buildStatisticsMethodsText(output);
+    output.figureLegend = buildStatisticsFigureLegend(output);
+    output.figure = buildStatisticsFigure(output);
+    return output;
+  }
+
+  function renderStatisticsPanelOutput(output) {
+    return `
+      <article class="figure-card calc-table-card">
+        <div class="figure-heading">
+          <p class="figure-label">Statistical result</p>
+          <h3>Selected statistical test outcome</h3>
+        </div>
+        <div class="plate-actions calc-download-actions">
+          <button type="button" class="secondary-action" data-stats-action="copy-table">Copy statistical table</button>
+          <button type="button" class="secondary-action" data-stats-action="download-table">Download table as CSV</button>
+          <button type="button" class="secondary-action" data-stats-action="download-graph">Download graph as PNG</button>
+          <button type="button" class="secondary-action" data-stats-action="copy-legend">Copy figure legend</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Comparison</th>
+                <th>Data used</th>
+                <th>Test selected</th>
+                <th>Test statistic</th>
+                <th>p-value</th>
+                <th>Significance level</th>
+                <th>Interpretation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>${escapeHtml(output.comparisonLabel)}</td>
+                <td>${escapeHtml(dataTypeLabel(output.statsState.dataType))}</td>
+                <td>${escapeHtml(output.testResult.testSelected)}</td>
+                <td>${escapeHtml(
+                  `${output.testResult.statisticLabel} = ${formatNumber(output.testResult.statistic, 4)}`
+                )}</td>
+                <td>${escapeHtml(formatPValue(output.testResult.pValue))}</td>
+                <td>${escapeHtml(output.testResult.significance)}</td>
+                <td>${escapeHtml(output.interpretation)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="calc-notice">
+        <h4>Normality and test-selection note</h4>
+        <ul>
+          <li>${escapeHtml(output.normalitySummary)}</li>
+          <li>Statistical analysis was performed on sample-level normalized values, not on mean Ct bars.</li>
+        </ul>
+      </article>
+
+      <article class="figure-card calc-chart-card">
+        <div class="figure-heading">
+          <p class="figure-label">Graphs</p>
+          <h3>Statistical summary graphs</h3>
+        </div>
+        ${output.figure.svg}
+      </article>
+
+      <article class="figure-card calc-table-card">
+        <div class="figure-heading">
+          <p class="figure-label">Methods text</p>
+          <h3>Statistical analysis methods text</h3>
+        </div>
+        <div class="plate-actions calc-download-actions">
+          <button type="button" class="secondary-action" data-stats-action="copy-methods">Copy methods text</button>
+        </div>
+        <div class="calc-methods-card">
+          <p>${escapeHtml(output.methodsText)}</p>
+        </div>
+      </article>
+    `;
+  }
+
+  function setupStatisticsPanel(statsShell, result) {
+    const statsState = buildInitialStatisticsState(result);
+
+    function render() {
+      normalizeStatisticsState(result, statsState);
+      const isMulti =
+        statsState.studyDesign === "multi-independent" ||
+        statsState.studyDesign === "multi-paired";
+      statsShell.innerHTML = `
+        <article class="figure-card calc-table-card">
+          <div class="figure-heading">
+            <p class="figure-label">Step 4</p>
+            <h3>Statistical analysis</h3>
+          </div>
+          <article class="calc-notice">
+            <h4>Important warning</h4>
+            <ul>
+              <li>Statistical analysis should be performed on sample-level normalized values. Mean Ct bars are descriptive only and should not be used alone for hypothesis testing.</li>
+              <li>Recommended data for hypothesis testing: DeltaCt or log2 fold change, rather than raw fold change.</li>
+            </ul>
+          </article>
+          <div class="plate-actions calc-download-actions">
+            <button type="button" class="primary-action" data-stats-action="toggle-panel">${
+              statsState.visible ? "Hide Statistical Analysis" : "Run Statistical Analysis"
+            }</button>
+          </div>
+          ${
+            statsState.visible
+              ? `
+                <div class="calculator-stats-shell">
+                  <div class="calculator-labels">
+                    <label class="field">
+                      <span>Study design</span>
+                      <select id="stats-study-design">
+                        <option value="two-independent" ${
+                          statsState.studyDesign === "two-independent" ? "selected" : ""
+                        }>Two independent groups, e.g. control vs patient</option>
+                        <option value="two-paired" ${
+                          statsState.studyDesign === "two-paired" ? "selected" : ""
+                        }>Two paired groups, e.g. same isolate untreated vs treated</option>
+                        <option value="multi-independent" ${
+                          statsState.studyDesign === "multi-independent" ? "selected" : ""
+                        }>More than two independent groups</option>
+                        <option value="multi-paired" ${
+                          statsState.studyDesign === "multi-paired" ? "selected" : ""
+                        }>More than two paired / repeated groups</option>
+                      </select>
+                    </label>
+                    <label class="field">
+                      <span>Data type to analyze</span>
+                      <select id="stats-data-type">
+                        <option value="deltaCt" ${
+                          statsState.dataType === "deltaCt" ? "selected" : ""
+                        }>DeltaCt values</option>
+                        <option value="deltaDeltaCt" ${
+                          statsState.dataType === "deltaDeltaCt" ? "selected" : ""
+                        }>DeltaDeltaCt values</option>
+                        <option value="foldChange" ${
+                          statsState.dataType === "foldChange" ? "selected" : ""
+                        }>Fold change values</option>
+                        <option value="log2FoldChange" ${
+                          statsState.dataType === "log2FoldChange" ? "selected" : ""
+                        }>log2 fold change values</option>
+                      </select>
+                    </label>
+                    <label class="field">
+                      <span>Normality check</span>
+                      <select id="stats-auto-normality">
+                        <option value="yes" ${statsState.autoNormality ? "selected" : ""}>Automatically test normality</option>
+                        <option value="no" ${!statsState.autoNormality ? "selected" : ""}>Skip automatic normality test</option>
+                      </select>
+                    </label>
+                    <label class="field">
+                      <span>Graph annotation style</span>
+                      <select id="stats-annotation-mode">
+                        <option value="pvalue" ${
+                          statsState.annotationMode === "pvalue" ? "selected" : ""
+                        }>Show exact p-value</option>
+                        <option value="stars" ${
+                          statsState.annotationMode === "stars" ? "selected" : ""
+                        }>Show significance stars</option>
+                      </select>
+                    </label>
+                    <label class="field">
+                      <span>Bar-chart error bars</span>
+                      <select id="stats-error-bar-mode">
+                        <option value="sd" ${statsState.errorBarMode === "sd" ? "selected" : ""}>Mean ± SD</option>
+                        <option value="sem" ${statsState.errorBarMode === "sem" ? "selected" : ""}>Mean ± SEM</option>
+                      </select>
+                    </label>
+                    ${
+                      isMulti
+                        ? `
+                          <label class="field">
+                            <span>Number of groups</span>
+                            <input id="stats-group-count" type="number" min="3" max="8" value="${statsState.groupCount}" />
+                          </label>
+                        `
+                        : ""
+                    }
+                  </div>
+
+                  ${
+                    isMulti
+                      ? `
+                        <div class="calculator-labels">
+                          ${statsState.groupNames
+                            .map(
+                              (name, index) => `
+                                <label class="field">
+                                  <span>Group ${index + 1} name</span>
+                                  <input
+                                    type="text"
+                                    data-stats-group-name="${index}"
+                                    value="${escapeHtml(name)}"
+                                  />
+                                </label>
+                              `
+                            )
+                            .join("")}
+                        </div>
+                      `
+                      : ""
+                  }
+
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Sample ID</th>
+                          <th>Original group</th>
+                          <th>Statistical group</th>
+                          <th>Pair / subject ID</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${statsState.assignments
+                          .map(
+                            (assignment, index) => `
+                              <tr>
+                                <td>${escapeHtml(assignment.sampleId)}</td>
+                                <td>${escapeHtml(assignment.originalGroup)}</td>
+                                <td>
+                                  <select data-stats-assignment-group="${index}">
+                                    ${statsState.groupNames
+                                      .map(
+                                        (groupName, groupIndex) => `
+                                          <option value="${groupIndex}" ${
+                                            assignment.groupIndex === groupIndex ? "selected" : ""
+                                          }>${escapeHtml(groupName)}</option>
+                                        `
+                                      )
+                                      .join("")}
+                                  </select>
+                                </td>
+                                <td>
+                                  <input
+                                    type="text"
+                                    data-stats-assignment-pair="${index}"
+                                    value="${escapeHtml(assignment.pairId)}"
+                                    placeholder="${
+                                      statsState.studyDesign === "two-paired" ||
+                                      statsState.studyDesign === "multi-paired"
+                                        ? "Required for paired designs"
+                                        : "Optional"
+                                    }"
+                                  />
+                                </td>
+                              </tr>
+                            `
+                          )
+                          .join("")}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div class="plate-actions calc-download-actions">
+                    <button type="button" class="primary-action" data-stats-action="run-analysis">Calculate statistical test</button>
+                  </div>
+                  ${
+                    statsState.output ? renderStatisticsPanelOutput(statsState.output) : ""
+                  }
+                </div>
+              `
+              : ""
+          }
+        </article>
+      `;
+    }
+
+    statsShell.addEventListener("click", async (event) => {
+      const actionTarget = event.target.closest("[data-stats-action]");
+      if (!actionTarget) {
+        return;
+      }
+      const action = actionTarget.dataset.statsAction;
+      if (action === "toggle-panel") {
+        statsState.visible = !statsState.visible;
+        render();
+        return;
+      }
+      if (action === "run-analysis") {
+        try {
+          statsState.output = buildStatisticsOutput(result, statsState);
+        } catch (error) {
+          statsState.output = {
+            statsState: { ...statsState },
+            testResult: {
+              testSelected: "Not completed",
+              statisticLabel: "—",
+              statistic: NaN,
+              pValue: NaN,
+              significance: "ns",
+            },
+            comparisonLabel: "Statistical analysis could not be completed",
+            interpretation: error.message || "Statistical analysis failed.",
+            normalitySummary: error.message || "Statistical analysis failed.",
+            groupSummaries: [],
+            showPairedPlot: false,
+            pairedSeries: [],
+            pairedPaths: [],
+            figure: { svg: "", width: 0, height: 0 },
+            methodsText: error.message || "Statistical analysis failed.",
+            figureLegend: "",
+            tableCsv: "",
+          };
+        }
+        render();
+        return;
+      }
+      if (!statsState.output) {
+        return;
+      }
+      if (action === "copy-table") {
+        await copyText(
+          [
+            "Comparison\tData used\tTest selected\tTest statistic\tp-value\tSignificance level\tInterpretation",
+            [
+              statsState.output.comparisonLabel,
+              dataTypeLabel(statsState.output.statsState.dataType),
+              statsState.output.testResult.testSelected,
+              `${statsState.output.testResult.statisticLabel} = ${formatNumber(
+                statsState.output.testResult.statistic,
+                4
+              )}`,
+              formatPValue(statsState.output.testResult.pValue),
+              statsState.output.testResult.significance,
+              statsState.output.interpretation,
+            ].join("\t"),
+          ].join("\n")
+        );
+      } else if (action === "download-table") {
+        downloadTextFile("qpcr-statistical-analysis.csv", statsState.output.tableCsv);
+      } else if (action === "download-graph") {
+        await downloadSvgAsPng(
+          "qpcr-statistical-analysis.png",
+          statsState.output.figure.svg,
+          statsState.output.figure.width,
+          statsState.output.figure.height
+        );
+      } else if (action === "copy-legend") {
+        await copyText(statsState.output.figureLegend);
+      } else if (action === "copy-methods") {
+        await copyText(statsState.output.methodsText);
+      }
+    });
+
+    statsShell.addEventListener("change", (event) => {
+      const target = event.target;
+      let shouldRender = false;
+      if (target.id === "stats-study-design") {
+        statsState.studyDesign = target.value;
+        statsState.output = null;
+        shouldRender = true;
+      } else if (target.id === "stats-data-type") {
+        statsState.dataType = target.value;
+        statsState.output = null;
+      } else if (target.id === "stats-auto-normality") {
+        statsState.autoNormality = target.value === "yes";
+        statsState.output = null;
+      } else if (target.id === "stats-annotation-mode") {
+        statsState.annotationMode = target.value;
+        if (statsState.output) {
+          statsState.output = buildStatisticsOutput(result, statsState);
+        }
+      } else if (target.id === "stats-error-bar-mode") {
+        statsState.errorBarMode = target.value;
+        if (statsState.output) {
+          statsState.output = buildStatisticsOutput(result, statsState);
+        }
+      } else if (target.id === "stats-group-count") {
+        statsState.groupCount = Number(target.value || 3);
+        statsState.output = null;
+        shouldRender = true;
+      } else if (target.dataset.statsGroupName !== undefined) {
+        statsState.groupNames[Number(target.dataset.statsGroupName)] =
+          target.value || `Group ${Number(target.dataset.statsGroupName) + 1}`;
+        statsState.output = null;
+      } else if (target.dataset.statsAssignmentGroup) {
+        const index = Number(target.dataset.statsAssignmentGroup);
+        statsState.assignments[index].groupIndex = Number(target.value || 0);
+        statsState.output = null;
+      }
+      render();
+      if (shouldRender) {
+        return;
+      }
+    });
+
+    statsShell.addEventListener("input", (event) => {
+      const target = event.target;
+      if (target.dataset.statsAssignmentPair !== undefined) {
+        statsState.assignments[Number(target.dataset.statsAssignmentPair)].pairId = target.value;
+        statsState.output = null;
+      }
+    });
+
+    render();
+  }
+
   function renderCtChart(result) {
     const items = [
       {
@@ -888,7 +1832,7 @@
     const svg = [
       `<svg viewBox="0 0 ${width} ${height}" class="calc-chart-svg" role="img" aria-label="Relative expression chart">`,
       `<rect x="0" y="0" width="${width}" height="${height}" rx="22" fill="#ffffff" stroke="#d7e4ef"/>`,
-      `<text x="${width / 2}" y="24" text-anchor="middle" class="calc-chart-title">Well-level normalized expression</text>`,
+      `<text x="${width / 2}" y="24" text-anchor="middle" class="calc-chart-title">Sample-level normalized expression</text>`,
       `<line x1="${margin.left}" y1="${margin.top + chartHeight}" x2="${width - margin.right}" y2="${margin.top + chartHeight}" class="calc-axis"/>`,
       `<line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + chartHeight}" class="calc-axis"/>`,
     ];
@@ -1161,6 +2105,8 @@
           </table>
         </div>
       </article>
+
+      <div id="stats-analysis-shell"></div>
     `;
 
     resultsSection.hidden = false;
@@ -1175,6 +2121,9 @@
     sampleButton.addEventListener("click", () => {
       downloadTextFile("qpcr-ddct-sample-level-results.csv", sampleCsv);
     });
+
+    const statsShell = resultsContainer.querySelector("#stats-analysis-shell");
+    setupStatisticsPanel(statsShell, result);
   }
 
   assignmentButtons.forEach((button) => {
