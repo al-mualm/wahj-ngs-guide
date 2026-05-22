@@ -1,6 +1,7 @@
-(function () {
+(function (windowObject) {
   const tool = document.querySelector("#pcr-expression-tool");
-  if (!tool) {
+  const core = windowObject.WahjPcrCalculatorCore;
+  if (!tool || !core) {
     return;
   }
 
@@ -20,6 +21,11 @@
   const treatedLabelInput = tool.querySelector("#treated-label");
   const referenceGeneLabelInput = tool.querySelector("#reference-gene-label");
   const targetGeneLabelInput = tool.querySelector("#target-gene-label");
+  const analysisModeInputs = Array.from(
+    tool.querySelectorAll('input[name="analysis-mode"]')
+  );
+  const sampleMetadataBody = tool.querySelector("#sample-metadata-body");
+  const sampleMetadataHint = tool.querySelector("#sample-metadata-hint");
 
   const rowLetters = "ABCDEFGH".split("");
   const colNumbers = Array.from({ length: 12 }, (_, index) => String(index + 1));
@@ -85,9 +91,11 @@
   const state = {
     activeAssignmentKey: "control-reference",
     assignments: {},
+    sampleMetadataByWell: {},
     loadedText: "",
     sourceLabel: "",
     lastWarnings: [],
+    analysisMode: "group-control-mean",
   };
 
   function labels() {
@@ -99,12 +107,29 @@
     };
   }
 
+  function getAnalysisMode() {
+    return (
+      analysisModeInputs.find((input) => input.checked)?.value ||
+      state.analysisMode ||
+      "group-control-mean"
+    );
+  }
+
   function formatNumber(value, decimals = 3) {
     if (!Number.isFinite(value)) {
       return "N/A";
     }
 
     return Number(value).toFixed(decimals);
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   function normalizeHeader(value) {
@@ -131,36 +156,138 @@
     return wellSortValue(a.well || a) - wellSortValue(b.well || b);
   }
 
-  function calculateStats(values) {
-    const numericValues = values.filter((value) => Number.isFinite(value));
-    const n = numericValues.length;
+  function buildDefaultSampleMetadata() {
+    const defaults = {};
+    const groupWells = {
+      control: { reference: [], target: [] },
+      treated: { reference: [], target: [] },
+    };
 
-    if (!n) {
-      return {
-        n: 0,
-        mean: NaN,
-        sd: NaN,
-        sem: NaN,
-        min: NaN,
-        max: NaN,
+    Object.entries(state.assignments)
+      .filter(([, assignmentKey]) => Boolean(assignmentKey))
+      .forEach(([well, assignmentKey]) => {
+        const meta = assignmentMeta[assignmentKey];
+        if (!meta) {
+          return;
+        }
+        groupWells[meta.sampleKey][meta.assayKey].push(well);
+      });
+
+    Object.values(groupWells).forEach((assays) => {
+      assays.reference.sort((left, right) => sortWells(left, right));
+      assays.target.sort((left, right) => sortWells(left, right));
+    });
+
+    const currentLabels = labels();
+    const groupPrefixes = {
+      control: currentLabels.control,
+      treated: currentLabels.treated,
+    };
+
+    ["control", "treated"].forEach((sampleKey) => {
+      const refs = groupWells[sampleKey].reference;
+      const tgts = groupWells[sampleKey].target;
+      const sampleCount = Math.max(refs.length, tgts.length);
+      for (let index = 0; index < sampleCount; index += 1) {
+        const sampleId = `${groupPrefixes[sampleKey]} ${index + 1}`;
+        const pairId = `Pair ${index + 1}`;
+        [refs[index], tgts[index]].forEach((well) => {
+          if (!well) {
+            return;
+          }
+          defaults[well] = {
+            sampleId,
+            pairId,
+          };
+        });
+      }
+    });
+
+    return defaults;
+  }
+
+  function syncSampleMetadata() {
+    const next = {};
+    const defaults = buildDefaultSampleMetadata();
+    const assignedWells = Object.entries(state.assignments)
+      .filter(([, assignmentKey]) => Boolean(assignmentKey))
+      .map(([well]) => well)
+      .sort(sortWells);
+
+    assignedWells.forEach((well) => {
+      const existing = state.sampleMetadataByWell[well] || {};
+      const fallback = defaults[well] || {};
+      next[well] = {
+        sampleId:
+          existing.sampleId !== undefined ? existing.sampleId : fallback.sampleId || "",
+        pairId: existing.pairId !== undefined ? existing.pairId : fallback.pairId || "",
       };
+    });
+
+    state.sampleMetadataByWell = next;
+  }
+
+  function renderSampleMetadataTable() {
+    syncSampleMetadata();
+    const mode = getAnalysisMode();
+    const currentLabels = labels();
+    const assignedRows = Object.entries(state.assignments)
+      .filter(([, assignmentKey]) => Boolean(assignmentKey))
+      .sort((left, right) => sortWells(left[0], right[0]));
+
+    if (!assignedRows.length) {
+      sampleMetadataBody.innerHTML = `
+        <tr>
+          <td colspan="5">Assign wells on the plate first.</td>
+        </tr>
+      `;
+      sampleMetadataHint.textContent =
+        "Use the same sample ID for the target and reference wells from the same biological sample.";
+      return;
     }
 
-    const mean = numericValues.reduce((sum, value) => sum + value, 0) / n;
-    const variance =
-      n > 1
-        ? numericValues.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (n - 1)
-        : 0;
-    const sd = Math.sqrt(variance);
+    sampleMetadataHint.textContent =
+      mode === "paired-matched-control"
+        ? "Use the same sample ID for target and reference wells from the same sample, and use the same pair ID for each matched control and treated sample."
+        : "Use the same sample ID for the target and reference wells from the same biological sample. Pair ID is optional in this mode.";
 
-    return {
-      n,
-      mean,
-      sd,
-      sem: sd / Math.sqrt(n),
-      min: Math.min(...numericValues),
-      max: Math.max(...numericValues),
-    };
+    sampleMetadataBody.innerHTML = assignedRows
+      .map(([well, assignmentKey]) => {
+        const assignment = assignmentMeta[assignmentKey];
+        const metadata = state.sampleMetadataByWell[well] || { sampleId: "", pairId: "" };
+        return `
+          <tr>
+            <td>${well}</td>
+            <td>${assignment.sampleKey === "control" ? currentLabels.control : currentLabels.treated}</td>
+            <td>${assignment.assayKey === "reference" ? currentLabels.reference : currentLabels.target}</td>
+            <td>
+              <input
+                type="text"
+                class="sample-metadata-input"
+                data-metadata-well="${well}"
+                data-metadata-field="sampleId"
+                value="${escapeHtml(metadata.sampleId)}"
+                placeholder="Sample ID"
+              />
+            </td>
+            <td>
+              <input
+                type="text"
+                class="sample-metadata-input"
+                data-metadata-well="${well}"
+                data-metadata-field="pairId"
+                value="${escapeHtml(metadata.pairId)}"
+                placeholder="${mode === "paired-matched-control" ? "Pair ID" : "Optional"}"
+              />
+            </td>
+          </tr>
+        `;
+      })
+      .join("");
+  }
+
+  function calculateStats(values) {
+    return core.calculateStats(values);
   }
 
   function parseDelimitedLine(line, delimiter) {
@@ -407,6 +534,7 @@
         <div class="plate-summary-chip"><strong>${labelSet.treated} + ${labelSet.target}:</strong> ${counts["treated-target"]}</div>
       </div>
     `;
+    renderSampleMetadataTable();
   }
 
   function setActiveAssignment(key) {
@@ -418,6 +546,7 @@
 
   function clearPlate() {
     state.assignments = {};
+    state.sampleMetadataByWell = {};
     Array.from(plateGrid.querySelectorAll(".plate-well")).forEach((button) => {
       renderWellButton(button);
     });
@@ -539,74 +668,38 @@
     const bucketStats = Object.fromEntries(
       Object.entries(bucketRows).map(([key, rows]) => [key, calculateStats(rows.map((row) => row.ct))])
     );
+    const analysisMode = getAnalysisMode();
+    const rowsWithSampleMetadata = matchedRows.map((row) => {
+      const metadata = state.sampleMetadataByWell[row.well] || { sampleId: "", pairId: "" };
+      return {
+        ...row,
+        sampleId: String(metadata.sampleId || "").trim(),
+        pairId: String(metadata.pairId || "").trim(),
+      };
+    });
 
-    const controlDeltaCt =
-      bucketStats["control-target"].mean - bucketStats["control-reference"].mean;
-    const treatedDeltaCt =
-      bucketStats["treated-target"].mean - bucketStats["treated-reference"].mean;
-    const controlDeltaCtSem = Math.sqrt(
-      bucketStats["control-target"].sem ** 2 + bucketStats["control-reference"].sem ** 2
-    );
-    const treatedDeltaCtSem = Math.sqrt(
-      bucketStats["treated-target"].sem ** 2 + bucketStats["treated-reference"].sem ** 2
-    );
-    const deltaDeltaCt = treatedDeltaCt - controlDeltaCt;
-    const deltaDeltaCtSem = Math.sqrt(controlDeltaCtSem ** 2 + treatedDeltaCtSem ** 2);
-    const foldChange = 2 ** -deltaDeltaCt;
-    const log2FoldChange = -deltaDeltaCt;
-    const ciA = 2 ** -(deltaDeltaCt + 1.96 * deltaDeltaCtSem);
-    const ciB = 2 ** -(deltaDeltaCt - 1.96 * deltaDeltaCtSem);
-    const foldChangeCI = [Math.min(ciA, ciB), Math.max(ciA, ciB)];
-
-    const referenceMeans = {
-      control: bucketStats["control-reference"].mean,
-      treated: bucketStats["treated-reference"].mean,
-    };
-
-    const wellLevelRows = matchedRows
-      .filter((row) => row.assayKey === "target")
-      .map((row) => {
-        const deltaCt = row.ct - referenceMeans[row.sampleKey];
-        const relativeExpression = 2 ** -(deltaCt - controlDeltaCt);
-        return {
-          well: row.well,
-          sampleKey: row.sampleKey,
-          ct: row.ct,
-          deltaCt,
-          relativeExpression,
-        };
-      })
-      .sort(sortWells);
-
-    const expressionStats = {
-      control: calculateStats(
-        wellLevelRows
-          .filter((row) => row.sampleKey === "control")
-          .map((row) => row.relativeExpression)
-      ),
-      treated: calculateStats(
-        wellLevelRows
-          .filter((row) => row.sampleKey === "treated")
-          .map((row) => row.relativeExpression)
-      ),
-    };
+    const comparativeResult = core.calculateComparativeCtResult({
+      matchedRows: rowsWithSampleMetadata,
+      analysisMode,
+    });
 
     return {
       labels: labels(),
-      matchedRows,
+      matchedRows: rowsWithSampleMetadata,
       bucketRows,
       bucketStats,
-      controlDeltaCt,
-      treatedDeltaCt,
-      controlDeltaCtSem,
-      treatedDeltaCtSem,
-      deltaDeltaCt,
-      deltaDeltaCtSem,
-      foldChange,
-      log2FoldChange,
-      foldChangeCI,
-      wellLevelRows,
-      expressionStats,
+      controlDeltaCt: comparativeResult.controlDeltaCt,
+      treatedDeltaCt: comparativeResult.treatedDeltaCt,
+      controlDeltaCtSem: comparativeResult.controlDeltaCtSem,
+      treatedDeltaCtSem: comparativeResult.treatedDeltaCtSem,
+      deltaDeltaCt: comparativeResult.deltaDeltaCt,
+      deltaDeltaCtSem: comparativeResult.deltaDeltaCtSem,
+      foldChange: comparativeResult.foldChange,
+      log2FoldChange: comparativeResult.log2FoldChange,
+      foldChangeCI: comparativeResult.foldChangeCI,
+      sampleRows: comparativeResult.sampleRows,
+      expressionStats: comparativeResult.expressionStats,
+      analysisMode,
       warnings,
       sourceLabel: state.sourceLabel || "pasted text",
     };
@@ -627,6 +720,7 @@
   function makeSummaryCsv(result) {
     const rows = [
       ["Metric", "Value"],
+      ["Analysis mode", result.analysisMode === "paired-matched-control" ? "Paired / matched control method" : "Group control mean method"],
       ["Control deltaCt", formatNumber(result.controlDeltaCt, 4)],
       ["Treated deltaCt", formatNumber(result.treatedDeltaCt, 4)],
       ["DeltaDeltaCt", formatNumber(result.deltaDeltaCt, 4)],
@@ -651,15 +745,29 @@
     return rows.map((row) => row.join(",")).join("\n");
   }
 
-  function makeWellLevelCsv(result) {
+  function makeSampleLevelCsv(result) {
     const rows = [
-      ["Well", "Sample", "Target Ct", "DeltaCt", "Relative expression (2^-DeltaDeltaCt)"],
-      ...result.wellLevelRows.map((row) => [
-        row.well,
-        row.sampleKey,
-        formatNumber(row.ct, 4),
+      [
+        "Sample ID",
+        "Group",
+        "Target Ct",
+        "Reference Ct",
+        "DeltaCt",
+        "Control DeltaCt used",
+        "DeltaDeltaCt",
+        "Fold change",
+        "Regulation status",
+      ],
+      ...result.sampleRows.map((row) => [
+        row.sampleId,
+        row.sampleKey === "control" ? result.labels.control : result.labels.treated,
+        formatNumber(row.targetCt, 4),
+        formatNumber(row.referenceCt, 4),
         formatNumber(row.deltaCt, 4),
-        formatNumber(row.relativeExpression, 6),
+        formatNumber(row.controlDeltaCtUsed, 4),
+        formatNumber(row.deltaDeltaCt, 4),
+        formatNumber(row.foldChange, 6),
+        row.regulationStatus,
       ]),
     ];
 
@@ -741,8 +849,8 @@
   }
 
   function renderExpressionChart(result) {
-    const controlRows = result.wellLevelRows.filter((row) => row.sampleKey === "control");
-    const treatedRows = result.wellLevelRows.filter((row) => row.sampleKey === "treated");
+    const controlRows = result.sampleRows.filter((row) => row.sampleKey === "control");
+    const treatedRows = result.sampleRows.filter((row) => row.sampleKey === "treated");
     const groups = [
       {
         label: result.labels.control,
@@ -767,7 +875,7 @@
       1.2,
       ...groups.flatMap((group) => [
         group.stats.mean + group.stats.sd,
-        ...group.rows.map((row) => row.relativeExpression),
+        ...group.rows.map((row) => row.foldChange),
       ])
     );
     const scaleY = (value) => margin.top + chartHeight - (value / (dataMax * 1.16)) * chartHeight;
@@ -813,7 +921,7 @@
       group.rows.forEach((row, pointIndex) => {
         const jitter = (pointIndex - (group.rows.length - 1) / 2) * 18;
         const cx = center + jitter;
-        const cy = scaleY(row.relativeExpression);
+        const cy = scaleY(row.foldChange);
         svg.push(`<circle cx="${cx}" cy="${cy}" r="6.5" fill="#ffffff" stroke="${group.color}" stroke-width="3"/>`);
       });
     });
@@ -840,7 +948,7 @@
 
   function renderResults(result) {
     const summaryCsv = makeSummaryCsv(result);
-    const wellCsv = makeWellLevelCsv(result);
+    const sampleCsv = makeSampleLevelCsv(result);
     const bucketRows = [
       {
         label: `${result.labels.control} + ${result.labels.reference}`,
@@ -859,16 +967,24 @@
         stats: result.bucketStats["treated-target"],
       },
     ];
+    const analysisModeLabel =
+      result.analysisMode === "paired-matched-control"
+        ? "Paired / matched control method"
+        : "Group control mean method";
+    const analysisModeExplanation =
+      result.analysisMode === "paired-matched-control"
+        ? "Each treated sample is compared only with its matched control sample."
+        : `Each sample first gets its own DeltaCt, then the mean DeltaCt of the ${result.labels.control} group is used as the calibrator baseline.`;
 
     resultsContainer.innerHTML = `
       <div class="calc-card-grid">
         <article class="calc-summary-card">
-          <p class="calc-summary-label">DeltaCt (${result.labels.control})</p>
+          <p class="calc-summary-label">Mean DeltaCt (${result.labels.control})</p>
           <h4>${formatNumber(result.controlDeltaCt, 3)}</h4>
           <p>SEM ${formatNumber(result.controlDeltaCtSem, 3)}</p>
         </article>
         <article class="calc-summary-card">
-          <p class="calc-summary-label">DeltaCt (${result.labels.treated})</p>
+          <p class="calc-summary-label">Mean DeltaCt (${result.labels.treated})</p>
           <h4>${formatNumber(result.treatedDeltaCt, 3)}</h4>
           <p>SEM ${formatNumber(result.treatedDeltaCtSem, 3)}</p>
         </article>
@@ -886,10 +1002,18 @@
 
       <div class="plate-actions calc-download-actions">
         <button type="button" class="secondary-action" id="download-summary-csv">Download summary CSV</button>
-        <button type="button" class="secondary-action" id="download-well-csv">Download well-level CSV</button>
+        <button type="button" class="secondary-action" id="download-sample-csv">Download sample-level CSV</button>
       </div>
 
       ${renderWarnings(result.warnings)}
+
+      <article class="calc-notice">
+        <h4>Applied analysis mode</h4>
+        <ul>
+          <li><strong>${analysisModeLabel}.</strong> ${analysisModeExplanation}</li>
+          <li>The reference gene Ct is never averaged before DeltaCt calculation for any biological sample.</li>
+        </ul>
+      </article>
 
       <div class="calc-chart-grid">
         <article class="calc-chart-card">
@@ -897,12 +1021,11 @@
           ${renderCtChart(result)}
         </article>
         <article class="calc-chart-card">
-          <h4>Well-level normalized expression</h4>
+          <h4>Sample-level normalized expression</h4>
           ${renderExpressionChart(result)}
           <p class="calc-chart-note">
-            Dots show well-level target expression normalized against the mean reference Ct
-            of the same sample group. The main comparative result remains the mean-based
-            2^-DeltaDeltaCt calculation shown above.
+            Dots show sample-level fold changes calculated after each biological sample first
+            receives its own DeltaCt value.
           </p>
         </article>
       </div>
@@ -962,19 +1085,24 @@
             </thead>
             <tbody>
               <tr>
-                <td>DeltaCt (${result.labels.control})</td>
-                <td>${formatNumber(result.controlDeltaCt, 4)}</td>
-                <td>Target Ct minus reference Ct in the calibrator group</td>
+                <td>Analysis mode</td>
+                <td>${analysisModeLabel}</td>
+                <td>${analysisModeExplanation}</td>
               </tr>
               <tr>
-                <td>DeltaCt (${result.labels.treated})</td>
+                <td>Mean DeltaCt (${result.labels.control})</td>
+                <td>${formatNumber(result.controlDeltaCt, 4)}</td>
+                <td>Mean of sample-level DeltaCt values in the calibrator group</td>
+              </tr>
+              <tr>
+                <td>Mean DeltaCt (${result.labels.treated})</td>
                 <td>${formatNumber(result.treatedDeltaCt, 4)}</td>
-                <td>Target Ct minus reference Ct in the treated or patient group</td>
+                <td>Mean of sample-level DeltaCt values in the treated or patient group</td>
               </tr>
               <tr>
                 <td>DeltaDeltaCt</td>
                 <td>${formatNumber(result.deltaDeltaCt, 4)}</td>
-                <td>Difference between treated DeltaCt and control DeltaCt</td>
+                <td>Difference between the treated comparison DeltaCt and the selected control baseline</td>
               </tr>
               <tr>
                 <td>2^-DeltaDeltaCt</td>
@@ -993,30 +1121,38 @@
 
       <article class="figure-card calc-table-card">
         <div class="figure-heading">
-          <p class="figure-label">Well list</p>
-          <h3>Well-level normalized target expression</h3>
+          <p class="figure-label">Sample list</p>
+          <h3>Sample-level DeltaCt and fold-change table</h3>
         </div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Well</th>
-                <th>Sample group</th>
+                <th>Sample ID</th>
+                <th>Group</th>
                 <th>Target Ct</th>
+                <th>Reference Ct</th>
                 <th>DeltaCt</th>
-                <th>Relative expression</th>
+                <th>Control DeltaCt used</th>
+                <th>DeltaDeltaCt</th>
+                <th>Fold change</th>
+                <th>Regulation status</th>
               </tr>
             </thead>
             <tbody>
-              ${result.wellLevelRows
+              ${result.sampleRows
                 .map(
                   (row) => `
                     <tr>
-                      <td>${row.well}</td>
+                      <td>${escapeHtml(row.sampleId)}</td>
                       <td>${row.sampleKey === "control" ? result.labels.control : result.labels.treated}</td>
-                      <td>${formatNumber(row.ct, 4)}</td>
+                      <td>${formatNumber(row.targetCt, 4)}</td>
+                      <td>${formatNumber(row.referenceCt, 4)}</td>
                       <td>${formatNumber(row.deltaCt, 4)}</td>
-                      <td>${formatNumber(row.relativeExpression, 6)}</td>
+                      <td>${formatNumber(row.controlDeltaCtUsed, 4)}</td>
+                      <td>${formatNumber(row.deltaDeltaCt, 4)}</td>
+                      <td>${formatNumber(row.foldChange, 6)}</td>
+                      <td>${row.regulationStatus}</td>
                     </tr>
                   `
                 )
@@ -1030,14 +1166,14 @@
     resultsSection.hidden = false;
 
     const summaryButton = resultsContainer.querySelector("#download-summary-csv");
-    const wellButton = resultsContainer.querySelector("#download-well-csv");
+    const sampleButton = resultsContainer.querySelector("#download-sample-csv");
 
     summaryButton.addEventListener("click", () => {
       downloadTextFile("qpcr-ddct-summary.csv", summaryCsv);
     });
 
-    wellButton.addEventListener("click", () => {
-      downloadTextFile("qpcr-ddct-well-level-results.csv", wellCsv);
+    sampleButton.addEventListener("click", () => {
+      downloadTextFile("qpcr-ddct-sample-level-results.csv", sampleCsv);
     });
   }
 
@@ -1079,6 +1215,39 @@
     }
   });
 
+  [controlLabelInput, treatedLabelInput, referenceGeneLabelInput, targetGeneLabelInput].forEach(
+    (input) => {
+      input.addEventListener("input", () => {
+        renderPlateSummary();
+      });
+    }
+  );
+
+  analysisModeInputs.forEach((input) => {
+    input.addEventListener("change", () => {
+      state.analysisMode = getAnalysisMode();
+      renderSampleMetadataTable();
+    });
+  });
+
+  sampleMetadataBody.addEventListener("input", (event) => {
+    const input = event.target.closest("[data-metadata-well]");
+    if (!input) {
+      return;
+    }
+
+    const well = input.dataset.metadataWell;
+    const field = input.dataset.metadataField;
+    if (!well || !field) {
+      return;
+    }
+
+    if (!state.sampleMetadataByWell[well]) {
+      state.sampleMetadataByWell[well] = { sampleId: "", pairId: "" };
+    }
+    state.sampleMetadataByWell[well][field] = input.value;
+  });
+
   loadExampleDataButton.addEventListener("click", () => {
     tableTextarea.value = exampleCtTable;
     state.loadedText = exampleCtTable;
@@ -1104,4 +1273,5 @@
   renderPlate();
   renderPlateSummary();
   setActiveAssignment(state.activeAssignmentKey);
-})();
+  state.analysisMode = getAnalysisMode();
+})(window);

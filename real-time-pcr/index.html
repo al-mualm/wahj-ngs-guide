@@ -698,10 +698,10 @@
             <span class="section-chip">6. Interactive tool</span>
             <h2>Gene expression calculator using 2<sup>-ΔΔCt</sup></h2>
             <p>
-              This calculator is designed for a common teaching scenario: one calibrator
-              (control) group, one treated or patient group, one reference gene, and one
-              target gene. It uses a plate-based setup so the assigned wells and imported Ct
-              values remain easy to audit.
+              This calculator is designed for common comparative-Ct teaching scenarios:
+              control versus treated groups or matched control/treated pairs, one reference
+              gene, and one target gene. It uses a plate-based setup so the assigned wells,
+              sample IDs, pair IDs, and imported Ct values remain easy to audit.
             </p>
           </div>
 
@@ -716,9 +716,11 @@
                   strategy.
                 </p>
                 <p>
-                  The result is most meaningful when control wells, treated/patient wells,
-                  target wells, and reference wells were all run on the same plate or in a
-                  directly comparable setup.
+                  Every biological sample must contribute its own target-gene Ct and
+                  reference-gene Ct before DeltaCt is calculated. The result is most
+                  meaningful when control wells, treated/patient wells, target wells, and
+                  reference wells were all run on the same plate or in a directly comparable
+                  setup.
                 </p>
               </article>
 
@@ -740,6 +742,46 @@
                   <input id="target-gene-label" type="text" value="Target gene" maxlength="50" />
                 </label>
               </div>
+
+              <article class="callout-box calculator-analysis-card">
+                <h3>Comparative Ct analysis mode</h3>
+                <div class="calculator-mode-grid" role="radiogroup" aria-label="Comparative Ct analysis mode">
+                  <label class="calculator-mode-option">
+                    <input
+                      type="radio"
+                      name="analysis-mode"
+                      value="group-control-mean"
+                      checked
+                    />
+                    <span>
+                      <strong>Group control mean method</strong>
+                      <small>Use this for independent groups such as controls versus patients.</small>
+                    </span>
+                  </label>
+                  <label class="calculator-mode-option">
+                    <input
+                      type="radio"
+                      name="analysis-mode"
+                      value="paired-matched-control"
+                    />
+                    <span>
+                      <strong>Paired / matched control method</strong>
+                      <small>Use this when each treated sample has its own matched control.</small>
+                    </span>
+                  </label>
+                </div>
+                <div class="calculator-analysis-notes">
+                  <p>The reference gene Ct is never averaged before DeltaCt calculation.</p>
+                  <p>
+                    In group control mean analysis, the average is applied only after each sample
+                    already has its own DeltaCt value.
+                  </p>
+                  <p>
+                    In paired analysis, each treated sample is compared only with its matched
+                    control sample.
+                  </p>
+                </div>
+              </article>
             </div>
 
             <div class="calculator-grid">
@@ -770,6 +812,35 @@
                 <div class="plate-wrap">
                   <div class="plate-grid" id="plate-grid" aria-label="96-well plate"></div>
                 </div>
+
+                <article class="calculator-sample-map">
+                  <div class="figure-heading">
+                    <p class="figure-label">Step 1b</p>
+                    <h4>Link wells to biological samples</h4>
+                  </div>
+                  <p class="calculator-help" id="sample-metadata-hint">
+                    Use the same sample ID for the target and reference wells from the same
+                    biological sample.
+                  </p>
+                  <div class="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Well</th>
+                          <th>Group</th>
+                          <th>Assay</th>
+                          <th>Sample ID</th>
+                          <th>Pair ID</th>
+                        </tr>
+                      </thead>
+                      <tbody id="sample-metadata-body">
+                        <tr>
+                          <td colspan="5">Assign wells on the plate first.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </article>
               </article>
 
               <article class="figure-card calculator-panel">
@@ -917,6 +988,7 @@
 
     <script src="../config.js"></script>
     <script src="../script.js"></script>
+    <script src="../pcr-calculator-core.js"></script>
     <script src="../pcr-calculator.js"></script>
   </body>
 </html>
