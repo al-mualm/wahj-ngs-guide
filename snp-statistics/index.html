@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SNP Statistics Calculator | Wahj Al-DNA</title>
+    <meta
+      name="description"
+      content="Compare three genotype counts between patients and controls, then review genotype frequencies, odds ratios, Fisher exact p-values, and confidence intervals."
+    />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="site-header" id="top">
+        <div class="brand-lockup">
+          <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Case-control genetics tool</p>
+            <p class="brand-title">Wahj Al-DNA</p>
+          </div>
+        </div>
+        <div class="reader-badge" aria-live="polite">
+          <p class="reader-label">Visits</p>
+          <p class="reader-count"><span id="reader-count">Loading...</span></p>
+          <p class="reader-note" id="reader-note">
+            Site-wide anonymous visit count updates automatically. No personal information is
+            collected.
+          </p>
+        </div>
+        <a class="hub-link" href="../">All topics</a>
+      </header>
+
+      <main>
+        <section class="section home-hero">
+          <div class="home-intro reveal">
+            <span class="section-chip">Association summary</span>
+            <h1>SNP Statistics Calculator</h1>
+            <p class="hero-lead">
+              Enter the three genotype counts for patients and controls. The tool reports
+              genotype frequencies, odds ratios, Fisher exact p-values, and confidence intervals
+              for each genotype versus the combined other genotypes.
+            </p>
+          </div>
+        </section>
+
+        <section class="section home-selection-stage">
+          <div class="tool-workbench-grid reveal">
+            <article class="topic-selection-shell genetics-panel">
+              <div class="figure-heading">
+                <p class="figure-label">Input</p>
+                <h2>Patient and control genotype counts</h2>
+              </div>
+
+              <div class="calculator-labels">
+                <label class="field">
+                  <span>1st genotype label</span>
+                  <input id="snp-label-1" type="text" value="AA" />
+                </label>
+                <label class="field">
+                  <span>2nd genotype label</span>
+                  <input id="snp-label-2" type="text" value="AG" />
+                </label>
+                <label class="field">
+                  <span>3rd genotype label</span>
+                  <input id="snp-label-3" type="text" value="GG" />
+                </label>
+              </div>
+
+              <div class="genetics-dual-grid">
+                <div class="genotype-count-block">
+                  <h3>Patients</h3>
+                  <div class="genotype-count-grid">
+                    <label class="field">
+                      <span>1st genotype</span>
+                      <input id="snp-patient-1" type="number" min="0" step="1" value="42" />
+                    </label>
+                    <label class="field">
+                      <span>2nd genotype</span>
+                      <input id="snp-patient-2" type="number" min="0" step="1" value="36" />
+                    </label>
+                    <label class="field">
+                      <span>3rd genotype</span>
+                      <input id="snp-patient-3" type="number" min="0" step="1" value="12" />
+                    </label>
+                  </div>
+                </div>
+
+                <div class="genotype-count-block">
+                  <h3>Controls</h3>
+                  <div class="genotype-count-grid">
+                    <label class="field">
+                      <span>1st genotype</span>
+                      <input id="snp-control-1" type="number" min="0" step="1" value="25" />
+                    </label>
+                    <label class="field">
+                      <span>2nd genotype</span>
+                      <input id="snp-control-2" type="number" min="0" step="1" value="41" />
+                    </label>
+                    <label class="field">
+                      <span>3rd genotype</span>
+                      <input id="snp-control-3" type="number" min="0" step="1" value="24" />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="plate-actions">
+                <button type="button" class="primary-action" id="snp-calculate">
+                  Calculate SNP statistics
+                </button>
+                <button type="button" class="secondary-action" id="snp-example">
+                  Load example
+                </button>
+                <button type="button" class="secondary-action" id="snp-clear">
+                  Clear
+                </button>
+              </div>
+
+              <p class="calculator-status" id="snp-status" aria-live="polite"></p>
+            </article>
+
+            <article class="topic-selection-shell genetics-panel">
+              <div class="figure-heading">
+                <p class="figure-label">Output</p>
+                <h2>Genotype-level association table</h2>
+              </div>
+
+              <div class="calc-card-grid genetics-summary-grid" id="snp-summary" hidden></div>
+
+              <article class="calc-notice genetics-inline-note">
+                <h4>Interpretation note</h4>
+                <ul>
+                  <li id="snp-comparison-note">
+                    Each genotype will be compared against the combined other genotypes.
+                  </li>
+                </ul>
+              </article>
+
+              <div class="table-wrap">
+                <table>
+                  <caption class="genetics-table-caption">
+                    SNP genotype statistics in patients and controls
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th>Genotype</th>
+                      <th>Patients n (frequency)</th>
+                      <th>Controls n (frequency)</th>
+                      <th>Odds ratio</th>
+                      <th>Fisher exact p-value</th>
+                      <th>95% confidence interval</th>
+                      <th>Association note</th>
+                    </tr>
+                  </thead>
+                  <tbody id="snp-table-body">
+                    <tr>
+                      <td colspan="7">Run the calculator to show the SNP statistics table.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <p><strong>Author:</strong> Mahmood Al-Mualm</p>
+          <p><strong>Title:</strong> CEO of Wahj Al-DNA</p>
+          <p><strong>Organization:</strong> Wahj Al-DNA</p>
+        </div>
+        <div>
+          <p>
+            Educational case-control genetics utility for genotype frequency comparison and
+            genotype-level association screening.
+          </p>
+        </div>
+        <div class="footer-card">
+          <p><strong>Visits:</strong> <span id="footer-reader-count">Loading...</span></p>
+          <p>This count is stored outside the browser and updates for total site visits.</p>
+        </div>
+      </footer>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="../script.js"></script>
+    <script src="../genetics-tools-core.js"></script>
+    <script src="./snp-statistics.js"></script>
+  </body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hardy-Weinberg Equilibrium Calculator | Wahj Al-DNA</title>
+    <meta
+      name="description"
+      content="Calculate observed and expected genotype counts, Hardy-Weinberg chi-square, p-value, and agreement status from three genotype counts."
+    />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="site-header" id="top">
+        <div class="brand-lockup">
+          <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Population genetics tool</p>
+            <p class="brand-title">Wahj Al-DNA</p>
+          </div>
+        </div>
+        <div class="reader-badge" aria-live="polite">
+          <p class="reader-label">Visits</p>
+          <p class="reader-count"><span id="reader-count">Loading...</span></p>
+          <p class="reader-note" id="reader-note">
+            Site-wide anonymous visit count updates automatically. No personal information is
+            collected.
+          </p>
+        </div>
+        <a class="hub-link" href="../">All topics</a>
+      </header>
+
+      <main>
+        <section class="section home-hero">
+          <div class="home-intro reveal">
+            <span class="section-chip">Genotype equilibrium</span>
+            <h1>Hardy-Weinberg Equilibrium Calculator</h1>
+            <p class="hero-lead">
+              Enter the three observed genotype counts, review the expected counts under
+              Hardy-Weinberg equilibrium, and inspect the chi-square value, p-value, and
+              agreement status in one clean table.
+            </p>
+          </div>
+        </section>
+
+        <section class="section home-selection-stage">
+          <div class="tool-workbench-grid reveal">
+            <article class="topic-selection-shell genetics-panel">
+              <div class="figure-heading">
+                <p class="figure-label">Input</p>
+                <h2>Observed genotype counts</h2>
+              </div>
+
+              <div class="calculator-labels">
+                <label class="field">
+                  <span>1st genotype label</span>
+                  <input id="hwe-label-1" type="text" value="AA" />
+                </label>
+                <label class="field">
+                  <span>2nd genotype label</span>
+                  <input id="hwe-label-2" type="text" value="AG" />
+                </label>
+                <label class="field">
+                  <span>3rd genotype label</span>
+                  <input id="hwe-label-3" type="text" value="GG" />
+                </label>
+              </div>
+
+              <div class="genotype-count-grid">
+                <label class="field">
+                  <span>Number of samples with 1st genotype</span>
+                  <input id="hwe-count-1" type="number" min="0" step="1" value="48" />
+                </label>
+                <label class="field">
+                  <span>Number of samples with 2nd genotype</span>
+                  <input id="hwe-count-2" type="number" min="0" step="1" value="44" />
+                </label>
+                <label class="field">
+                  <span>Number of samples with 3rd genotype</span>
+                  <input id="hwe-count-3" type="number" min="0" step="1" value="8" />
+                </label>
+              </div>
+
+              <div class="plate-actions">
+                <button type="button" class="primary-action" id="hwe-calculate">
+                  Calculate Hardy-Weinberg
+                </button>
+                <button type="button" class="secondary-action" id="hwe-example">
+                  Load example
+                </button>
+                <button type="button" class="secondary-action" id="hwe-clear">
+                  Clear
+                </button>
+              </div>
+
+              <p class="calculator-status" id="hwe-status" aria-live="polite"></p>
+            </article>
+
+            <article class="topic-selection-shell genetics-panel">
+              <div class="figure-heading">
+                <p class="figure-label">Output</p>
+                <h2>Expected and observed genotype table</h2>
+              </div>
+
+              <div class="calc-card-grid genetics-summary-grid" id="hwe-summary" hidden></div>
+
+              <div class="table-wrap">
+                <table>
+                  <caption class="genetics-table-caption">
+                    Observed and expected genotype counts under Hardy-Weinberg equilibrium
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th>Genotype</th>
+                      <th>Observed n</th>
+                      <th>Observed frequency</th>
+                      <th>Expected n</th>
+                      <th>Expected frequency</th>
+                      <th>Chi-square contribution</th>
+                    </tr>
+                  </thead>
+                  <tbody id="hwe-table-body">
+                    <tr>
+                      <td colspan="6">Run the calculator to show the Hardy-Weinberg table.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="table-wrap genetics-summary-table-wrap" id="hwe-summary-table" hidden></div>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <p><strong>Author:</strong> Mahmood Al-Mualm</p>
+          <p><strong>Title:</strong> CEO of Wahj Al-DNA</p>
+          <p><strong>Organization:</strong> Wahj Al-DNA</p>
+        </div>
+        <div>
+          <p>
+            Educational population-genetics utility for genotype equilibrium checking and
+            genotype-level association summaries.
+          </p>
+        </div>
+        <div class="footer-card">
+          <p><strong>Visits:</strong> <span id="footer-reader-count">Loading...</span></p>
+          <p>This count is stored outside the browser and updates for total site visits.</p>
+        </div>
+      </footer>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="../script.js"></script>
+    <script src="../genetics-tools-core.js"></script>
+    <script src="./hardy-weinberg.js"></script>
+  </body>
+</html>

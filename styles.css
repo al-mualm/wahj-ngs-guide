@@ -698,7 +698,8 @@ tbody tr:nth-child(even) {
 }
 
 .field input,
-.field textarea {
+.field textarea,
+.field select {
   width: 100%;
   border: 1px solid rgba(22, 37, 54, 0.14);
   border-radius: 16px;
@@ -711,6 +712,7 @@ tbody tr:nth-child(even) {
 
 .field input:focus,
 .field textarea:focus,
+.field select:focus,
 #glossary-search:focus {
   outline: 2px solid rgba(0, 157, 205, 0.22);
   border-color: rgba(0, 157, 205, 0.48);
@@ -2547,7 +2549,7 @@ html[dir="rtl"] .comment-actions {
 }
 
 .topic-selector-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
 }
 
 .topic-selection-grid {
@@ -2588,6 +2590,64 @@ html[dir="rtl"] .comment-actions {
 
 .topic-selector-card h3 {
   font-size: clamp(1.4rem, 2vw, 1.95rem);
+}
+
+.tool-workbench-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: var(--space-5);
+}
+
+.genetics-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.genotype-count-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.genetics-dual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.genotype-count-block {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+  border-radius: 22px;
+  border: 1px solid rgba(22, 37, 54, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.genotype-count-block h3,
+.genetics-panel h2 {
+  margin: 0;
+}
+
+.genetics-summary-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.genetics-table-caption {
+  caption-side: top;
+  text-align: left;
+  padding-bottom: 0.65rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.genetics-summary-table-wrap {
+  margin-top: 1rem;
+}
+
+.genetics-inline-note {
+  border-color: rgba(47, 149, 184, 0.2);
+  background: rgba(241, 248, 252, 0.9);
 }
 
 .topic-selector-card p,
@@ -2666,18 +2726,28 @@ html[dir="rtl"] .comment-actions {
 }
 
 @media (max-width: 1100px) {
-  .topic-selector-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .topic-selection-grid {
     grid-template-columns: 1fr;
+  }
+
+  .tool-workbench-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .genetics-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 760px) {
   .topic-selector-grid,
   .topic-selection-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .genotype-count-grid,
+  .genetics-dual-grid,
+  .genetics-summary-grid {
     grid-template-columns: 1fr;
   }
 }

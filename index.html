@@ -6,7 +6,7 @@
     <title>Wahj Molecular Biology Learning Hub</title>
     <meta
       name="description"
-      content="A structured Wahj Al-DNA learning hub for Next-Generation Sequencing, Sanger sequencing, Real-Time PCR, ELISA learning, BLAST alignment, and gene expression analysis."
+      content="A structured Wahj Al-DNA learning hub for Next-Generation Sequencing, Sanger sequencing, Real-Time PCR, ELISA learning, BLAST alignment, gene expression analysis, and genotype statistics."
     />
     <script>
       document.documentElement.classList.add("js");
@@ -19,6 +19,7 @@
         "#sanger",
         "#rt-pcr",
         "#elisa",
+        "#genetics",
       ]);
       if (
         window.location.hash &&
@@ -60,7 +61,7 @@
             <span class="section-chip">Learn first, then open the working page you need</span>
             <h1>Wahj Molecular Biology Learning Hub</h1>
             <p class="hero-lead">
-              Choose one of the four core topics below. After you select a topic, the hub
+              Choose one of the five core topics below. After you select a topic, the hub
               will show the best direct entry cards for that topic, including the lecture page
               and the related practical page when available.
             </p>
@@ -81,8 +82,9 @@
             <h2>Select the topic</h2>
             <p>
               The homepage is intentionally simple: <strong>Next-Generation Sequencing</strong>,
-              <strong>Sanger sequencing</strong>, <strong>Real-Time PCR</strong>, and
-              <strong>Wahj ELISA Learning and Analysis Suite</strong>.
+              <strong>Sanger sequencing</strong>, <strong>Real-Time PCR</strong>,
+              <strong>Wahj ELISA Learning and Analysis Suite</strong>, and
+              <strong>Genotype statistics</strong>.
             </p>
           </div>
 
@@ -162,6 +164,25 @@
                 <span>Statistics</span>
               </div>
             </button>
+
+            <button
+              class="topic-selector-card"
+              type="button"
+              data-topic-select="genetics"
+              aria-pressed="false"
+            >
+              <span class="topic-tag">Topic</span>
+              <h3>Genotype Statistics</h3>
+              <p>
+                Open population-genetics tools for Hardy-Weinberg equilibrium checking and
+                SNP genotype comparison between patients and controls.
+              </p>
+              <div class="topic-selector-meta">
+                <span>HWE</span>
+                <span>Odds ratio</span>
+                <span>Fisher exact</span>
+              </div>
+            </button>
           </div>
         </section>
 
@@ -170,7 +191,7 @@
             <span class="section-chip" id="selection-step-chip">Step 2</span>
             <h2 id="selection-title">Choose a topic first</h2>
             <p id="selection-copy">
-              After you click one of the four topic cards, the direct lecture and practical
+              After you click one of the five topic cards, the direct lecture and practical
               entry cards will appear here.
             </p>
           </div>
@@ -179,8 +200,9 @@
             <div class="topic-selection-grid" id="selection-options">
               <div class="topic-placeholder">
                 Select <strong>Next-Generation Sequencing</strong>,
-                <strong>Sanger sequencing</strong>, <strong>Real-Time PCR</strong>, or
-                <strong>Wahj ELISA Learning and Analysis Suite</strong> to
+                <strong>Sanger sequencing</strong>, <strong>Real-Time PCR</strong>,
+                <strong>Wahj ELISA Learning and Analysis Suite</strong>, or
+                <strong>Genotype statistics</strong> to
                 continue.
               </div>
             </div>
@@ -195,7 +217,7 @@
           <p><strong>Organization:</strong> Wahj Al-DNA</p>
         </div>
         <div>
-          <p>Educational resource for structured learning in genomics, qPCR, and sequence analysis.</p>
+          <p>Educational resource for structured learning in genomics, qPCR, immunoassays, and genotype statistics.</p>
           <p class="home-footer-note">
             The site uses one platform-wide anonymous visit counter, so the same total appears
             on the hub and the lecture/tool pages.
@@ -307,6 +329,28 @@
                   "Enter standards and unknown ODs, generate the fitted equation, calculate concentrations, and open guided statistical analysis.",
                 href: "./elisa-tool/",
                 chips: ["Curve fit", "Concentration", "Statistics"],
+              },
+            ],
+          },
+          genetics: {
+            title: "Genotype Statistics",
+            copy: "Open the Hardy-Weinberg equilibrium calculator or go directly to the SNP case-control statistics tool.",
+            cards: [
+              {
+                badge: "Tool",
+                title: "Hardy-Weinberg equation",
+                description:
+                  "Enter the three genotype counts, compare observed and expected values, and review the Hardy-Weinberg chi-square and p-value.",
+                href: "./hardy-weinberg/",
+                chips: ["Observed vs expected", "Chi-square", "P-value"],
+              },
+              {
+                badge: "Tool",
+                title: "SNP statistics",
+                description:
+                  "Enter patient and control genotype counts to review genotype frequencies, odds ratios, Fisher exact p-values, and confidence intervals.",
+                href: "./snp-statistics/",
+                chips: ["Patients vs controls", "Odds ratio", "Fisher exact"],
               },
             ],
           },
