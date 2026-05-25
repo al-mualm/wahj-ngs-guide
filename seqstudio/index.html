@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SeqStudio / Sanger Smart Analyzer | Wahj Al-DNA</title>
+    <meta
+      name="description"
+      content="Upload AB1 Sanger sequencing files, trim reads, align against a reference, review chromatogram evidence, annotate candidate variants, and export publication-ready outputs."
+    />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./seqstudio.css" />
+  </head>
+  <body class="seqstudio-page">
+    <div class="site-shell">
+      <header class="site-header site-header-compact" id="top">
+        <div class="brand-lockup">
+          <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Educational Hub</p>
+            <p class="brand-title">Wahj Al-DNA</p>
+          </div>
+        </div>
+        <div class="reader-badge" aria-live="polite">
+          <p class="reader-label">Visits</p>
+          <p class="reader-count"><span id="reader-count">Loading...</span></p>
+          <p class="reader-note" id="reader-note">
+            Anonymous visit count updates automatically. No personal information is collected.
+          </p>
+        </div>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+          Menu
+        </button>
+        <nav class="primary-nav" id="primary-nav" aria-label="Primary">
+          <a href="../">Hub</a>
+          <a href="#overview">Overview</a>
+          <a href="#workbench">Upload</a>
+          <a href="#alignment-browser-panel">Alignment</a>
+          <a href="#variant-panel">Variants</a>
+          <a href="#publication-panel">Publication output</a>
+          <a href="../sequence-analysis/">BLAST tool</a>
+          <a href="../real-time-pcr/">Real-Time PCR</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="section seqstudio-hero" id="overview">
+          <div class="seqstudio-hero-copy reveal">
+            <span class="section-chip">AB1 upload + alignment + annotation</span>
+            <h1>SeqStudio / Sanger Smart Analyzer</h1>
+            <p class="hero-lead">
+              Upload raw <code>.ab1</code> Sanger files, trim low-quality ends, align each read
+              against a selected reference, inspect chromatogram evidence, annotate candidate
+              variants, and export clean publication-ready outputs.
+            </p>
+
+            <div class="seqstudio-warning">
+              <p class="eyebrow">Scientific guardrails</p>
+              <p>
+                Candidate differences are called from sample-level pairwise alignments.
+                Low-quality positions are not presented as confident variants. Clinical
+                annotations are descriptive database summaries only and are not diagnoses.
+              </p>
+            </div>
+
+            <div class="sequence-badge-row">
+              <span>AB1 chromatograms</span>
+              <span>Quality trimming</span>
+              <span>Pairwise alignment</span>
+              <span>Candidate variants</span>
+              <span>Publication output</span>
+            </div>
+          </div>
+
+          <div class="seqstudio-hero-panel reveal">
+            <div class="hero-panel-header">
+              <p class="eyebrow">Workflow</p>
+              <h2>From raw trace file to annotated candidate variants</h2>
+            </div>
+            <div class="hero-panel-grid">
+              <article class="hero-panel-card">
+                <strong>1. Upload AB1 files</strong>
+                <p>Read base calls, quality scores, and chromatogram traces directly from each sample.</p>
+              </article>
+              <article class="hero-panel-card">
+                <strong>2. Choose a reference</strong>
+                <p>Search by gene and organism, enter an accession number, or paste a FASTA reference manually.</p>
+              </article>
+              <article class="hero-panel-card">
+                <strong>3. Review evidence</strong>
+                <p>Inspect alignment windows, variant tables, chromatogram peaks, and database-backed context.</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="workbench">
+          <div class="section-heading">
+            <span class="section-chip">Interactive analyzer</span>
+            <h2>Step 1 to Step 3: upload, select the reference, and run the analysis</h2>
+            <p>
+              The core analysis is browser-side. The tool works without sending your AB1
+              files to a remote server. External annotation lookups are optional and happen
+              only after you choose a reference and run the analysis.
+            </p>
+          </div>
+
+          <div class="seqstudio-workbench">
+            <section class="seqstudio-card reveal">
+              <div class="card-header">
+                <span class="section-chip">Step 1</span>
+                <h3>Upload <code>.ab1</code> files</h3>
+              </div>
+              <label class="upload-dropzone" for="ab1-files">
+                <input id="ab1-files" type="file" accept=".ab1,.abi" multiple />
+                <strong>Drop AB1 files here or click to browse</strong>
+                <span>
+                  Multiple files are supported. The file name is used as the initial sample
+                  name.
+                </span>
+              </label>
+              <div class="status-inline" id="upload-status">
+                No AB1 files loaded yet.
+              </div>
+              <div class="table-shell">
+                <table class="data-table">
+                  <caption>Sample QC preview</caption>
+                  <thead>
+                    <tr>
+                      <th>Sample</th>
+                      <th>Raw length</th>
+                      <th>Trimmed length</th>
+                      <th>Mean Q</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sample-qc-body">
+                    <tr>
+                      <td colspan="5">Load one or more AB1 files to inspect the read quality.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="seqstudio-card reveal">
+              <div class="card-header">
+                <span class="section-chip">Step 2</span>
+                <h3>Choose the reference</h3>
+              </div>
+              <div class="segmented-control" role="tablist" aria-label="Reference mode">
+                <button class="segmented-button is-active" type="button" data-reference-mode="gene">
+                  Gene symbol + organism
+                </button>
+                <button class="segmented-button" type="button" data-reference-mode="accession">
+                  NCBI accession
+                </button>
+                <button class="segmented-button" type="button" data-reference-mode="fasta">
+                  Paste FASTA
+                </button>
+              </div>
+
+              <div class="reference-mode-panel is-active" id="reference-mode-gene">
+                <div class="input-grid">
+                  <label class="field">
+                    <span>Gene symbol</span>
+                    <input id="reference-gene-symbol" type="text" placeholder="HBB" />
+                  </label>
+                  <label class="field">
+                    <span>Organism</span>
+                    <input id="reference-organism" type="text" placeholder="Homo sapiens" />
+                  </label>
+                </div>
+                <p class="field-help">
+                  This mode uses Ensembl to fetch a canonical transcript reference plus exon,
+                  CDS, and UTR annotations when available.
+                </p>
+              </div>
+
+              <div class="reference-mode-panel" id="reference-mode-accession" hidden>
+                <label class="field">
+                  <span>NCBI accession number</span>
+                  <input id="reference-accession" type="text" placeholder="NM_000518.5" />
+                </label>
+                <p class="field-help">
+                  This mode first tries GenBank so feature annotations can be used. If only a
+                  FASTA record is available, the analysis still runs with limited annotation.
+                </p>
+              </div>
+
+              <div class="reference-mode-panel" id="reference-mode-fasta" hidden>
+                <label class="field field-textarea">
+                  <span>Reference FASTA</span>
+                  <textarea
+                    id="reference-fasta"
+                    rows="8"
+                    placeholder=">reference\nATG..."
+                  ></textarea>
+                </label>
+                <p class="field-help">
+                  Manual FASTA gives full alignment and variant calling, but feature and
+                  database annotations are only available when they can be derived safely.
+                </p>
+              </div>
+
+              <div class="action-row">
+                <button class="button-secondary" type="button" id="load-reference-button">
+                  Load reference
+                </button>
+              </div>
+              <div class="status-inline" id="reference-status">
+                No reference loaded yet.
+              </div>
+              <div class="reference-summary" id="reference-summary">
+                <div><strong>Reference:</strong> <span id="reference-label">—</span></div>
+                <div><strong>Length:</strong> <span id="reference-length">—</span></div>
+                <div><strong>Features:</strong> <span id="reference-features">—</span></div>
+                <div><strong>Annotation source:</strong> <span id="reference-source">—</span></div>
+              </div>
+            </section>
+
+            <section class="seqstudio-card reveal">
+              <div class="card-header">
+                <span class="section-chip">Step 3</span>
+                <h3>Run the sample-level analysis</h3>
+              </div>
+              <div class="metric-grid">
+                <div class="metric-card">
+                  <span>Uploaded samples</span>
+                  <strong id="metric-samples">0</strong>
+                </div>
+                <div class="metric-card">
+                  <span>Loaded reference</span>
+                  <strong id="metric-reference">No</strong>
+                </div>
+                <div class="metric-card">
+                  <span>Detected candidate variants</span>
+                  <strong id="metric-variants">0</strong>
+                </div>
+              </div>
+
+              <div class="action-row">
+                <button class="button-primary" type="button" id="run-analysis-button">
+                  Run analysis
+                </button>
+                <button class="button-secondary" type="button" id="generate-report-button">
+                  Generate Thesis/Paper Report
+                </button>
+              </div>
+
+              <div class="status-inline" id="analysis-status">
+                Load AB1 files and a reference before running the analysis.
+              </div>
+
+              <p class="field-help">
+                Candidate variants are flagged from sample-level pairwise alignments. Low-quality
+                differences remain marked for manual review and should be confirmed by
+                bidirectional sequencing or repeat PCR before interpretation.
+              </p>
+            </section>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="alignment-browser-panel">
+          <div class="section-heading">
+            <span class="section-chip">Step 4</span>
+            <h2>Alignment browser</h2>
+            <p>
+              The browser shows the reference track, feature annotations, known-variant markers,
+              and each uploaded sample aligned in the same coordinate window.
+            </p>
+          </div>
+
+          <div class="seqstudio-card reveal">
+            <div class="browser-toolbar">
+              <label class="field">
+                <span>Displayed samples</span>
+                <select id="browser-sample-filter">
+                  <option value="all">All samples</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Variant type</span>
+                <select id="browser-variant-filter">
+                  <option value="all">All candidate differences</option>
+                  <option value="substitution">Substitutions</option>
+                  <option value="insertion">Insertions</option>
+                  <option value="deletion">Deletions</option>
+                  <option value="heterozygous-candidate">Possible heterozygous calls</option>
+                  <option value="ambiguous">Ambiguous calls</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Coding filter</span>
+                <select id="browser-region-filter">
+                  <option value="all">Coding and noncoding</option>
+                  <option value="coding">Coding only</option>
+                  <option value="noncoding">Noncoding only</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Known / novel</span>
+                <select id="browser-known-filter">
+                  <option value="all">Known and novel</option>
+                  <option value="known">Known only</option>
+                  <option value="novel">Novel only</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Jump to variant</span>
+                <select id="browser-variant-jump">
+                  <option value="">Choose a variant</option>
+                </select>
+              </label>
+              <div class="browser-nav">
+                <button class="button-secondary" type="button" id="browser-prev">Previous</button>
+                <span id="browser-window-label">Window not available yet.</span>
+                <button class="button-secondary" type="button" id="browser-next">Next</button>
+              </div>
+            </div>
+
+            <div class="browser-scroll-hint">Scroll horizontally to inspect long alignments.</div>
+            <div class="alignment-browser-shell">
+              <div class="alignment-browser" id="alignment-browser">
+                Run the analysis to populate the reference and sample alignment browser.
+              </div>
+            </div>
+            <div class="known-variant-note" id="known-variant-note">
+              Known-variant markers appear here after supported annotation lookups complete.
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="variant-panel">
+          <div class="section-heading">
+            <span class="section-chip">Step 5 and Step 6</span>
+            <h2>Variant table, chromatogram evidence, and annotation</h2>
+            <p>
+              Use the tables below to review candidate differences, chromatogram traces,
+              coding effects when trusted feature models are available, and database-backed
+              context such as dbSNP and ClinVar links.
+            </p>
+          </div>
+
+          <div class="seqstudio-results-grid">
+            <section class="seqstudio-card reveal">
+              <div class="card-header">
+                <h3>Candidate variant summary</h3>
+              </div>
+              <div class="table-shell">
+                <table class="data-table">
+                  <caption>Sample-level candidate variants</caption>
+                  <thead>
+                    <tr>
+                      <th>Sample</th>
+                      <th>Reference position</th>
+                      <th>Reference / sample</th>
+                      <th>Type</th>
+                      <th>Quality</th>
+                      <th>Status</th>
+                      <th>Context</th>
+                    </tr>
+                  </thead>
+                  <tbody id="variant-summary-body">
+                    <tr>
+                      <td colspan="7">Run the analysis to detect candidate variants.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="seqstudio-card reveal">
+              <div class="card-header">
+                <h3>Chromatogram evidence viewer</h3>
+              </div>
+              <div class="chromatogram-toolbar">
+                <label class="field">
+                  <span>Sample</span>
+                  <select id="chromatogram-sample">
+                    <option value="">Select a sample</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Variant focus</span>
+                  <select id="chromatogram-variant">
+                    <option value="">Select a candidate variant</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Zoom (bases around the site)</span>
+                  <input id="chromatogram-zoom" type="range" min="8" max="40" value="18" />
+                </label>
+                <button class="button-secondary" type="button" id="chromatogram-export">
+                  Export chromatogram image
+                </button>
+              </div>
+              <div class="chromatogram-shell">
+                <canvas id="chromatogram-canvas" width="1200" height="360"></canvas>
+              </div>
+              <p class="field-help" id="chromatogram-note">
+                Choose a sample and a detected candidate variant to view chromatogram evidence.
+              </p>
+            </section>
+          </div>
+
+          <section class="seqstudio-card reveal">
+            <div class="card-header">
+              <h3>Annotation table</h3>
+            </div>
+            <div class="annotation-warning">
+              Clinical and literature links are descriptive context only. This tool does not
+              provide diagnosis and does not replace professional clinical interpretation.
+            </div>
+            <div class="table-shell">
+              <table class="data-table">
+                <caption>Variant annotation and external context</caption>
+                <thead>
+                  <tr>
+                    <th>Sample</th>
+                    <th>Gene</th>
+                    <th>Region</th>
+                    <th>Coding effect</th>
+                    <th>Codon change</th>
+                    <th>Amino acid change</th>
+                    <th>dbSNP / ClinVar</th>
+                    <th>Context links</th>
+                  </tr>
+                </thead>
+                <tbody id="annotation-body">
+                  <tr>
+                    <td colspan="8">Run the analysis to populate candidate variant annotations.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="section section-alt" id="publication-panel">
+          <div class="section-heading">
+            <span class="section-chip">Step 7</span>
+            <h2>Publication tables and report text</h2>
+            <p>
+              Copy clean tables or export them as CSV. The buttons stay outside the copied
+              content so the output can be pasted directly into Word, Google Docs, or a thesis.
+            </p>
+          </div>
+
+          <section class="seqstudio-card reveal">
+            <div class="publication-header">
+              <div>
+                <h3>Publication-ready tables</h3>
+                <p id="publication-status">Run the analysis to generate the publication tables.</p>
+              </div>
+              <div class="publication-controls">
+                <button class="button-secondary" type="button" id="copy-publication-table">
+                  Copy table
+                </button>
+                <button class="button-secondary" type="button" id="copy-all-publication-tables">
+                  Copy all tables
+                </button>
+                <button class="button-secondary" type="button" id="download-publication-csv">
+                  Export CSV
+                </button>
+              </div>
+            </div>
+
+            <div class="publication-tabs" role="tablist" aria-label="Publication table tabs">
+              <button class="publication-tab is-active" type="button" data-publication-tab="qc">
+                Sample QC table
+              </button>
+              <button class="publication-tab" type="button" data-publication-tab="alignment">
+                Alignment summary
+              </button>
+              <button class="publication-tab" type="button" data-publication-tab="variants">
+                Variant summary
+              </button>
+              <button class="publication-tab" type="button" data-publication-tab="clinical">
+                ClinVar / dbSNP
+              </button>
+              <button class="publication-tab" type="button" data-publication-tab="coding">
+                Coding effect
+              </button>
+              <button class="publication-tab" type="button" data-publication-tab="frequency">
+                Variant frequency
+              </button>
+            </div>
+
+            <div class="table-shell">
+              <div id="publication-table-shell">
+                Select a publication table tab after the analysis is complete.
+              </div>
+            </div>
+          </section>
+
+          <section class="seqstudio-card reveal">
+            <div class="publication-header">
+              <div>
+                <h3>Thesis / paper report</h3>
+                <p>
+                  The generated paragraphs stay conservative: candidate variants only, no
+                  diagnostic claims, and no confident statement without evidence.
+                </p>
+              </div>
+              <div class="publication-controls">
+                <button class="button-secondary" type="button" id="copy-report-button">
+                  Copy report
+                </button>
+              </div>
+            </div>
+
+            <div class="report-grid">
+              <article class="report-card">
+                <h4>Methods paragraph</h4>
+                <p id="report-methods">Generate the report after running the analysis.</p>
+              </article>
+              <article class="report-card">
+                <h4>Results paragraph</h4>
+                <p id="report-results">Generate the report after running the analysis.</p>
+              </article>
+              <article class="report-card">
+                <h4>Variant interpretation</h4>
+                <p id="report-interpretation">Generate the report after running the analysis.</p>
+              </article>
+              <article class="report-card">
+                <h4>Figure legend</h4>
+                <p id="report-figure-legend">Generate the report after running the analysis.</p>
+              </article>
+              <article class="report-card">
+                <h4>Chromatogram evidence note</h4>
+                <p id="report-evidence">Generate the report after running the analysis.</p>
+              </article>
+              <article class="report-card">
+                <h4>Limitations paragraph</h4>
+                <p id="report-limitations">Generate the report after running the analysis.</p>
+              </article>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="../script.js"></script>
+    <script src="./bio-parsers.min.js"></script>
+    <script src="./seqstudio-core.js"></script>
+    <script src="./seqstudio.js"></script>
+  </body>
+</html>
