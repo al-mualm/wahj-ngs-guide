@@ -17,8 +17,10 @@
         "#selection-panel",
         "#ngs",
         "#sanger",
+        "#qpcr",
         "#rt-pcr",
         "#elisa",
+        "#genotype",
         "#genetics",
       ]);
       if (
@@ -31,7 +33,7 @@
     </script>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
+  <body class="homepage">
     <div class="site-shell">
       <header class="site-header home-header" id="top">
         <div class="brand-lockup">
@@ -57,155 +59,112 @@
 
       <main>
         <section class="section home-hero" id="overview">
-          <div class="home-intro reveal">
-            <span class="section-chip">Learn first, then open the working page you need</span>
-            <h1>Wahj Molecular Biology Learning Hub</h1>
-            <p class="hero-lead">
-              Choose one of the five core topics below. After you select a topic, the hub
-              will show the best direct entry cards for that topic, including the lecture page
-              and the related practical page when available.
-            </p>
-            <div class="selector-note">
-              <p><strong>Author:</strong> Mahmood Al-Mualm</p>
-              <p><strong>Title:</strong> CEO of Wahj Al-DNA</p>
-              <p>
-                <strong>Entry logic:</strong> first select the scientific topic, then open the
-                lecture or the practical page from the second step.
+          <div class="home-hero-grid">
+            <div class="home-intro reveal">
+              <span class="section-chip">From DNA to Data</span>
+              <h1>Wahj Molecular Biology Learning Hub</h1>
+              <p class="hero-lead">
+                A bilingual molecular learning platform for sequencing, qPCR, ELISA, and
+                genotype-statistics workflows.
               </p>
+              <p class="home-supporting-copy">
+                Start by choosing a scientific module. The homepage then reveals the best
+                lecture page and practical analysis page for that topic without changing any of
+                the existing scientific tools or URLs.
+              </p>
+              <div class="home-credibility-ribbon">
+                <article class="mini-signal-card">
+                  <span class="mini-signal-label">Author</span>
+                  <strong>Mahmood Al-Mualm</strong>
+                  <p>Wahj Al-DNA educational platform lead.</p>
+                </article>
+                <article class="mini-signal-card">
+                  <span class="mini-signal-label">Mode</span>
+                  <strong>Lecture plus tool</strong>
+                  <p>Choose the concept page first, then open the working scientific page.</p>
+                </article>
+                <article class="mini-signal-card">
+                  <span class="mini-signal-label">Audience</span>
+                  <strong>Students and researchers</strong>
+                  <p>Built for molecular biology learning with working analysis pages behind each topic.</p>
+                </article>
+              </div>
             </div>
+
+            <aside class="home-signal-board reveal" aria-hidden="true">
+              <div class="signal-board">
+                <div class="signal-board-header">
+                  <span class="signal-board-chip">Molecular learning hub</span>
+                  <h2>Scientific stations</h2>
+                </div>
+                <div class="signal-grid">
+                  <article class="signal-card signal-card--ngs">
+                    <span class="signal-card-label">NGS</span>
+                    <p>FASTQ to alignment</p>
+                  </article>
+                  <article class="signal-card signal-card--sanger">
+                    <span class="signal-card-label">Sanger</span>
+                    <p>Chromatogram to BLAST</p>
+                  </article>
+                  <article class="signal-card signal-card--qpcr">
+                    <span class="signal-card-label">qPCR</span>
+                    <p>Ct to fold change</p>
+                  </article>
+                  <article class="signal-card signal-card--elisa">
+                    <span class="signal-card-label">ELISA</span>
+                    <p>OD to concentration</p>
+                  </article>
+                  <article class="signal-card signal-card--genotype">
+                    <span class="signal-card-label">Genotype</span>
+                    <p>HWE to odds ratio</p>
+                  </article>
+                </div>
+              </div>
+            </aside>
           </div>
         </section>
 
         <section class="section home-topic-stage" id="topics">
-          <div class="section-heading">
+          <div class="section-heading home-section-heading">
             <span class="section-chip">Step 1</span>
             <h2>Select the topic</h2>
             <p>
-              The homepage is intentionally simple: <strong>Next-Generation Sequencing</strong>,
-              <strong>Sanger sequencing</strong>, <strong>Real-Time PCR</strong>,
-              <strong>Wahj ELISA Learning and Analysis Suite</strong>, and
-              <strong>Genotype statistics</strong>.
+              Choose one of the five scientific modules below. Each card opens a compact module
+              explanation, a real topic-visit badge, and the direct entry pages for that
+              topic.
             </p>
           </div>
+          <p class="topic-analytics-note">
+            Topic-visit badges count real topic opens only when the live backend supports
+            per-topic analytics.
+          </p>
 
-          <div class="topic-selector-grid reveal" role="list" aria-label="Topic selection">
-            <button
-              class="topic-selector-card"
-              type="button"
-              data-topic-select="ngs"
-              aria-pressed="false"
-            >
-              <span class="topic-tag">Topic</span>
-              <h3>Next-Generation Sequencing</h3>
-              <p>
-                Learn the sequencing workflow, applications, file formats, quality control,
-                and how to choose the right NGS approach.
-              </p>
-              <div class="topic-selector-meta">
-                <span>Genomics</span>
-                <span>QC</span>
-                <span>Decision guide</span>
-              </div>
-            </button>
-
-            <button
-              class="topic-selector-card"
-              type="button"
-              data-topic-select="sanger"
-              aria-pressed="false"
-            >
-              <span class="topic-tag">Topic</span>
-              <h3>Sanger Sequencing</h3>
-              <p>
-                Study the sequence-cleaning workflow, BLAST reasoning, ranked hit comparison,
-                alignment review, and publication-oriented tables.
-              </p>
-              <div class="topic-selector-meta">
-                <span>Sequence cleaning</span>
-                <span>BLAST</span>
-                <span>Alignment</span>
-              </div>
-            </button>
-
-            <button
-              class="topic-selector-card"
-              type="button"
-              data-topic-select="rt-pcr"
-              aria-pressed="false"
-            >
-              <span class="topic-tag">Topic</span>
-              <h3>Real-Time PCR</h3>
-              <p>
-                Review Ct interpretation, assay chemistry, qPCR workflow, relative
-                quantification, and the gene expression calculator.
-              </p>
-              <div class="topic-selector-meta">
-                <span>Ct</span>
-                <span>qPCR</span>
-                <span>2^-ΔΔCt</span>
-              </div>
-            </button>
-
-            <button
-              class="topic-selector-card"
-              type="button"
-              data-topic-select="elisa"
-              aria-pressed="false"
-            >
-              <span class="topic-tag">Topic</span>
-              <h3>Wahj ELISA Learning and Analysis Suite</h3>
-              <p>
-                Study ELISA from signal generation to OD interpretation, then open the
-                concentration and statistics workflow built around the standard curve.
-              </p>
-              <div class="topic-selector-meta">
-                <span>OD</span>
-                <span>Standard curve</span>
-                <span>Statistics</span>
-              </div>
-            </button>
-
-            <button
-              class="topic-selector-card"
-              type="button"
-              data-topic-select="genetics"
-              aria-pressed="false"
-            >
-              <span class="topic-tag">Topic</span>
-              <h3>Genotype Statistics</h3>
-              <p>
-                Open population-genetics tools for Hardy-Weinberg equilibrium checking and
-                SNP genotype comparison between patients and controls.
-              </p>
-              <div class="topic-selector-meta">
-                <span>HWE</span>
-                <span>Odds ratio</span>
-                <span>Fisher exact</span>
-              </div>
-            </button>
-          </div>
+          <div
+            class="topic-selector-grid reveal"
+            id="topic-selector-grid"
+            role="list"
+            aria-label="Topic selection"
+          ></div>
         </section>
 
         <section class="section home-selection-stage" id="selection-panel">
-          <div class="section-heading">
+          <div class="section-heading home-section-heading">
             <span class="section-chip" id="selection-step-chip">Step 2</span>
             <h2 id="selection-title">Choose a topic first</h2>
             <p id="selection-copy">
-              After you click one of the five topic cards, the direct lecture and practical
-              entry cards will appear here.
+              Select a scientific module above to reveal the direct lecture and practical entry
+              pages for that topic.
             </p>
           </div>
 
           <div class="topic-selection-shell reveal">
-            <div class="topic-selection-grid" id="selection-options">
+            <div class="topic-selection-context" id="selection-context">
               <div class="topic-placeholder">
-                Select <strong>Next-Generation Sequencing</strong>,
-                <strong>Sanger sequencing</strong>, <strong>Real-Time PCR</strong>,
-                <strong>Wahj ELISA Learning and Analysis Suite</strong>, or
-                <strong>Genotype statistics</strong> to
-                continue.
+                Select one of the five scientific modules above. The selected topic will reveal
+                the lecture page and the matching practical tools here.
               </div>
             </div>
+            <div class="topic-selection-grid" id="selection-options"></div>
           </div>
         </section>
       </main>
@@ -232,175 +191,6 @@
 
     <script src="config.js"></script>
     <script src="script.js"></script>
-    <script>
-      (() => {
-        const selectorButtons = Array.from(document.querySelectorAll("[data-topic-select]"));
-        const selectionOptions = document.querySelector("#selection-options");
-        const selectionTitle = document.querySelector("#selection-title");
-        const selectionCopy = document.querySelector("#selection-copy");
-
-        if (!selectorButtons.length || !selectionOptions || !selectionTitle || !selectionCopy) {
-          return;
-        }
-
-        const topics = {
-          ngs: {
-            title: "Next-Generation Sequencing",
-            copy: "Open either the full lecture or the practical guide entry page for this topic.",
-            cards: [
-              {
-                badge: "Lecture",
-                title: "NGS lecture",
-                description:
-                  "Open the full NGS teaching page covering workflow, applications, files, platforms, and biological interpretation.",
-                href: "./ngs/",
-                chips: ["Workflow", "Applications", "QC"],
-              },
-              {
-                badge: "Practical guide",
-                title: "NGS workflow and decision sections",
-                description:
-                  "Jump directly into the workflow, quality-control, platform, and decision-guide sections inside the NGS page.",
-                href: "./ngs/#workflow",
-                chips: ["Workflow", "Decision guide", "Study tables"],
-              },
-            ],
-          },
-          sanger: {
-            title: "Sanger Sequencing",
-            copy: "Open the conceptual lecture or go directly to the live BLAST alignment workflow.",
-            cards: [
-              {
-                badge: "Lecture",
-                title: "Sanger sequencing lecture",
-                description:
-                  "Start with sequence cleaning, BLAST interpretation, taxonomy context, and how to read alignment evidence correctly.",
-                href: "./sequence-analysis/#overview",
-                chips: ["Cleaning", "Taxonomy", "Interpretation"],
-              },
-              {
-                badge: "Tool",
-                title: "BLAST alignment tool",
-                description:
-                  "Paste a sequence, clean it, run BLAST, inspect ranked hits, and generate publication-oriented tables.",
-                href: "./sequence-analysis/#analysis-tool",
-                chips: ["Live BLAST", "Ranked hits", "Publication tables"],
-              },
-            ],
-          },
-          "rt-pcr": {
-            title: "Real-Time PCR",
-            copy: "Open the scientific lecture or go directly to the gene expression calculator.",
-            cards: [
-              {
-                badge: "Lecture",
-                title: "Real-Time PCR lecture",
-                description:
-                  "Study Ct, threshold logic, SYBR Green vs TaqMan chemistry, and relative vs absolute quantification.",
-                href: "./real-time-pcr/",
-                chips: ["Ct", "Chemistry", "Quantification"],
-              },
-              {
-                badge: "Tool",
-                title: "Gene expression calculator",
-                description:
-                  "Assign plate wells, import Ct values, calculate 2^-ΔΔCt, and review summary tables, statistics, and graphs.",
-                href: "./real-time-pcr/#calculator",
-                chips: ["96-well plate", "Ct import", "2^-ΔΔCt"],
-              },
-            ],
-          },
-          elisa: {
-            title: "Wahj ELISA Learning and Analysis Suite",
-            copy: "Open the ELISA lecture or go directly to the curve-fitting and concentration tool.",
-            cards: [
-              {
-                badge: "Lecture",
-                title: "ELISA lecture",
-                description:
-                  "Learn what ELISA measures, what OD means, how the standard curve works, and how to choose the curve shape from the kit leaflet.",
-                href: "./elisa/",
-                chips: ["Signal", "OD", "Standard curve"],
-              },
-              {
-                badge: "Tool",
-                title: "Wahj ELISA Learning and Analysis Suite",
-                description:
-                  "Enter standards and unknown ODs, generate the fitted equation, calculate concentrations, and open guided statistical analysis.",
-                href: "./elisa-tool/",
-                chips: ["Curve fit", "Concentration", "Statistics"],
-              },
-            ],
-          },
-          genetics: {
-            title: "Genotype Statistics",
-            copy: "Open the Hardy-Weinberg equilibrium calculator or go directly to the SNP case-control statistics tool.",
-            cards: [
-              {
-                badge: "Tool",
-                title: "Hardy-Weinberg equation",
-                description:
-                  "Enter the three genotype counts, compare observed and expected values, and review the Hardy-Weinberg chi-square and p-value.",
-                href: "./hardy-weinberg/",
-                chips: ["Observed vs expected", "Chi-square", "P-value"],
-              },
-              {
-                badge: "Tool",
-                title: "SNP statistics",
-                description:
-                  "Enter patient and control genotype counts to review genotype frequencies, odds ratios, Fisher exact p-values, and confidence intervals.",
-                href: "./snp-statistics/",
-                chips: ["Patients vs controls", "Odds ratio", "Fisher exact"],
-              },
-            ],
-          },
-        };
-
-        function renderTopic(topicKey) {
-          const topic = topics[topicKey];
-          if (!topic) {
-            return;
-          }
-
-          selectorButtons.forEach((button) => {
-            const isActive = button.dataset.topicSelect === topicKey;
-            button.classList.toggle("is-active", isActive);
-            button.setAttribute("aria-pressed", isActive ? "true" : "false");
-          });
-
-          selectionTitle.textContent = topic.title;
-          selectionCopy.textContent = topic.copy;
-          selectionOptions.innerHTML = topic.cards
-            .map(
-              (card) => `
-                <a class="topic-entry-card" href="${card.href}">
-                  <span class="topic-entry-badge">${card.badge}</span>
-                  <h3>${card.title}</h3>
-                  <p>${card.description}</p>
-                  <div class="topic-selector-meta">
-                    ${card.chips.map((chip) => `<span>${chip}</span>`).join("")}
-                  </div>
-                </a>
-              `
-            )
-            .join("");
-        }
-
-        selectorButtons.forEach((button) => {
-          button.addEventListener("click", () => {
-            renderTopic(button.dataset.topicSelect || "ngs");
-            document.querySelector("#selection-panel")?.scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-            });
-          });
-        });
-
-        const topicFromHash = window.location.hash.replace("#", "");
-        if (topics[topicFromHash]) {
-          renderTopic(topicFromHash);
-        }
-      })();
-    </script>
+    <script src="homepage.js"></script>
   </body>
 </html>
