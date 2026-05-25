@@ -2,14 +2,24 @@ const homepageConfig = window.WAHJ_NGS_CONFIG || {};
 const homepageBackendApiUrl = (homepageConfig.readerApiUrl || "").trim();
 const homepageSiteLabel = (homepageConfig.siteLabel || "Wahj NGS Guide").trim();
 const homepageLanguage = document.documentElement.lang === "ar" ? "ar" : "en";
-const homepageReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const homepageReducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 const homepageReaderIdStorageKey = "wahj-ngs-reader-id";
 const homepageTopicCooldownStorageKey = "wahj-topic-visit-cooldowns-v1";
+const homepageMotionPreferenceStorageKey = "wahj-homepage-motion-v1";
 const homepageTopicCooldownMs = 30 * 60 * 1000;
 const homepagePathPrefix = homepageLanguage === "ar" ? "../" : "./";
 
 const homepageCopy = {
   en: {
+    sceneChip: "Living molecular scene",
+    sceneTitle: "Animated molecular workflow",
+    sceneCopy:
+      "Schematic scientific motion links DNA replication, gene expression, PCR, Sanger traces, ELISA signal, and genotype statistics.",
+    sceneNote: "Schematic, not to scale",
+    motionReduce: "Reduce motion",
+    motionResume: "Resume motion",
+    motionLiveLabel: "Scene motion on",
+    motionReducedLabel: "Scene motion reduced",
     topicTag: "Scientific module",
     selectedBadge: "Selected module",
     countLabel: "Visits",
@@ -30,6 +40,14 @@ const homepageCopy = {
       "Choose one of the five molecular biology modules above. The selected topic will reveal the best lecture and practical entry cards here.",
     panelCountLabel: "Topic visits",
     cardsLabel: "Available entry points",
+    scenePanels: {
+      ngs: "DNA replication and data stream",
+      expression: "Gene expression pathway",
+      qpcr: "PCR and qPCR signal",
+      sanger: "Sanger chromatogram",
+      elisa: "ELISA plate and standard curve",
+      genotype: "Genotype comparison logic",
+    },
     topics: {
       ngs: {
         analyticsId: "ngs",
@@ -187,6 +205,15 @@ const homepageCopy = {
     },
   },
   ar: {
+    sceneChip: "مشهد جزيئي حي",
+    sceneTitle: "سير عمل جزيئي متحرك",
+    sceneCopy:
+      "حركة علمية تخطيطية تربط تضاعف الحمض النووي، والتعبير الجيني، وPCR، وكروماتوغرام سانجر، وإشارة ELISA، وإحصاءات الأنماط الجينية.",
+    sceneNote: "رسم تخطيطي غير مطابق للمقياس",
+    motionReduce: "تقليل الحركة",
+    motionResume: "استئناف الحركة",
+    motionLiveLabel: "الحركة مفعلة",
+    motionReducedLabel: "تم تقليل الحركة",
     topicTag: "وحدة علمية",
     selectedBadge: "الوحدة المختارة",
     countLabel: "الزيارات",
@@ -207,6 +234,14 @@ const homepageCopy = {
       "اختر واحدة من الوحدات الخمس في الأعلى. بعد الاختيار ستظهر لك هنا بطاقات الدخول المباشر المناسبة للشرح أو الأداة العملية.",
     panelCountLabel: "زيارات الموضوع",
     cardsLabel: "نقاط الدخول المتاحة",
+    scenePanels: {
+      ngs: "تضاعف الحمض النووي وتيار البيانات",
+      expression: "مسار التعبير الجيني",
+      qpcr: "إشارة PCR وqPCR",
+      sanger: "كروماتوغرام سانجر",
+      elisa: "صفيحة ELISA والمنحنى القياسي",
+      genotype: "منطق مقارنة الأنماط الجينية",
+    },
     topics: {
       ngs: {
         analyticsId: "ngs",
@@ -377,9 +412,35 @@ const homepageTopicKeyAliases = {
 
 const homepageTopicStats = new Map();
 const homepagePendingTrackRequests = new Map();
+let homepageManualMotionMode = "";
+let homepageSceneInView = true;
 
 function getHomepageCopy() {
   return homepageCopy[homepageLanguage];
+}
+
+function getStoredHomepageMotionMode() {
+  try {
+    return localStorage.getItem(homepageMotionPreferenceStorageKey) || "";
+  } catch (error) {
+    return "";
+  }
+}
+
+function setStoredHomepageMotionMode(value) {
+  try {
+    if (!value) {
+      localStorage.removeItem(homepageMotionPreferenceStorageKey);
+      return;
+    }
+    localStorage.setItem(homepageMotionPreferenceStorageKey, value);
+  } catch (error) {
+    // Ignore storage errors and keep the in-memory preference.
+  }
+}
+
+function isHomepageReducedMotion() {
+  return homepageManualMotionMode === "reduce" || homepageReducedMotionQuery.matches;
 }
 
 function normalizeHomepageTopicKey(value) {
@@ -489,84 +550,335 @@ function isTopicCooldownActive(topicId) {
   return Boolean(lastTrackedAt && Date.now() - lastTrackedAt < homepageTopicCooldownMs);
 }
 
+function renderLivingScene() {
+  const root = document.querySelector("#home-scene-root");
+  const copy = getHomepageCopy();
+  if (!root) {
+    return;
+  }
+
+  const motionReduced = isHomepageReducedMotion();
+  root.innerHTML = `
+    <section
+      class="molecular-scene"
+      id="molecular-scene"
+      data-active-topic="ngs"
+      data-scene-play-state="${motionReduced ? "reduced" : "running"}"
+      aria-label="${copy.sceneTitle}"
+    >
+      <div class="scene-atmosphere" aria-hidden="true">
+        <span class="scene-particle scene-particle--1"></span>
+        <span class="scene-particle scene-particle--2"></span>
+        <span class="scene-particle scene-particle--3"></span>
+        <span class="scene-particle scene-particle--4"></span>
+      </div>
+      <div class="molecular-scene-toolbar">
+        <div class="molecular-scene-copy">
+          <span class="signal-board-chip">${copy.sceneChip}</span>
+          <h2>${copy.sceneTitle}</h2>
+          <p>${copy.sceneCopy}</p>
+        </div>
+        <div class="molecular-scene-controls">
+          <button
+            type="button"
+            class="motion-toggle"
+            id="scene-motion-toggle"
+            aria-pressed="${motionReduced ? "true" : "false"}"
+          >
+            ${motionReduced ? copy.motionResume : copy.motionReduce}
+          </button>
+          <span class="scene-motion-state" id="scene-motion-state">
+            ${motionReduced ? copy.motionReducedLabel : copy.motionLiveLabel}
+          </span>
+        </div>
+      </div>
+
+      <div class="molecular-scene-grid">
+        <article class="scene-panel scene-panel--wide scene-panel--ngs" data-scene-panel="ngs">
+          <div class="scene-panel-head">
+            <span class="scene-panel-tag">NGS</span>
+            <strong>${copy.scenePanels.ngs}</strong>
+          </div>
+          <svg class="scene-svg" viewBox="0 0 360 156" aria-hidden="true" focusable="false">
+            <text x="18" y="30" class="scene-svg-label">3'</text>
+            <text x="316" y="30" class="scene-svg-label">5'</text>
+            <text x="18" y="138" class="scene-svg-label">5'</text>
+            <text x="316" y="138" class="scene-svg-label">3'</text>
+            <path class="scene-strand scene-strand--template" d="M26 42 H334" />
+            <path class="scene-strand scene-strand--new scene-animate-grow" d="M26 114 H266" />
+            <path class="scene-strand scene-strand--new-ghost" d="M266 114 H334" />
+            <g class="scene-rungs">
+              <line x1="42" y1="50" x2="42" y2="106" />
+              <line x1="68" y1="50" x2="68" y2="106" />
+              <line x1="94" y1="50" x2="94" y2="106" />
+              <line x1="120" y1="50" x2="120" y2="106" />
+              <line x1="146" y1="50" x2="146" y2="106" />
+              <line x1="172" y1="50" x2="172" y2="106" />
+              <line x1="198" y1="50" x2="198" y2="106" />
+              <line x1="224" y1="50" x2="224" y2="106" />
+              <line x1="250" y1="50" x2="250" y2="106" />
+            </g>
+            <g class="scene-polymerase scene-animate-polymerase">
+              <ellipse cx="0" cy="0" rx="30" ry="22" />
+              <circle cx="-10" cy="-3" r="4" />
+              <circle cx="8" cy="7" r="4" />
+            </g>
+            <g class="scene-nucleotides">
+              <circle class="scene-animate-float-a" cx="244" cy="24" r="6" />
+              <circle class="scene-animate-float-b" cx="268" cy="18" r="6" />
+              <circle class="scene-animate-float-c" cx="294" cy="22" r="6" />
+            </g>
+            <g class="scene-data-stream">
+              <rect x="282" y="66" width="52" height="44" rx="12" />
+              <text x="308" y="84" text-anchor="middle" class="scene-svg-code">FASTQ</text>
+              <text x="308" y="100" text-anchor="middle" class="scene-svg-code scene-animate-fade">A C G T</text>
+            </g>
+          </svg>
+        </article>
+
+        <article class="scene-panel scene-panel--wide scene-panel--expression" data-scene-panel="expression">
+          <div class="scene-panel-head">
+            <span class="scene-panel-tag">RNA</span>
+            <strong>${copy.scenePanels.expression}</strong>
+          </div>
+          <svg class="scene-svg" viewBox="0 0 360 156" aria-hidden="true" focusable="false">
+            <circle class="scene-nucleus" cx="86" cy="78" r="54" />
+            <path class="scene-dna-loop" d="M46 66 C70 40, 92 100, 118 60 S156 48, 132 98" />
+            <circle class="scene-rna-polymerase scene-animate-transcription" cx="112" cy="72" r="12" />
+            <path class="scene-mrna-trail scene-animate-rna" d="M120 84 C144 96, 168 102, 196 102 S244 94, 282 98" />
+            <text x="170" y="90" class="scene-svg-code">A U G</text>
+            <g class="scene-ribosome scene-animate-ribosome">
+              <ellipse cx="248" cy="98" rx="22" ry="16" />
+              <ellipse cx="248" cy="112" rx="16" ry="10" />
+            </g>
+            <path class="scene-polypeptide scene-animate-polypeptide" d="M270 98 C286 92, 300 110, 312 90 S334 84, 340 106" />
+            <path class="scene-folded-protein scene-animate-fold" d="M320 52 C336 36, 350 48, 344 66 C338 84, 314 84, 308 66 C302 52, 308 38, 320 52 Z" />
+          </svg>
+        </article>
+
+        <article class="scene-panel scene-panel--qpcr" data-scene-panel="qpcr">
+          <div class="scene-panel-head">
+            <span class="scene-panel-tag">qPCR</span>
+            <strong>${copy.scenePanels.qpcr}</strong>
+          </div>
+          <svg class="scene-svg" viewBox="0 0 240 132" aria-hidden="true" focusable="false">
+            <g class="scene-wells scene-animate-glow">
+              <rect x="20" y="22" width="30" height="56" rx="12" />
+              <rect x="60" y="22" width="30" height="56" rx="12" />
+              <rect x="100" y="22" width="30" height="56" rx="12" />
+            </g>
+            <line class="scene-axis" x1="150" y1="102" x2="222" y2="102" />
+            <line class="scene-axis" x1="160" y1="28" x2="160" y2="102" />
+            <line class="scene-threshold" x1="150" y1="64" x2="222" y2="64" />
+            <path class="scene-curve scene-animate-curve" d="M160 100 C176 100, 186 96, 194 88 S210 62, 220 36" />
+            <circle class="scene-curve-dot scene-animate-curve-dot" cx="0" cy="0" r="4.5" />
+          </svg>
+        </article>
+
+        <article class="scene-panel scene-panel--sanger" data-scene-panel="sanger">
+          <div class="scene-panel-head">
+            <span class="scene-panel-tag">AB1</span>
+            <strong>${copy.scenePanels.sanger}</strong>
+          </div>
+          <svg class="scene-svg" viewBox="0 0 240 132" aria-hidden="true" focusable="false">
+            <rect class="scene-screen" x="18" y="16" width="204" height="88" rx="16" />
+            <path class="scene-trace scene-trace--a" d="M28 92 Q44 52 58 92 T92 92 T126 92 T160 92 T194 92" />
+            <path class="scene-trace scene-trace--c" d="M28 94 Q50 78 62 94 T108 94 T154 94 T200 94" />
+            <path class="scene-trace scene-trace--g" d="M28 96 Q56 88 68 96 T124 96 T180 96" />
+            <path class="scene-trace scene-trace--t" d="M28 98 Q60 44 74 98 T136 98 T198 98" />
+            <rect class="scene-scan-bar scene-animate-scan" x="38" y="18" width="16" height="84" rx="8" />
+            <text x="34" y="118" class="scene-svg-code">.ab1 / FASTA</text>
+          </svg>
+        </article>
+
+        <article class="scene-panel scene-panel--elisa" data-scene-panel="elisa">
+          <div class="scene-panel-head">
+            <span class="scene-panel-tag">ELISA</span>
+            <strong>${copy.scenePanels.elisa}</strong>
+          </div>
+          <svg class="scene-svg" viewBox="0 0 240 132" aria-hidden="true" focusable="false">
+            <g class="scene-plate">
+              <rect x="16" y="18" width="112" height="86" rx="20" />
+              <circle class="scene-well-fill scene-well-fill--1" cx="38" cy="42" r="10" />
+              <circle class="scene-well-fill scene-well-fill--2" cx="72" cy="42" r="10" />
+              <circle class="scene-well-fill scene-well-fill--3" cx="106" cy="42" r="10" />
+              <circle class="scene-well-fill scene-well-fill--4" cx="38" cy="76" r="10" />
+              <circle class="scene-well-fill scene-well-fill--5" cx="72" cy="76" r="10" />
+              <circle class="scene-well-fill scene-well-fill--6" cx="106" cy="76" r="10" />
+            </g>
+            <line class="scene-axis" x1="150" y1="100" x2="220" y2="100" />
+            <line class="scene-axis" x1="160" y1="28" x2="160" y2="100" />
+            <path class="scene-curve scene-animate-curve" d="M160 96 C174 86, 188 72, 198 58 S214 36, 220 24" />
+          </svg>
+        </article>
+
+        <article class="scene-panel scene-panel--genotype" data-scene-panel="genotype">
+          <div class="scene-panel-head">
+            <span class="scene-panel-tag">HWE</span>
+            <strong>${copy.scenePanels.genotype}</strong>
+          </div>
+          <svg class="scene-svg" viewBox="0 0 240 132" aria-hidden="true" focusable="false">
+            <g class="scene-genotype-groups">
+              <circle class="scene-allele scene-animate-gentle scene-allele--a" cx="34" cy="40" r="9" />
+              <circle class="scene-allele scene-animate-gentle scene-allele--b" cx="62" cy="40" r="9" />
+              <circle class="scene-allele scene-animate-gentle scene-allele--c" cx="48" cy="68" r="9" />
+              <circle class="scene-allele scene-animate-gentle scene-allele--d" cx="92" cy="40" r="9" />
+              <circle class="scene-allele scene-animate-gentle scene-allele--e" cx="120" cy="40" r="9" />
+              <circle class="scene-allele scene-animate-gentle scene-allele--f" cx="106" cy="68" r="9" />
+            </g>
+            <g class="scene-or-table">
+              <rect x="150" y="24" width="68" height="64" rx="14" />
+              <line x1="184" y1="24" x2="184" y2="88" />
+              <line x1="150" y1="56" x2="218" y2="56" />
+              <text x="166" y="46" class="scene-svg-code">a</text>
+              <text x="198" y="46" class="scene-svg-code">b</text>
+              <text x="166" y="76" class="scene-svg-code">c</text>
+              <text x="198" y="76" class="scene-svg-code">d</text>
+            </g>
+          </svg>
+        </article>
+      </div>
+
+      <p class="scene-footnote">${copy.sceneNote}</p>
+    </section>
+  `;
+
+  const motionButton = root.querySelector("#scene-motion-toggle");
+  if (motionButton) {
+    motionButton.addEventListener("click", () => {
+      homepageManualMotionMode = isHomepageReducedMotion() ? "" : "reduce";
+      setStoredHomepageMotionMode(homepageManualMotionMode);
+      applyHomepageSceneMotionState();
+    });
+  }
+}
+
+function applyHomepageSceneMotionState() {
+  const scene = document.querySelector("#molecular-scene");
+  const motionButton = document.querySelector("#scene-motion-toggle");
+  const motionState = document.querySelector("#scene-motion-state");
+  const copy = getHomepageCopy();
+  if (!scene) {
+    return;
+  }
+
+  const reduced = isHomepageReducedMotion();
+  const playState = reduced ? "reduced" : homepageSceneInView ? "running" : "paused";
+  scene.dataset.scenePlayState = playState;
+
+  if (motionButton) {
+    motionButton.textContent = reduced ? copy.motionResume : copy.motionReduce;
+    motionButton.setAttribute("aria-pressed", reduced ? "true" : "false");
+  }
+
+  if (motionState) {
+    motionState.textContent = reduced ? copy.motionReducedLabel : copy.motionLiveLabel;
+  }
+}
+
+function setSceneTopic(topicKey) {
+  const scene = document.querySelector("#molecular-scene");
+  if (!scene) {
+    return;
+  }
+  const normalizedKey = normalizeHomepageTopicKey(topicKey) || "ngs";
+  scene.dataset.activeTopic = normalizedKey;
+}
+
+function initializeHomepageSceneMotion() {
+  homepageManualMotionMode = getStoredHomepageMotionMode();
+  applyHomepageSceneMotionState();
+
+  if (typeof IntersectionObserver === "function") {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        homepageSceneInView = Boolean(entry?.isIntersecting);
+        applyHomepageSceneMotionState();
+      },
+      { threshold: 0.15 }
+    );
+    const shell = document.querySelector("#home-scene-shell");
+    if (shell) {
+      observer.observe(shell);
+    }
+  }
+
+  if (typeof homepageReducedMotionQuery.addEventListener === "function") {
+    homepageReducedMotionQuery.addEventListener("change", () => {
+      if (!homepageManualMotionMode) {
+        applyHomepageSceneMotionState();
+      }
+    });
+  }
+}
+
 function topicVisualSvg(theme) {
   const svgByTheme = {
     ngs: `
-      <svg viewBox="0 0 220 96" role="presentation" focusable="false">
-        <defs>
-          <linearGradient id="ngsLine" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="rgba(47,149,184,0.9)" />
-            <stop offset="100%" stop-color="rgba(94,191,214,0.95)" />
-          </linearGradient>
-        </defs>
-        <rect x="8" y="12" width="76" height="46" rx="14" fill="rgba(47,149,184,0.12)" />
-        <rect x="96" y="18" width="116" height="34" rx="17" fill="rgba(24,79,103,0.08)" />
-        <path d="M28 70 C58 28, 88 90, 118 44 S178 18, 198 58" fill="none" stroke="url(#ngsLine)" stroke-width="4.5" stroke-linecap="round"/>
-        <circle cx="34" cy="34" r="4.5" fill="rgba(24,79,103,0.9)" />
-        <circle cx="48" cy="40" r="4.5" fill="rgba(24,79,103,0.72)" />
-        <circle cx="62" cy="28" r="4.5" fill="rgba(24,79,103,0.5)" />
-        <circle cx="146" cy="35" r="5" fill="rgba(47,149,184,0.92)" />
-        <circle cx="166" cy="35" r="5" fill="rgba(47,149,184,0.68)" />
-        <circle cx="186" cy="35" r="5" fill="rgba(47,149,184,0.42)" />
+      <svg viewBox="0 0 220 110" role="presentation" focusable="false">
+        <rect x="12" y="14" width="70" height="40" rx="16" fill="rgba(47,149,184,0.1)" />
+        <rect x="98" y="18" width="110" height="32" rx="16" fill="rgba(24,79,103,0.08)" />
+        <path d="M24 78 C48 46, 72 94, 96 64 S144 28, 170 52 S198 82, 210 62" fill="none" stroke="rgba(47,149,184,0.95)" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M24 90 C48 58, 72 106, 96 76 S144 40, 170 64 S198 94, 210 74" fill="none" stroke="rgba(24,79,103,0.42)" stroke-width="3.5" stroke-linecap="round"/>
+        <text x="30" y="40" class="scene-svg-code">FASTQ</text>
+        <text x="128" y="39" class="scene-svg-code">ALIGN</text>
       </svg>
     `,
     sanger: `
-      <svg viewBox="0 0 220 96" role="presentation" focusable="false">
-        <path d="M12 72 Q28 32 42 72 T72 72 T102 72 T132 72 T162 72 T192 72" fill="none" stroke="rgba(201,106,88,0.88)" stroke-width="4" stroke-linecap="round"/>
-        <path d="M12 74 Q32 58 44 74 T84 74 T124 74 T164 74 T204 74" fill="none" stroke="rgba(63,137,104,0.88)" stroke-width="3" stroke-linecap="round"/>
-        <path d="M12 76 Q36 70 48 76 T96 76 T144 76 T192 76" fill="none" stroke="rgba(47,149,184,0.82)" stroke-width="3" stroke-linecap="round"/>
-        <path d="M12 78 Q40 42 54 78 T108 78 T162 78 T216 78" fill="none" stroke="rgba(199,168,96,0.82)" stroke-width="3" stroke-linecap="round"/>
-        <rect x="12" y="10" width="196" height="16" rx="8" fill="rgba(255,255,255,0.52)" />
-        <circle cx="32" cy="18" r="3.5" fill="rgba(201,106,88,0.95)" />
-        <circle cx="50" cy="18" r="3.5" fill="rgba(63,137,104,0.92)" />
-        <circle cx="68" cy="18" r="3.5" fill="rgba(47,149,184,0.92)" />
-        <circle cx="86" cy="18" r="3.5" fill="rgba(199,168,96,0.92)" />
+      <svg viewBox="0 0 220 110" role="presentation" focusable="false">
+        <rect x="12" y="12" width="196" height="76" rx="18" fill="rgba(255,255,255,0.74)" stroke="rgba(201,106,88,0.18)"/>
+        <path d="M20 80 Q36 34 48 80 T78 80 T108 80 T138 80 T168 80 T198 80" fill="none" stroke="rgba(201,106,88,0.9)" stroke-width="4" stroke-linecap="round"/>
+        <path d="M20 82 Q40 66 52 82 T92 82 T132 82 T172 82 T212 82" fill="none" stroke="rgba(63,137,104,0.86)" stroke-width="3" stroke-linecap="round"/>
+        <path d="M20 84 Q42 76 58 84 T108 84 T158 84 T208 84" fill="none" stroke="rgba(47,149,184,0.82)" stroke-width="3" stroke-linecap="round"/>
+        <path d="M20 86 Q46 38 64 86 T128 86 T192 86" fill="none" stroke="rgba(199,168,96,0.85)" stroke-width="3" stroke-linecap="round"/>
+        <text x="24" y="102" class="scene-svg-code">.ab1</text>
+        <text x="70" y="102" class="scene-svg-code">FASTA</text>
       </svg>
     `,
     qpcr: `
-      <svg viewBox="0 0 220 96" role="presentation" focusable="false">
-        <line x1="12" y1="78" x2="208" y2="78" stroke="rgba(23,39,57,0.18)" stroke-width="3" />
-        <line x1="28" y1="18" x2="28" y2="78" stroke="rgba(23,39,57,0.18)" stroke-width="3" />
-        <line x1="12" y1="48" x2="208" y2="48" stroke="rgba(201,106,88,0.4)" stroke-width="2.5" stroke-dasharray="7 7" />
-        <path d="M28 76 C72 76, 98 74, 120 68 S162 48, 190 18" fill="none" stroke="rgba(47,149,184,0.92)" stroke-width="4.5" stroke-linecap="round" />
-        <path d="M28 76 C82 76, 104 72, 128 60 S172 34, 198 12" fill="none" stroke="rgba(63,137,104,0.78)" stroke-width="3.5" stroke-linecap="round" />
-        <circle cx="146" cy="51" r="5" fill="rgba(201,106,88,0.9)" />
+      <svg viewBox="0 0 220 110" role="presentation" focusable="false">
+        <rect x="16" y="18" width="24" height="52" rx="10" fill="rgba(63,137,104,0.14)" />
+        <rect x="48" y="18" width="24" height="52" rx="10" fill="rgba(63,137,104,0.14)" />
+        <rect x="80" y="18" width="24" height="52" rx="10" fill="rgba(63,137,104,0.14)" />
+        <line x1="126" y1="88" x2="210" y2="88" stroke="rgba(23,39,57,0.18)" stroke-width="3" />
+        <line x1="136" y1="24" x2="136" y2="88" stroke="rgba(23,39,57,0.18)" stroke-width="3" />
+        <line x1="126" y1="56" x2="210" y2="56" stroke="rgba(201,106,88,0.36)" stroke-width="2.5" stroke-dasharray="7 7" />
+        <path d="M136 86 C152 86, 164 84, 172 74 S190 50, 206 26" fill="none" stroke="rgba(47,149,184,0.92)" stroke-width="4.5" stroke-linecap="round" />
+        <text x="146" y="104" class="scene-svg-code">Ct</text>
       </svg>
     `,
     elisa: `
-      <svg viewBox="0 0 220 96" role="presentation" focusable="false">
-        <g fill="rgba(47,149,184,0.14)">
-          <rect x="16" y="16" width="96" height="58" rx="18" />
-          <circle cx="34" cy="34" r="8" />
-          <circle cx="58" cy="34" r="8" />
-          <circle cx="82" cy="34" r="8" />
-          <circle cx="34" cy="58" r="8" />
-          <circle cx="58" cy="58" r="8" />
-          <circle cx="82" cy="58" r="8" />
-        </g>
-        <polyline points="128,76 148,60 168,40 188,30 208,18" fill="none" stroke="rgba(199,168,96,0.96)" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" />
-        <circle cx="128" cy="76" r="4.6" fill="rgba(24,79,103,0.9)" />
-        <circle cx="148" cy="60" r="4.6" fill="rgba(24,79,103,0.82)" />
-        <circle cx="168" cy="40" r="4.6" fill="rgba(24,79,103,0.74)" />
-        <circle cx="188" cy="30" r="4.6" fill="rgba(24,79,103,0.66)" />
-        <circle cx="208" cy="18" r="4.6" fill="rgba(24,79,103,0.58)" />
+      <svg viewBox="0 0 220 110" role="presentation" focusable="false">
+        <rect x="16" y="18" width="92" height="66" rx="18" fill="rgba(199,168,96,0.14)" />
+        <circle cx="36" cy="40" r="9" fill="rgba(199,168,96,0.42)" />
+        <circle cx="62" cy="40" r="9" fill="rgba(199,168,96,0.58)" />
+        <circle cx="88" cy="40" r="9" fill="rgba(199,168,96,0.74)" />
+        <circle cx="36" cy="66" r="9" fill="rgba(199,168,96,0.32)" />
+        <circle cx="62" cy="66" r="9" fill="rgba(199,168,96,0.52)" />
+        <circle cx="88" cy="66" r="9" fill="rgba(199,168,96,0.88)" />
+        <line x1="132" y1="86" x2="210" y2="86" stroke="rgba(23,39,57,0.18)" stroke-width="3" />
+        <line x1="142" y1="24" x2="142" y2="86" stroke="rgba(23,39,57,0.18)" stroke-width="3" />
+        <path d="M142 80 C154 72, 168 58, 180 44 S200 24, 210 18" fill="none" stroke="rgba(24,79,103,0.92)" stroke-width="4.2" stroke-linecap="round" />
+        <text x="146" y="104" class="scene-svg-code">OD</text>
       </svg>
     `,
     genotype: `
-      <svg viewBox="0 0 220 96" role="presentation" focusable="false">
-        <rect x="18" y="16" width="72" height="58" rx="18" fill="rgba(199,168,96,0.14)" />
-        <rect x="102" y="16" width="100" height="58" rx="18" fill="rgba(24,79,103,0.08)" />
-        <circle cx="40" cy="36" r="9" fill="rgba(201,106,88,0.92)" />
-        <circle cx="68" cy="36" r="9" fill="rgba(47,149,184,0.92)" />
-        <circle cx="54" cy="56" r="9" fill="rgba(63,137,104,0.88)" />
-        <line x1="118" y1="34" x2="186" y2="34" stroke="rgba(23,39,57,0.24)" stroke-width="3" />
-        <line x1="118" y1="56" x2="186" y2="56" stroke="rgba(23,39,57,0.24)" stroke-width="3" />
-        <circle cx="132" cy="34" r="5" fill="rgba(47,149,184,0.92)" />
-        <circle cx="158" cy="34" r="5" fill="rgba(201,106,88,0.88)" />
-        <circle cx="184" cy="34" r="5" fill="rgba(47,149,184,0.58)" />
-        <circle cx="132" cy="56" r="5" fill="rgba(63,137,104,0.92)" />
-        <circle cx="158" cy="56" r="5" fill="rgba(201,106,88,0.68)" />
-        <circle cx="184" cy="56" r="5" fill="rgba(63,137,104,0.56)" />
+      <svg viewBox="0 0 220 110" role="presentation" focusable="false">
+        <circle cx="38" cy="36" r="9" fill="rgba(201,106,88,0.92)" />
+        <circle cx="66" cy="36" r="9" fill="rgba(47,149,184,0.92)" />
+        <circle cx="52" cy="64" r="9" fill="rgba(63,137,104,0.88)" />
+        <circle cx="96" cy="36" r="9" fill="rgba(201,106,88,0.72)" />
+        <circle cx="124" cy="36" r="9" fill="rgba(47,149,184,0.72)" />
+        <circle cx="110" cy="64" r="9" fill="rgba(63,137,104,0.72)" />
+        <rect x="150" y="20" width="54" height="48" rx="12" fill="rgba(88,119,180,0.1)" stroke="rgba(88,119,180,0.24)" />
+        <line x1="177" y1="20" x2="177" y2="68" stroke="rgba(88,119,180,0.24)" />
+        <line x1="150" y1="44" x2="204" y2="44" stroke="rgba(88,119,180,0.24)" />
+        <text x="158" y="38" class="scene-svg-code">a</text>
+        <text x="184" y="38" class="scene-svg-code">b</text>
+        <text x="158" y="58" class="scene-svg-code">c</text>
+        <text x="184" y="58" class="scene-svg-code">d</text>
+        <text x="150" y="92" class="scene-svg-code">OR</text>
       </svg>
     `,
   };
@@ -607,15 +919,17 @@ function renderTopicCards() {
           role="listitem"
         >
           <span class="topic-card-shell" aria-hidden="true"></span>
-          <span class="topic-tag">${copy.topicTag}</span>
-          <span
-            class="topic-count-badge is-loading"
-            data-topic-count="${topic.analyticsId}"
-            title="${copy.countTitle}"
-          >
-            <span class="topic-count-label">${copy.countLabel}</span>
-            <strong class="topic-count-value">${copy.countLoading}</strong>
-          </span>
+          <div class="topic-card-head">
+            <span class="topic-tag">${copy.topicTag}</span>
+            <span
+              class="topic-count-badge is-loading"
+              data-topic-count="${topic.analyticsId}"
+              title="${copy.countTitle}"
+            >
+              <span class="topic-count-label">${copy.countLabel}</span>
+              <strong class="topic-count-value">${copy.countLoading}</strong>
+            </span>
+          </div>
           <div class="topic-visual" aria-hidden="true">
             ${topicVisualSvg(topic.theme)}
           </div>
@@ -657,6 +971,7 @@ function renderSelectionPlaceholder() {
   if (selectionOptions) {
     selectionOptions.innerHTML = "";
   }
+  setSceneTopic("ngs");
 }
 
 function formatTopicCount(topicId) {
@@ -731,6 +1046,7 @@ function renderSelection(topicKey) {
 
   selectionTitle.textContent = topic.title;
   selectionCopy.textContent = topic.panelLead;
+  setSceneTopic(normalizedKey);
   selectionContext.innerHTML = `
     <div class="topic-context-panel topic-context-panel--${topic.theme}">
       <div class="topic-context-copy">
@@ -872,7 +1188,7 @@ function bindTopicSelection() {
       renderSelection(topicKey);
       trackTopicVisit(topicKey);
       document.querySelector("#selection-panel")?.scrollIntoView({
-        behavior: homepageReducedMotion ? "auto" : "smooth",
+        behavior: isHomepageReducedMotion() ? "auto" : "smooth",
         block: "start",
       });
     });
@@ -884,6 +1200,8 @@ function initializeHomepage() {
     return;
   }
 
+  renderLivingScene();
+  initializeHomepageSceneMotion();
   renderTopicCards();
   renderSelectionPlaceholder();
   bindTopicSelection();
