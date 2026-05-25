@@ -53,6 +53,46 @@
   gap: 1rem;
 }
 
+.paste-import-panel {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(23, 39, 57, 0.08);
+  background: rgba(247, 251, 253, 0.92);
+}
+
+.paste-import-copy {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.paste-import-copy h3 {
+  margin: 0;
+}
+
+.paste-import-copy p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.paste-import-textarea {
+  width: 100%;
+  min-height: 9rem;
+  resize: vertical;
+  border-radius: 18px;
+  border: 1px solid rgba(23, 39, 57, 0.14);
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--ink);
+  padding: 0.95rem 1rem;
+  font: 500 0.96rem/1.55 "Avenir Next", "Aptos", "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+.paste-import-textarea:focus {
+  outline: 2px solid rgba(47, 149, 184, 0.22);
+  border-color: rgba(47, 149, 184, 0.32);
+}
+
 .elisa-choice-stack,
 .curve-choice-grid {
   display: grid;

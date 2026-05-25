@@ -256,6 +256,27 @@
           </div>
 
           <article class="callout-box elisa-tool-panel reveal">
+            <section class="paste-import-panel" aria-labelledby="unknowns-paste-heading">
+              <div class="paste-import-copy">
+                <h3 id="unknowns-paste-heading">Paste unknown samples from Excel</h3>
+                <p>
+                  Paste a block copied from Excel. You can paste only the raw OD matrix from a
+                  96-well plate and the table will be filled automatically with well IDs, or paste
+                  a structured sample table. If you omit dilution factors, they default to 1.
+                </p>
+              </div>
+              <textarea
+                id="unknowns-paste"
+                class="paste-import-textarea"
+                rows="6"
+                placeholder="0.54	0.57	0.56	0.58&#10;0.61	0.63	0.60	0.62&#10;&#10;or&#10;&#10;Sample ID	Dilution factor	OD 1	OD 2	OD 3&#10;Control 1	1	0.54	0.57	0.56"
+              ></textarea>
+              <div class="selector-actions">
+                <button type="button" class="secondary-action" id="import-unknowns-paste">
+                  Import unknown samples
+                </button>
+              </div>
+            </section>
             <div class="tool-bar">
               <div>
                 <h3>Unknown sample table</h3>

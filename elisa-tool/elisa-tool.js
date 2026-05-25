@@ -14,6 +14,8 @@
   const element = {
     standardsBody: document.querySelector("#standards-body"),
     unknownsBody: document.querySelector("#unknowns-body"),
+    unknownsPaste: document.querySelector("#unknowns-paste"),
+    importUnknownsPaste: document.querySelector("#import-unknowns-paste"),
     addStandardRow: document.querySelector("#add-standard-row"),
     addSampleRow: document.querySelector("#add-sample-row"),
     calculateButton: document.querySelector("#calculate-elisa"),
@@ -76,6 +78,175 @@
       return "—";
     }
     return Number(value).toFixed(digits);
+  }
+
+  function splitPastedGrid(text) {
+    return String(text || "")
+      .split(/\r?\n/)
+      .map((line) => line.trimEnd())
+      .filter((line) => line.trim())
+      .map((line) => {
+        const delimiter = line.includes("\t") ? "\t" : ",";
+        return line.split(delimiter).map((cell) => cell.trim());
+      });
+  }
+
+  function normalizeHeaderKey(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+  }
+
+  function detectHeaderMap(cells, mode) {
+    const fieldMap = {};
+    cells.forEach((cell, index) => {
+      const key = normalizeHeaderKey(cell);
+      if (!key) {
+        return;
+      }
+      if (!fieldMap.concentration && (key === "conc" || key.includes("concentration"))) {
+        fieldMap.concentration = index;
+        return;
+      }
+      if (!fieldMap.sampleId && (key === "sample" || key === "sample id" || key === "id")) {
+        fieldMap.sampleId = index;
+        return;
+      }
+      if (!fieldMap.dilutionFactor && key.includes("dilution")) {
+        fieldMap.dilutionFactor = index;
+        return;
+      }
+      if (!fieldMap.label && mode === "standards" && (key === "standard" || key === "label" || key === "name")) {
+        fieldMap.label = index;
+        return;
+      }
+      if (!fieldMap.od1 && /(^od ?1$)|(^rep(licate)? ?1$)|(^well ?1$)/.test(key)) {
+        fieldMap.od1 = index;
+        return;
+      }
+      if (!fieldMap.od2 && /(^od ?2$)|(^rep(licate)? ?2$)|(^well ?2$)/.test(key)) {
+        fieldMap.od2 = index;
+        return;
+      }
+      if (!fieldMap.od3 && /(^od ?3$)|(^rep(licate)? ?3$)|(^well ?3$)/.test(key)) {
+        fieldMap.od3 = index;
+      }
+    });
+
+    if (!Object.keys(fieldMap).length) {
+      return null;
+    }
+    if (mode === "standards" && fieldMap.concentration !== undefined && fieldMap.od1 !== undefined) {
+      return fieldMap;
+    }
+    if (mode === "unknowns" && fieldMap.sampleId !== undefined && fieldMap.od1 !== undefined) {
+      return fieldMap;
+    }
+    return null;
+  }
+
+  function getMappedValue(cells, fieldMap, fieldName) {
+    const index = fieldMap?.[fieldName];
+    if (index === undefined) {
+      return "";
+    }
+    return cells[index] ?? "";
+  }
+
+  function parseUnknownsPaste(text) {
+    const rows = splitPastedGrid(text);
+    if (!rows.length) {
+      throw new Error("Paste at least one unknown-sample row copied from Excel.");
+    }
+    if (looksLikePlateMatrix(rows)) {
+      return parseUnknownPlateMatrix(rows);
+    }
+    const headerMap = detectHeaderMap(rows[0], "unknowns");
+    const dataRows = headerMap ? rows.slice(1) : rows;
+
+    const imported = dataRows
+      .map((cells, index) => {
+        if (!cells.some((cell) => String(cell || "").trim())) {
+          return null;
+        }
+
+        if (headerMap) {
+          return {
+            id: createId("sample"),
+            sampleId: getMappedValue(cells, headerMap, "sampleId") || `Sample ${index + 1}`,
+            dilutionFactor: getMappedValue(cells, headerMap, "dilutionFactor") || "1",
+            od1: getMappedValue(cells, headerMap, "od1"),
+            od2: getMappedValue(cells, headerMap, "od2"),
+            od3: getMappedValue(cells, headerMap, "od3"),
+          };
+        }
+
+        if (cells.length >= 5) {
+          return {
+            id: createId("sample"),
+            sampleId: cells[0] || `Sample ${index + 1}`,
+            dilutionFactor: cells[1] || "1",
+            od1: cells[2] || "",
+            od2: cells[3] || "",
+            od3: cells[4] || "",
+          };
+        }
+
+        return {
+          id: createId("sample"),
+          sampleId: cells[0] || `Sample ${index + 1}`,
+          dilutionFactor: "1",
+          od1: cells[1] || "",
+          od2: cells[2] || "",
+          od3: cells[3] || "",
+        };
+      })
+      .filter((row) => row && String(row.sampleId || "").trim());
+
+    if (!imported.length) {
+      throw new Error("No valid unknown-sample rows were found in the pasted block.");
+    }
+    return imported;
+  }
+
+  function looksLikePlateMatrix(rows) {
+    const maxColumns = Math.max(...rows.map((row) => row.length));
+    if (rows.length < 2 || rows.length > 8 || maxColumns < 2 || maxColumns > 12) {
+      return false;
+    }
+    if (detectHeaderMap(rows[0], "unknowns")) {
+      return false;
+    }
+    return rows.every((row) =>
+      row.every((cell) => !String(cell || "").trim() || Number.isFinite(Number(cell)))
+    );
+  }
+
+  function parseUnknownPlateMatrix(rows) {
+    const rowLabels = "ABCDEFGH".split("");
+    const imported = [];
+
+    rows.forEach((cells, rowIndex) => {
+      cells.forEach((cell, columnIndex) => {
+        if (!String(cell || "").trim()) {
+          return;
+        }
+        imported.push({
+          id: createId("sample"),
+          sampleId: `${rowLabels[rowIndex] || `R${rowIndex + 1}`}${columnIndex + 1}`,
+          dilutionFactor: "1",
+          od1: cell,
+          od2: "",
+          od3: "",
+        });
+      });
+    });
+
+    if (!imported.length) {
+      throw new Error("No valid OD values were found in the pasted plate matrix.");
+    }
+    return imported;
   }
 
   function setStatus(message, tone) {
@@ -753,6 +924,29 @@
     });
   }
 
+  function bindPasteImports() {
+    const importUnknowns = () => {
+      try {
+        state.unknowns = parseUnknownsPaste(element.unknownsPaste.value);
+        renderInputTables();
+        hideOutputs();
+        setStatus(`Imported ${state.unknowns.length} unknown sample row(s) from the pasted Excel block.`, "success");
+      } catch (error) {
+        setStatus(error.message || "The pasted unknown-sample block could not be imported.", "error");
+      }
+    };
+
+    element.importUnknownsPaste.addEventListener("click", importUnknowns);
+    element.unknownsPaste.addEventListener("paste", () => {
+      window.setTimeout(() => {
+        if (!element.unknownsPaste.value.trim()) {
+          return;
+        }
+        importUnknowns();
+      }, 0);
+    });
+  }
+
   function bindStatisticsEditing() {
     element.statsGroupCount.addEventListener("change", () => {
       if (!state.statsUi) {
@@ -910,6 +1104,7 @@
     resetState();
     renderInputTables();
     hideOutputs();
+    element.unknownsPaste.value = "";
     element.assayName.value = "";
     element.blankOd.value = "";
     element.concentrationUnit.value = "pg/mL";
@@ -923,6 +1118,7 @@
     resetState();
     renderInputTables();
     bindTableEditing();
+    bindPasteImports();
     bindStatisticsEditing();
     bindExports();
 
