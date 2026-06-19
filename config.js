@@ -7,5 +7,6 @@ window.WAHJ_NGS_CONFIG = {
     "https://docs.google.com/spreadsheets/d/1bF4CgbdG_0K34i9yM9gZl3yweLBwli_XLeARUMeJqFo/edit",
   commentsLimit: 6,
   sequenceAnalysisDemoEnabled: true,
+  localNgsApiUrl: "http://127.0.0.1:8787",
   siteLabel: "Wahj NGS Guide",
 };

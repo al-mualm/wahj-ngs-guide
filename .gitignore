@@ -1,2 +1,4 @@
 .DS_Store
 backend/google-apps-script/.clasp.json
+local-ngs-server/jobs/
+local-ngs-server/*.log

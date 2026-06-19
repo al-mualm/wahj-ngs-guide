@@ -66,6 +66,14 @@ const homepageCopy = {
             href: "fastq-analyzer/",
             chips: ["FASTQ upload", "Q30", "Adapter flags"],
           },
+          {
+            badge: "Local server",
+            title: "Local NGS workflow",
+            description:
+              "Use this Mac as the analysis machine: submit local FASTQ paths to the backend for fastp, BWA alignment, samtools statistics, genome structure, and annotation summaries.",
+            href: "local-ngs-workbench/",
+            chips: ["Mac backend", "Alignment", "Reports"],
+          },
         ],
       },
       sanger: {
@@ -250,6 +258,14 @@ const homepageCopy = {
               "ارفع ملفات FASTQ داخل المتصفح وراجع عدد القراءات وGC وQ20/Q30 وجودة الدورات وإشارات المحولات ثم صدّر ملخصات QC.",
             href: "fastq-analyzer/",
             chips: ["FASTQ upload", "Q30", "Adapter flags"],
+          },
+          {
+            badge: "خادم محلي",
+            title: "سير عمل NGS على هذا الماك",
+            description:
+              "استخدم جهاز Mac كمحرك تحليل: أرسل مسارات FASTQ المحلية إلى الخلفية لتشغيل fastp والمحاذاة وsamtools وملخصات البنية الجينومية والتعليقات.",
+            href: "local-ngs-workbench/",
+            chips: ["Mac backend", "Alignment", "Reports"],
           },
         ],
       },
