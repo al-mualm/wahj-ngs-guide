@@ -4,6 +4,7 @@ This project is a static educational website for Wahj Al-DNA. It currently inclu
 
 - a learning hub homepage
 - an English Next-Generation Sequencing guide
+- a browser-side FASTQ QC Analyzer for NGS read files
 - an Arabic NGS guide
 - a Real-Time PCR teaching page with a gene expression calculator
 - a Sanger Sequence Analysis & BLAST Alignment page for teaching sequence cleaning, taxonomy lookup, and BLAST interpretation
@@ -15,6 +16,10 @@ This project is a static educational website for Wahj Al-DNA. It currently inclu
 - `script.js` — shared navigation, reader counter, reveal effects, and comments logic
 - `config.js` — site configuration, including backend URLs and feature flags
 - `ngs/index.html` — English NGS guide
+- `fastq-analyzer/index.html` — browser-side FASTQ QC Analyzer
+- `fastq-analyzer/fastq-core.js` — FASTQ parser and QC metric engine
+- `fastq-analyzer/fastq-analyzer.js` — FASTQ Analyzer UI and export workflow
+- `fastq-analyzer/fastq-analyzer.css` — FASTQ Analyzer styling
 - `ar/index.html` — Arabic NGS guide
 - `real-time-pcr/index.html` — Real-Time PCR guide
 - `pcr-calculator.js` — qPCR expression calculator logic
@@ -78,6 +83,19 @@ Important:
 - When students use live BLAST, submitted sequences are sent to public NCBI services.
 - Do not submit confidential, clinical, human-identifiable, or unpublished sensitive sequences.
 - The page is for teaching and research training, not diagnosis.
+
+## FASTQ Analyzer notes
+
+The FASTQ QC Analyzer supports:
+
+- `.fastq`, `.fq`, `.fastq.gz`, and `.fq.gz` uploads
+- browser-side parsing without uploading read files to the backend
+- Phred+33, Phred+64, or automatic quality encoding handling
+- read count, base count, GC content, N content, mean quality, Q20, and Q30 metrics
+- per-cycle quality and base-composition charts
+- read-length and GC-distribution charts
+- adapter-like sequence and overrepresented-read warnings
+- CSV, JSON, and plain-text report export
 
 ## Apps Script deployment
 
