@@ -25,6 +25,42 @@
   };
 
   const TRANSITIONS = new Set(["AG", "GA", "CT", "TC"]);
+  const COMPLEMENT_MAP = {
+    A: "T",
+    C: "G",
+    G: "C",
+    T: "A",
+    R: "Y",
+    Y: "R",
+    S: "S",
+    W: "W",
+    K: "M",
+    M: "K",
+    B: "V",
+    D: "H",
+    H: "D",
+    V: "B",
+    N: "N",
+    "-": "-",
+  };
+  const CODON_TABLE = {
+    TTT: "F", TTC: "F", TTA: "L", TTG: "L",
+    TCT: "S", TCC: "S", TCA: "S", TCG: "S",
+    TAT: "Y", TAC: "Y", TAA: "*", TAG: "*",
+    TGT: "C", TGC: "C", TGA: "*", TGG: "W",
+    CTT: "L", CTC: "L", CTA: "L", CTG: "L",
+    CCT: "P", CCC: "P", CCA: "P", CCG: "P",
+    CAT: "H", CAC: "H", CAA: "Q", CAG: "Q",
+    CGT: "R", CGC: "R", CGA: "R", CGG: "R",
+    ATT: "I", ATC: "I", ATA: "I", ATG: "M",
+    ACT: "T", ACC: "T", ACA: "T", ACG: "T",
+    AAT: "N", AAC: "N", AAA: "K", AAG: "K",
+    AGT: "S", AGC: "S", AGA: "R", AGG: "R",
+    GTT: "V", GTC: "V", GTA: "V", GTG: "V",
+    GCT: "A", GCC: "A", GCA: "A", GCG: "A",
+    GAT: "D", GAC: "D", GAA: "E", GAG: "E",
+    GGT: "G", GGC: "G", GGA: "G", GGG: "G",
+  };
 
   function normalizeBase(base) {
     const normalized = String(base || "").trim().toUpperCase();
@@ -35,6 +71,13 @@
       return "-";
     }
     return normalized === "U" ? "T" : normalized;
+  }
+
+  function normalizeSequence(sequence) {
+    return String(sequence || "")
+      .toUpperCase()
+      .replace(/[^ACGTU]/g, "")
+      .replace(/U/g, "T");
   }
 
   function getIupacSet(base) {
@@ -184,6 +227,129 @@
     return segments;
   }
 
+  function decodeXmlText(value) {
+    return String(value || "")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+  }
+
+  function extractXmlText(source, tagName) {
+    const match = String(source || "").match(
+      new RegExp(`<${tagName}>([\\s\\S]*?)<\\/${tagName}>`, "i")
+    );
+    return match ? decodeXmlText(match[1].trim()) : "";
+  }
+
+  function extractXmlBlocks(source, tagName) {
+    return Array.from(
+      String(source || "").matchAll(new RegExp(`<${tagName}>([\\s\\S]*?)<\\/${tagName}>`, "gi"))
+    ).map((match) => match[1]);
+  }
+
+  function parseNcbiNuccoreXml(xmlText) {
+    const seqBlock = extractXmlBlocks(xmlText, "GBSeq")[0] || "";
+    if (!seqBlock) {
+      return {
+        status: "error",
+        message: "NCBI did not return a GenBank XML sequence record.",
+      };
+    }
+
+    const accession = extractXmlText(seqBlock, "GBSeq_accession-version");
+    const definition = extractXmlText(seqBlock, "GBSeq_definition");
+    const organism = extractXmlText(seqBlock, "GBSeq_organism");
+    const source = extractXmlText(seqBlock, "GBSeq_source");
+    const sequence = normalizeSequence(extractXmlText(seqBlock, "GBSeq_sequence"));
+    const featureBlocks = extractXmlBlocks(seqBlock, "GBFeature");
+    const features = featureBlocks
+      .map((featureBlock) => {
+        const type = extractXmlText(featureBlock, "GBFeature_key").toLowerCase();
+        const location = extractXmlText(featureBlock, "GBFeature_location");
+        const intervalBlocks = extractXmlBlocks(featureBlock, "GBInterval");
+        const qualifiers = {};
+
+        extractXmlBlocks(featureBlock, "GBQualifier").forEach((qualifierBlock) => {
+          const name = extractXmlText(qualifierBlock, "GBQualifier_name");
+          const value = extractXmlText(qualifierBlock, "GBQualifier_value");
+          if (!name || !value) {
+            return;
+          }
+          if (!qualifiers[name]) {
+            qualifiers[name] = [];
+          }
+          qualifiers[name].push(value);
+        });
+
+        const strand =
+          /complement\s*\(/i.test(location) ||
+          /<GBInterval_iscomp>\s*true\s*<\/GBInterval_iscomp>/i.test(featureBlock)
+            ? -1
+            : 1;
+        const parts = intervalBlocks
+          .map((intervalBlock) => {
+            const point = Number(extractXmlText(intervalBlock, "GBInterval_point")) || 0;
+            const from = Number(extractXmlText(intervalBlock, "GBInterval_from")) || point;
+            const to = Number(extractXmlText(intervalBlock, "GBInterval_to")) || point;
+            if (!from || !to) {
+              return null;
+            }
+            return {
+              start: Math.min(from, to),
+              end: Math.max(from, to),
+              strand,
+            };
+          })
+          .filter(Boolean);
+
+        if (!type || !parts.length) {
+          return null;
+        }
+
+        const start = Math.min(...parts.map((part) => Number(part.start) || 0));
+        const end = Math.max(...parts.map((part) => Number(part.end) || 0));
+        const firstValue = (name) => (qualifiers[name] && qualifiers[name][0]) || "";
+
+        return {
+          type,
+          start,
+          end,
+          strand,
+          parts,
+          location,
+          gene: firstValue("gene"),
+          locusTag: firstValue("locus_tag"),
+          product: firstValue("product"),
+          note: firstValue("note"),
+          label:
+            firstValue("gene") ||
+            firstValue("product") ||
+            firstValue("note") ||
+            type.toUpperCase(),
+          codonStart: Number(firstValue("codon_start")) || 1,
+          translTable: Number(firstValue("transl_table")) || 1,
+        };
+      })
+      .filter(Boolean);
+
+    return {
+      status: "ready",
+      accession,
+      definition,
+      source,
+      organism,
+      label: definition || source || organism || accession || "Reference record",
+      geneName:
+        (features.find((feature) => feature.gene) || {}).gene ||
+        extractXmlText(seqBlock, "GBSeq_locus") ||
+        "—",
+      sequence,
+      features,
+    };
+  }
+
   function buildIupacInterpretation(subjectBase, queryBase, difference) {
     if (!difference.isDifference) {
       return "—";
@@ -265,6 +431,7 @@
       queryRange: "—",
       subjectRange: "—",
       strand: "—",
+      alignmentSubjectDirection: 1,
     };
 
     if (!segments.length) {
@@ -319,6 +486,8 @@
         segments[0].subjectStart,
         segments[segments.length - 1].subjectEnd
       ),
+      alignmentSubjectDirection:
+        segments[segments.length - 1].subjectEnd >= segments[0].subjectStart ? 1 : -1,
     };
 
     let rowNumber = 1;
@@ -397,6 +566,7 @@
             iupacInterpretation: buildIupacInterpretation(subjectBase, queryBase, difference),
             status: difference.status,
             differenceType: difference.differenceType,
+            alignmentSubjectDirection: subjectStep,
             flankingContext: buildFlankingContext(
               subjectUngappedBases,
               currentSubjectIndex,
@@ -587,8 +757,33 @@
     return "—";
   }
 
+  function getReadyReferenceAnnotation(optionalFeatureAnnotations) {
+    return optionalFeatureAnnotations && optionalFeatureAnnotations.status === "ready"
+      ? optionalFeatureAnnotations
+      : null;
+  }
+
+  function getAnnotationStatusMessage(optionalFeatureAnnotations, fallbackMessage) {
+    if (
+      optionalFeatureAnnotations &&
+      optionalFeatureAnnotations.status &&
+      optionalFeatureAnnotations.status !== "ready"
+    ) {
+      return optionalFeatureAnnotations.message || fallbackMessage;
+    }
+    return fallbackMessage;
+  }
+
+  function getFeaturePriority(feature) {
+    const normalizedType = String(feature && feature.type || "").trim().toLowerCase();
+    const priorities = ["cds", "rrna", "trna", "exon", "utr", "mrna", "gene", "source"];
+    const index = priorities.indexOf(normalizedType);
+    return index === -1 ? 99 : index;
+  }
+
   function getReferenceAnnotationAtPosition(subjectPosition, optionalFeatureAnnotations) {
-    if (!optionalFeatureAnnotations || !Array.isArray(optionalFeatureAnnotations.features)) {
+    const reference = getReadyReferenceAnnotation(optionalFeatureAnnotations);
+    if (!reference || !Array.isArray(reference.features)) {
       return null;
     }
 
@@ -597,8 +792,7 @@
       return null;
     }
 
-    return (
-      optionalFeatureAnnotations.features.find((feature) => {
+    const overlapping = reference.features.filter((feature) => {
         const start = Number(feature.start);
         const end = Number(feature.end);
         if (!Number.isFinite(start) || !Number.isFinite(end)) {
@@ -607,8 +801,102 @@
         const lower = Math.min(start, end);
         const upper = Math.max(start, end);
         return numericPosition >= lower && numericPosition <= upper;
-      }) || null
-    );
+      });
+    if (!overlapping.length) {
+      return null;
+    }
+    overlapping.sort((left, right) => getFeaturePriority(left) - getFeaturePriority(right));
+    return overlapping[0];
+  }
+
+  function getCodingFeatureAtPosition(subjectPosition, optionalFeatureAnnotations) {
+    const reference = getReadyReferenceAnnotation(optionalFeatureAnnotations);
+    if (!reference || !Array.isArray(reference.features)) {
+      return null;
+    }
+
+    const numericPosition = Number(subjectPosition);
+    if (!Number.isFinite(numericPosition)) {
+      return null;
+    }
+
+    const overlappingCdsFeatures = reference.features.filter((feature) => {
+        if (String(feature.type || "").toLowerCase() !== "cds") {
+          return false;
+        }
+        const start = Number(feature.start);
+        const end = Number(feature.end);
+        if (!Number.isFinite(start) || !Number.isFinite(end)) {
+          return false;
+        }
+        return numericPosition >= Math.min(start, end) && numericPosition <= Math.max(start, end);
+      });
+    if (!overlappingCdsFeatures.length) {
+      return null;
+    }
+    overlappingCdsFeatures.sort((left, right) => {
+      const leftSpan = Math.abs(Number(left.end) - Number(left.start));
+      const rightSpan = Math.abs(Number(right.end) - Number(right.start));
+      return leftSpan - rightSpan;
+    });
+    return overlappingCdsFeatures[0];
+  }
+
+  function buildCdsModel(reference, cdsFeature) {
+    const referenceRecord = getReadyReferenceAnnotation(reference);
+    const feature = cdsFeature || null;
+    if (!referenceRecord || !feature || !Array.isArray(feature.parts) || !feature.parts.length) {
+      return null;
+    }
+
+    const strand = Number(feature.strand || 1) >= 0 ? 1 : -1;
+    const codonStartOffset = Math.max(0, Math.min(2, (Number(feature.codonStart) || 1) - 1));
+    const translTable = Number(feature.translTable) || 1;
+    const orderedParts = feature.parts
+      .map((part) => ({
+        start: Number(part.start),
+        end: Number(part.end),
+        strand,
+      }))
+      .filter((part) => Number.isFinite(part.start) && Number.isFinite(part.end))
+      .sort((left, right) => {
+        if (strand >= 0) {
+          return left.start - right.start;
+        }
+        return right.end - left.end;
+      });
+
+    if (!orderedParts.length) {
+      return null;
+    }
+
+    const rawPositionMap = [];
+    orderedParts.forEach((part) => {
+      if (strand >= 0) {
+        for (let position = part.start; position <= part.end; position += 1) {
+          rawPositionMap.push(position);
+        }
+      } else {
+        for (let position = part.end; position >= part.start; position -= 1) {
+          rawPositionMap.push(position);
+        }
+      }
+    });
+
+    const positionMap = rawPositionMap.slice(codonStartOffset);
+    const codingSequence = positionMap
+      .map((position) => {
+        const genomicBase = normalizeBase(referenceRecord.sequence[position - 1] || "N");
+        return strand >= 0 ? genomicBase : COMPLEMENT_MAP[genomicBase] || "N";
+      })
+      .join("");
+
+    return {
+      strand,
+      translTable,
+      positionMap,
+      codingSequence,
+    };
   }
 
   function classifyRegionType(feature) {
@@ -651,6 +939,167 @@
     return row.differenceType || row.status || "—";
   }
 
+  function translateCodon(codon, translTable) {
+    const normalized = normalizeSequence(codon);
+    if (normalized.length !== 3) {
+      return "?";
+    }
+    if (![1, 11].includes(Number(translTable) || 1)) {
+      return "?";
+    }
+    return CODON_TABLE[normalized] || "?";
+  }
+
+  function parseSubjectPositionValue(subjectPosition) {
+    const match = String(subjectPosition || "").match(/-?\d+/);
+    return match ? Number(match[0]) : NaN;
+  }
+
+  function formatAminoAcidLine(referenceCodon, alternateCodon, referenceAa, alternateAa) {
+    return `${referenceCodon}/${alternateCodon} ${referenceAa}/${alternateAa}`;
+  }
+
+  function computeAminoAcidChangeForDifference(row, optionalFeatureAnnotations) {
+    const reference = getReadyReferenceAnnotation(optionalFeatureAnnotations);
+    const rowStatus = String(row && row.status || "");
+    if (!reference) {
+      return getAnnotationStatusMessage(optionalFeatureAnnotations, "Annotation unavailable");
+    }
+
+    const subjectPosition = parseSubjectPositionValue(row && row.subjectPosition);
+    if (!Number.isFinite(subjectPosition)) {
+      return "Not assessed";
+    }
+
+    const codingFeature = getCodingFeatureAtPosition(subjectPosition, reference);
+    if (!codingFeature) {
+      return "Not applicable";
+    }
+
+    if (row.differenceType === "Insertion" || row.differenceType === "Deletion") {
+      return "Indel; not assessed";
+    }
+
+    if (row.differenceType === "Ambiguous" || rowStatus.indexOf("Ambiguous") === 0) {
+      return "Ambiguous; not assessed";
+    }
+
+    const normalizedQueryBase = normalizeBase(row.queryBase);
+    if (!isUnambiguousBase(normalizedQueryBase)) {
+      return "Not assessed";
+    }
+
+    const cdsModel = buildCdsModel(reference, codingFeature);
+    if (!cdsModel || !cdsModel.positionMap.length || !cdsModel.codingSequence.length) {
+      return "Not assessed";
+    }
+
+    const cdsIndex = cdsModel.positionMap.indexOf(subjectPosition);
+    if (cdsIndex === -1) {
+      return "Not applicable";
+    }
+
+    const codonIndex = Math.floor(cdsIndex / 3);
+    const codonOffset = cdsIndex % 3;
+    const codonStart = codonIndex * 3;
+    const referenceCodon = cdsModel.codingSequence.slice(codonStart, codonStart + 3);
+    if (referenceCodon.length !== 3) {
+      return "Not assessed";
+    }
+
+    const alignmentOrientation =
+      Number(row && row.alignmentSubjectDirection) < 0 ? -1 : 1;
+    const queryReferenceBase =
+      alignmentOrientation >= 0
+        ? normalizedQueryBase
+        : COMPLEMENT_MAP[normalizedQueryBase] || "N";
+    const alternateCodingBase =
+      cdsModel.strand >= 0
+        ? queryReferenceBase
+        : COMPLEMENT_MAP[queryReferenceBase] || "N";
+
+    if (!isUnambiguousBase(alternateCodingBase)) {
+      return "Not assessed";
+    }
+
+    const alternateCodon =
+      referenceCodon.slice(0, codonOffset) +
+      alternateCodingBase +
+      referenceCodon.slice(codonOffset + 1);
+    const referenceAa = translateCodon(referenceCodon, cdsModel.translTable);
+    const alternateAa = translateCodon(alternateCodon, cdsModel.translTable);
+
+    if (referenceAa === "?" || alternateAa === "?") {
+      return "Not assessed";
+    }
+
+    return formatAminoAcidLine(referenceCodon, alternateCodon, referenceAa, alternateAa);
+  }
+
+  function buildAminoAcidChangeTableRows(
+    selectedHit,
+    differenceRows,
+    queryMetadata,
+    optionalFeatureAnnotations
+  ) {
+    const metadata = queryMetadata || {};
+    const rows = Array.isArray(differenceRows) ? differenceRows : [];
+    const sampleLabel = metadata.sampleNumber || metadata.wahjSampleId || "—";
+    const accession = (selectedHit && selectedHit.accession) || "—";
+    const identityLabel =
+      selectedHit && Number.isFinite(Number(selectedHit.percentIdentity))
+        ? `${selectedHit.percentIdentity}%`
+        : (selectedHit && selectedHit.identities) || "—";
+
+    const unavailableRow = rows.find(
+      (row) => row.status === "Detailed alignment unavailable for this hit"
+    );
+    if (unavailableRow) {
+      return [
+        [
+          sampleLabel,
+          "—",
+          "—",
+          "—",
+          "Detailed alignment unavailable",
+          accession,
+          identityLabel,
+        ],
+      ];
+    }
+
+    const noDifferenceRow = rows.find(
+      (row) => row.status === "No nucleotide differences detected in the aligned region"
+    );
+    if (noDifferenceRow) {
+      return [
+        [
+          sampleLabel,
+          "—",
+          "—",
+          "—",
+          "No nucleotide differences detected",
+          accession,
+          identityLabel,
+        ],
+      ];
+    }
+
+    return [
+      [
+        sampleLabel,
+        rows.map((row) => formatReferenceChangeType(row)).join("\n"),
+        rows.map((row) => row.subjectPosition || "—").join("\n"),
+        rows.map((row) => `${row.subjectBase || "—"}/${row.queryBase || "—"}`).join("\n"),
+        rows
+          .map((row) => computeAminoAcidChangeForDifference(row, optionalFeatureAnnotations))
+          .join("\n"),
+        accession,
+        identityLabel,
+      ],
+    ];
+  }
+
   function buildReferenceBasedChangeTableRows(
     selectedHit,
     differenceRows,
@@ -687,6 +1136,7 @@
       ];
     }
 
+    const annotationRecord = getReadyReferenceAnnotation(optionalFeatureAnnotations);
     const noDifferenceRow = rows.find(
       (row) => row.status === "No nucleotide differences detected in the aligned region"
     );
@@ -697,15 +1147,18 @@
           metadata.wahjSampleId || "—",
           (selectedHit && selectedHit.accession) || "—",
           source,
-          optionalFeatureAnnotations ? "Intergenic / noncoding" : "Annotation unavailable",
+          annotationRecord ? "Intergenic / noncoding" : "Annotation unavailable",
           geneOrFeature,
           "—",
           "—",
           "—",
           percentIdentity,
-          optionalFeatureAnnotations
+          annotationRecord
             ? "No nucleotide differences detected in the aligned region."
-            : "No nucleotide differences detected in the aligned region. Region classification requires annotated reference features.",
+            : getAnnotationStatusMessage(
+                optionalFeatureAnnotations,
+                "No nucleotide differences detected in the aligned region. Region classification requires annotated reference features."
+              ),
         ],
       ];
     }
@@ -721,17 +1174,20 @@
     });
 
     const regionType =
-      optionalFeatureAnnotations && regionTypeValues.some((value) => value !== "Annotation unavailable")
+      annotationRecord && regionTypeValues.some((value) => value !== "Annotation unavailable")
         ? regionTypeValues.join("\n")
         : "Annotation unavailable";
     const featureLabel =
-      optionalFeatureAnnotations && featureValues.some((value) => value && value !== "—")
+      annotationRecord && featureValues.some((value) => value && value !== "—")
         ? featureValues.join("\n")
         : geneOrFeature;
 
-    const annotationComment = optionalFeatureAnnotations
+    const annotationComment = annotationRecord
       ? "Nucleotide-level changes only; coding/protein effect not assessed."
-      : "Region classification requires annotated reference features.";
+      : getAnnotationStatusMessage(
+          optionalFeatureAnnotations,
+          "Region classification requires annotated reference features."
+        );
 
     return [
       [
@@ -950,9 +1406,9 @@
     const differenceBundle = buildDifferenceRows(hit);
     const accessionKey = sanitizeFilenamePart(hit && hit.accession ? hit.accession : "selected_hit");
 
-    // Coding/protein-effect prediction is intentionally not implemented here.
-    // A BLAST nucleotide alignment alone is not enough for safe CDS/codon/HGVS inference.
-    // That requires trusted CDS/transcript annotation and reference feature tables.
+    // Amino-acid change reporting is only attempted when the selected reference record
+    // contains trusted CDS annotation. BLAST title text alone is never used to infer
+    // codons, amino-acid changes, or HGVS-style effects.
     return [
       {
         id: "alignment-summary",
@@ -1024,6 +1480,27 @@
         filename: `wahj_reference_change_table_${accessionKey}.csv`,
       },
       {
+        id: "amino-acid-change-table",
+        label: "Amino-acid change table",
+        caption: "Amino-acid change table for the selected BLAST hit",
+        columns: [
+          "No.",
+          "Type of substitution",
+          "Location",
+          "Nucleotide",
+          "Amino acids",
+          "Sequence ID with compare",
+          "Identities",
+        ],
+        rows: buildAminoAcidChangeTableRows(
+          hit,
+          differenceBundle.rows,
+          queryMetadata,
+          optionalFeatureAnnotations
+        ),
+        filename: `wahj_amino_acid_change_table_${accessionKey}.csv`,
+      },
+      {
         id: "top-hit-comparison",
         label: "Top-hit comparison",
         caption: "Comparison of top BLAST hits for the query sequence",
@@ -1055,8 +1532,11 @@
     buildAlignmentSummaryRows,
     buildDifferenceCountRows,
     buildReferenceBasedChangeTableRows,
+    buildAminoAcidChangeTableRows,
     buildTopHitComparisonRows,
     buildPublicationTables,
+    parseNcbiNuccoreXml,
+    computeAminoAcidChangeForDifference,
     tableToTsv,
     copyTableElement,
     copyTableData,

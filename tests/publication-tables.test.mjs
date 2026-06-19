@@ -8,9 +8,12 @@ const {
   classifyDifference,
   buildDifferenceRows,
   buildReferenceBasedChangeTableRows,
+  buildAminoAcidChangeTableRows,
   buildPublicationTables,
   buildCopyPayloadFromTableData,
   buildStandaloneHtmlDocument,
+  parseNcbiNuccoreXml,
+  computeAminoAcidChangeForDifference,
 } = publicationApi;
 
 function testDifferenceClassification() {
@@ -130,14 +133,18 @@ function testPublicationTables() {
     },
   });
 
-  assert.equal(tables.length, 5);
+  assert.equal(tables.length, 6);
   assert.equal(tables[0].caption, "Alignment summary for the selected BLAST hit");
   assert.equal(
     tables[3].caption,
     "Reference-based nucleotide change table for the selected BLAST hit"
   );
-  assert.equal(tables[4].rows.length, 1);
-  assert.equal(tables[4].rows[0][10], "Top selected hit");
+  assert.equal(
+    tables[4].caption,
+    "Amino-acid change table for the selected BLAST hit"
+  );
+  assert.equal(tables[5].rows.length, 1);
+  assert.equal(tables[5].rows[0][10], "Top selected hit");
 }
 
 function testReferenceBasedChangeTableRows() {
@@ -185,6 +192,138 @@ function testReferenceBasedChangeTableRows() {
   assert.match(rows[0][10], /Region classification requires annotated reference features/);
 }
 
+function testNcbiNuccoreParsingAndAminoAcidChange() {
+  const parsed = parseNcbiNuccoreXml(`
+    <GBSet>
+      <GBSeq>
+        <GBSeq_locus>TEST1</GBSeq_locus>
+        <GBSeq_definition>Test gene sequence</GBSeq_definition>
+        <GBSeq_accession-version>TEST1.1</GBSeq_accession-version>
+        <GBSeq_source>Testus organismus</GBSeq_source>
+        <GBSeq_organism>Testus organismus</GBSeq_organism>
+        <GBSeq_sequence>ATGGAAGAA</GBSeq_sequence>
+        <GBSeq_feature-table>
+          <GBFeature>
+            <GBFeature_key>gene</GBFeature_key>
+            <GBFeature_location>1..9</GBFeature_location>
+            <GBFeature_intervals>
+              <GBInterval><GBInterval_from>1</GBInterval_from><GBInterval_to>9</GBInterval_to></GBInterval>
+            </GBFeature_intervals>
+            <GBFeature_quals>
+              <GBQualifier><GBQualifier_name>gene</GBQualifier_name><GBQualifier_value>TEST</GBQualifier_value></GBQualifier>
+            </GBFeature_quals>
+          </GBFeature>
+          <GBFeature>
+            <GBFeature_key>CDS</GBFeature_key>
+            <GBFeature_location>1..9</GBFeature_location>
+            <GBFeature_intervals>
+              <GBInterval><GBInterval_from>1</GBInterval_from><GBInterval_to>9</GBInterval_to></GBInterval>
+            </GBFeature_intervals>
+            <GBFeature_quals>
+              <GBQualifier><GBQualifier_name>gene</GBQualifier_name><GBQualifier_value>TEST</GBQualifier_value></GBQualifier>
+              <GBQualifier><GBQualifier_name>product</GBQualifier_name><GBQualifier_value>Test protein</GBQualifier_value></GBQualifier>
+              <GBQualifier><GBQualifier_name>codon_start</GBQualifier_name><GBQualifier_value>1</GBQualifier_value></GBQualifier>
+              <GBQualifier><GBQualifier_name>transl_table</GBQualifier_name><GBQualifier_value>1</GBQualifier_value></GBQualifier>
+            </GBFeature_quals>
+          </GBFeature>
+        </GBSeq_feature-table>
+      </GBSeq>
+    </GBSet>
+  `);
+
+  assert.equal(parsed.status, "ready");
+  assert.equal(parsed.accession, "TEST1.1");
+  assert.equal(parsed.sequence, "ATGGAAGAA");
+
+  const aminoAcidLine = computeAminoAcidChangeForDifference(
+    {
+      subjectPosition: "5",
+      subjectBase: "A",
+      queryBase: "T",
+      status: "Definite mismatch",
+      differenceType: "Transversion",
+      alignmentSubjectDirection: 1,
+    },
+    parsed
+  );
+
+  assert.equal(aminoAcidLine, "GAA/GTA E/V");
+
+  const rows = buildAminoAcidChangeTableRows(
+    {
+      accession: "TEST1.1",
+      percentIdentity: 98,
+    },
+    [
+      {
+        subjectPosition: "5",
+        subjectBase: "A",
+        queryBase: "T",
+        status: "Definite mismatch",
+        differenceType: "Transversion",
+        alignmentSubjectDirection: 1,
+      },
+    ],
+    {
+      sampleNumber: "7",
+      wahjSampleId: "S7",
+    },
+    parsed
+  );
+
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0][0], "7");
+  assert.equal(rows[0][1], "Transversion");
+  assert.equal(rows[0][2], "5");
+  assert.equal(rows[0][3], "A/T");
+  assert.equal(rows[0][4], "GAA/GTA E/V");
+  assert.equal(rows[0][5], "TEST1.1");
+  assert.equal(rows[0][6], "98%");
+}
+
+function testReverseStrandAminoAcidChange() {
+  const parsed = parseNcbiNuccoreXml(`
+    <GBSet>
+      <GBSeq>
+        <GBSeq_locus>REV1</GBSeq_locus>
+        <GBSeq_definition>Reverse strand test sequence</GBSeq_definition>
+        <GBSeq_accession-version>REV1.1</GBSeq_accession-version>
+        <GBSeq_source>Testus reversus</GBSeq_source>
+        <GBSeq_organism>Testus reversus</GBSeq_organism>
+        <GBSeq_sequence>TTCTTCCAT</GBSeq_sequence>
+        <GBSeq_feature-table>
+          <GBFeature>
+            <GBFeature_key>CDS</GBFeature_key>
+            <GBFeature_location>complement(1..9)</GBFeature_location>
+            <GBFeature_intervals>
+              <GBInterval><GBInterval_from>1</GBInterval_from><GBInterval_to>9</GBInterval_to><GBInterval_iscomp>true</GBInterval_iscomp></GBInterval>
+            </GBFeature_intervals>
+            <GBFeature_quals>
+              <GBQualifier><GBQualifier_name>gene</GBQualifier_name><GBQualifier_value>REVTEST</GBQualifier_value></GBQualifier>
+              <GBQualifier><GBQualifier_name>codon_start</GBQualifier_name><GBQualifier_value>1</GBQualifier_value></GBQualifier>
+              <GBQualifier><GBQualifier_name>transl_table</GBQualifier_name><GBQualifier_value>1</GBQualifier_value></GBQualifier>
+            </GBFeature_quals>
+          </GBFeature>
+        </GBSeq_feature-table>
+      </GBSeq>
+    </GBSet>
+  `);
+
+  const aminoAcidLine = computeAminoAcidChangeForDifference(
+    {
+      subjectPosition: "5",
+      subjectBase: "A",
+      queryBase: "T",
+      status: "Definite mismatch",
+      differenceType: "Transversion",
+      alignmentSubjectDirection: -1,
+    },
+    parsed
+  );
+
+  assert.equal(aminoAcidLine, "GAA/GTA E/V");
+}
+
 function testCopyPayloadIsClean() {
   const payload = buildCopyPayloadFromTableData({
     caption: "Alignment summary for the selected BLAST hit",
@@ -216,6 +355,8 @@ testReverseCoordinateHandling();
 testNoDifferences();
 testPublicationTables();
 testReferenceBasedChangeTableRows();
+testNcbiNuccoreParsingAndAminoAcidChange();
+testReverseStrandAminoAcidChange();
 testCopyPayloadIsClean();
 testStandaloneHtmlReport();
 

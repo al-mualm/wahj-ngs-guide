@@ -468,6 +468,16 @@ Sbjct   26  AGAGTTTGATCCTGGCTCAGGATGAACGCTGGCGGCGTGCCTAATACATGCAA  85</pre>
                 </button>
                 <button
                   class="publication-tab"
+                  id="publication-tab-amino-acid-change-table"
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
+                  data-publication-tab="amino-acid-change-table"
+                >
+                  Amino-acid change table
+                </button>
+                <button
+                  class="publication-tab"
                   id="publication-tab-top-hit-comparison"
                   type="button"
                   role="tab"
@@ -479,12 +489,12 @@ Sbjct   26  AGAGTTTGATCCTGGCTCAGGATGAACGCTGGCGGCGTGCCTAATACATGCAA  85</pre>
               </div>
 
               <p class="publication-note no-copy">
-                Coding/protein effects are not assessed automatically in this educational
-                table.
+                Amino-acid changes are only estimated when the selected reference record
+                contains trusted CDS annotation.
               </p>
               <p class="publication-note no-copy">
-                Coding and protein effects are only reported when trusted annotation
-                features are available.
+                BLAST title text alone is never used to infer codons, amino-acid changes,
+                or HGVS-style effects.
               </p>
 
               <div class="publication-controls no-copy">

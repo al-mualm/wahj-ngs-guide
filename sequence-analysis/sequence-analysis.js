@@ -9,6 +9,10 @@ const requiredSequenceActions = [
   "blastStatus",
   "blastResult",
 ];
+const ncbiNuccoreEfetchUrl =
+  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi";
+const referenceAnnotationLengthLimit = 250000;
+const ncbiReferenceToolName = "WahjSequenceAnalysis";
 
 const allowedSequencePattern = /^[ACGTRYSWKMBDHVN]+$/;
 const allowedSequenceCharacters = new Set("ACGTRYSWKMBDHVN".split(""));
@@ -165,6 +169,9 @@ const state = {
   autoResultTimerId: 0,
   activePublicationTab: "alignment-summary",
   publicationTables: [],
+  referenceAnnotationCache: new Map(),
+  referenceAnnotationPromises: new Map(),
+  publicationRenderToken: 0,
 };
 
 const AUTO_RESULT_DELAY_AFTER_READY_SECONDS = 11;
@@ -354,6 +361,87 @@ async function requestSequenceApi(action, params = {}) {
     ok: true,
   });
   return payload;
+}
+
+function getReferenceAnnotationCacheKey(result) {
+  return String(result && result.accession ? result.accession : "").trim();
+}
+
+async function loadReferenceAnnotationForResult(result) {
+  const accession = getReferenceAnnotationCacheKey(result);
+  if (!accession) {
+    return {
+      status: "unavailable",
+      message: "Reference accession unavailable for amino-acid annotation.",
+    };
+  }
+
+  const cached = state.referenceAnnotationCache.get(accession);
+  if (cached) {
+    return cached;
+  }
+
+  const pending = state.referenceAnnotationPromises.get(accession);
+  if (pending) {
+    return pending;
+  }
+
+  const sequenceLength = Number(result && result.sequenceLength) || 0;
+  if (sequenceLength > referenceAnnotationLengthLimit) {
+    const oversized = {
+      status: "unavailable",
+      message: `Reference record ${accession} is ${sequenceLength} bp, so on-page amino-acid annotation was skipped.`,
+    };
+    state.referenceAnnotationCache.set(accession, oversized);
+    return oversized;
+  }
+
+  const requestUrl = new URL(ncbiNuccoreEfetchUrl);
+  requestUrl.searchParams.set("db", "nuccore");
+  requestUrl.searchParams.set("id", accession);
+  requestUrl.searchParams.set("rettype", "gb");
+  requestUrl.searchParams.set("retmode", "xml");
+  requestUrl.searchParams.set("tool", ncbiReferenceToolName);
+
+  const requestPromise = fetch(requestUrl.toString(), {
+    headers: {
+      accept: "text/xml",
+    },
+  })
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error(`NCBI reference annotation request failed (${response.status}).`);
+      }
+
+      const xmlText = await response.text();
+      const parsed =
+        publicationApi && typeof publicationApi.parseNcbiNuccoreXml === "function"
+          ? publicationApi.parseNcbiNuccoreXml(xmlText)
+          : null;
+
+      if (!parsed || parsed.status !== "ready") {
+        return {
+          status: "error",
+          message:
+            (parsed && parsed.message) ||
+            `Trusted reference annotation could not be parsed for ${accession}.`,
+        };
+      }
+
+      return parsed;
+    })
+    .catch((error) => ({
+      status: "error",
+      message: String(error && error.message ? error.message : error),
+    }))
+    .then((annotationState) => {
+      state.referenceAnnotationCache.set(accession, annotationState);
+      state.referenceAnnotationPromises.delete(accession);
+      return annotationState;
+    });
+
+  state.referenceAnnotationPromises.set(accession, requestPromise);
+  return requestPromise;
 }
 
 function setButtonBusy(button, busy, busyLabel = "Working...") {
@@ -857,7 +945,7 @@ function buildPublicationTableMarkup(tableData) {
   `;
 }
 
-function renderPublicationPanel(payload, index = 0) {
+async function renderPublicationPanel(payload, index = 0) {
   if (!publicationApi) {
     renderPublicationPlaceholder(
       "Publication table helpers are not available in this build.",
@@ -876,10 +964,33 @@ function renderPublicationPanel(payload, index = 0) {
     return;
   }
 
+  const renderToken = ++state.publicationRenderToken;
+  const cachedAnnotation = state.referenceAnnotationCache.get(
+    getReferenceAnnotationCacheKey(result)
+  );
+  if (!cachedAnnotation && result.accession) {
+    renderPublicationPlaceholder(
+      "Loading the selected reference annotation so the amino-acid change table can be prepared safely.",
+      `${result.accession || "Selected hit"} | Loading`
+    );
+  }
+
+  const referenceAnnotation = result.accession
+    ? await loadReferenceAnnotationForResult(result)
+    : {
+        status: "unavailable",
+        message: "Reference accession unavailable for amino-acid annotation.",
+      };
+
+  if (renderToken !== state.publicationRenderToken) {
+    return;
+  }
+
   const tables = publicationApi.buildPublicationTables({
     hit: result,
     hits: normalized.results,
     queryMetadata: getQueryMetadata(normalized, result),
+    optionalFeatureAnnotations: referenceAnnotation,
   });
   const activeTable =
     tables.find((table) => table.id === state.activePublicationTab) || tables[0];
@@ -1055,6 +1166,7 @@ function clearResults() {
   state.selectedResultIndex = 0;
   state.activePublicationTab = "alignment-summary";
   state.publicationTables = [];
+  state.publicationRenderToken += 1;
   resultsNote.textContent = "Run BLAST and the page will load the live result automatically when NCBI is ready. Demo mode is optional.";
   renderPublicationPlaceholder(
     "Select a BLAST hit to generate clean publication tables for that alignment."
