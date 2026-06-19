@@ -45,6 +45,18 @@
       .replace(/"/g, "&quot;");
   }
 
+  function normalizePathInput(value) {
+    let text = String(value || "").trim();
+    while (
+      text.length >= 2 &&
+      text[0] === text[text.length - 1] &&
+      (text[0] === "'" || text[0] === '"')
+    ) {
+      text = text.slice(1, -1).trim();
+    }
+    return text;
+  }
+
   async function request(path, options = {}) {
     const response = await fetch(`${apiUrl}${path}`, {
       ...options,
@@ -133,10 +145,14 @@
       setText(elements.jobStatus, "Enter the FASTQ path.");
       return;
     }
+    const read1Path = normalizePathInput(elements.read1Path.value);
+    const read2Path = normalizePathInput(elements.read2Path.value);
+    elements.read1Path.value = read1Path;
+    elements.read2Path.value = read2Path;
     const payload = {
       organismId: organism.id,
-      read1Path: elements.read1Path.value.trim(),
-      read2Path: elements.read2Path.value.trim(),
+      read1Path,
+      read2Path,
     };
     setText(elements.jobStatus, "Submitting job...");
     try {

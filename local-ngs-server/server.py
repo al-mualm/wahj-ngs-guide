@@ -680,8 +680,17 @@ def parse_samtools_stats(text: str) -> dict:
     return summary
 
 
+def normalize_input_path(value: object) -> str:
+    text = str(value or "").strip()
+    while len(text) >= 2 and text[0] == text[-1] and text[0] in {"'", '"'}:
+        text = text[1:-1].strip()
+    return text
+
+
 def run_alignment_pipeline(job_dir: Path, payload: dict, reference: dict, store: JobStore) -> None:
     job_id = job_dir.name
+    read1_value = normalize_input_path(payload.get("read1Path"))
+    read2_value = normalize_input_path(payload.get("read2Path"))
     commands: list[dict] = []
     status = {
         "jobId": job_id,
@@ -689,8 +698,8 @@ def run_alignment_pipeline(job_dir: Path, payload: dict, reference: dict, store:
         "createdAt": now_iso(),
         "organism": reference.get("organismName", ""),
         "reference": reference,
-        "read1Path": payload.get("read1Path", ""),
-        "read2Path": payload.get("read2Path", ""),
+        "read1Path": read1_value,
+        "read2Path": read2_value,
         "steps": [],
         "reportPath": str(job_dir / "report.json"),
     }
@@ -703,9 +712,8 @@ def run_alignment_pipeline(job_dir: Path, payload: dict, reference: dict, store:
         else:
             thread_count = recommended_threads(reference)
         threads = str(thread_count)
-        read1 = Path(str(payload.get("read1Path") or "")).expanduser()
-        read2_raw = str(payload.get("read2Path") or "").strip()
-        read2 = Path(read2_raw).expanduser() if read2_raw else None
+        read1 = Path(read1_value).expanduser()
+        read2 = Path(read2_value).expanduser() if read2_value else None
         reference_path = Path(reference["path"])
 
         if not read1.exists():
