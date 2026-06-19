@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import io
 import json
 import mimetypes
 import os
@@ -36,6 +37,8 @@ DEFAULT_REFERENCE_FILES = DEFAULT_REFERENCE_COLLECTION / "files"
 DEFAULT_JOB_ROOT = HOME / "Downloads" / "Wahj_NGS_Jobs"
 REFERENCE_EXTENSIONS = (".fa", ".fasta", ".fna", ".fas", ".fa.gz", ".fasta.gz", ".fna.gz")
 ANNOTATION_EXTENSIONS = (".gff3", ".gff", ".gtf")
+MAX_FORM_FIELD_BYTES = 1024 * 1024
+MULTIPART_READ_SIZE = 1024 * 1024
 STATIC_EXTENSIONS = {
     ".css",
     ".gif",
@@ -687,6 +690,125 @@ def normalize_input_path(value: object) -> str:
     return text
 
 
+def sanitize_upload_filename(filename: str) -> str:
+    name = Path(filename or "uploaded.fastq").name.strip()
+    name = re.sub(r"[^A-Za-z0-9._ +()-]+", "_", name)
+    name = name.strip(" .")[:180]
+    return name or "uploaded.fastq"
+
+
+def parse_content_disposition(value: str) -> dict[str, str]:
+    parsed: dict[str, str] = {}
+    for part in value.split(";"):
+        part = part.strip()
+        if "=" not in part:
+            parsed.setdefault("type", part.lower())
+            continue
+        key, raw = part.split("=", 1)
+        key = key.strip().lower()
+        raw = raw.strip()
+        if len(raw) >= 2 and raw[0] == raw[-1] == '"':
+            raw = raw[1:-1]
+        parsed[key] = raw
+    return parsed
+
+
+def boundary_from_content_type(content_type: str) -> bytes:
+    match = re.search(r"boundary=(?:\"([^\"]+)\"|([^;]+))", content_type)
+    if not match:
+        raise ValueError("Missing multipart boundary.")
+    boundary = (match.group(1) or match.group(2)).strip()
+    if not boundary:
+        raise ValueError("Empty multipart boundary.")
+    return f"--{boundary}".encode("utf-8")
+
+
+def read_multipart_headers(handler: BaseHTTPRequestHandler) -> dict[str, str]:
+    headers: dict[str, str] = {}
+    while True:
+        line = handler.rfile.readline(64 * 1024)
+        if line in {b"\r\n", b"\n", b""}:
+            return headers
+        text = line.decode("utf-8", errors="replace").strip()
+        if ":" not in text:
+            continue
+        key, value = text.split(":", 1)
+        headers[key.strip().lower()] = value.strip()
+
+
+def stream_multipart_part(
+    handler: BaseHTTPRequestHandler,
+    boundary: bytes,
+    sink,
+    max_bytes: int | None = None,
+) -> tuple[bytes, int]:
+    previous: bytes | None = None
+    written = 0
+    while True:
+        line = handler.rfile.readline(MULTIPART_READ_SIZE)
+        if line == b"":
+            raise EOFError("Unexpected end of multipart upload.")
+        if line.startswith(boundary):
+            if previous is not None:
+                if previous.endswith(b"\r\n"):
+                    previous = previous[:-2]
+                elif previous.endswith(b"\n"):
+                    previous = previous[:-1]
+                if previous:
+                    sink.write(previous)
+                    written += len(previous)
+            return line, written
+        if previous is not None:
+            sink.write(previous)
+            written += len(previous)
+            if max_bytes is not None and written > max_bytes:
+                raise ValueError("Multipart form field is too large.")
+        previous = line
+
+
+def read_multipart_upload(
+    handler: BaseHTTPRequestHandler,
+    upload_dir: Path,
+) -> tuple[dict[str, str], dict[str, Path]]:
+    content_type = handler.headers.get("Content-Type", "")
+    boundary = boundary_from_content_type(content_type)
+    final_boundary = boundary + b"--"
+    first_line = handler.rfile.readline(MULTIPART_READ_SIZE)
+    if not first_line.startswith(boundary):
+        raise ValueError("Invalid multipart upload.")
+
+    fields: dict[str, str] = {}
+    files: dict[str, Path] = {}
+    boundary_line = first_line
+    while boundary_line and not boundary_line.startswith(final_boundary):
+        headers = read_multipart_headers(handler)
+        if not headers:
+            break
+        disposition = parse_content_disposition(headers.get("content-disposition", ""))
+        field_name = disposition.get("name", "")
+        filename = disposition.get("filename", "")
+        if filename:
+            safe_name = sanitize_upload_filename(filename)
+            target = upload_dir / safe_name
+            counter = 1
+            while target.exists():
+                target = upload_dir / f"{target.stem}-{counter}{target.suffix}"
+                counter += 1
+            with target.open("wb") as handle:
+                boundary_line, _ = stream_multipart_part(handler, boundary, handle)
+            files[field_name] = target
+        else:
+            buffer = io.BytesIO()
+            boundary_line, _ = stream_multipart_part(
+                handler,
+                boundary,
+                buffer,
+                max_bytes=MAX_FORM_FIELD_BYTES,
+            )
+            fields[field_name] = buffer.getvalue().decode("utf-8", errors="replace")
+    return fields, files
+
+
 def run_alignment_pipeline(job_dir: Path, payload: dict, reference: dict, store: JobStore) -> None:
     job_id = job_dir.name
     read1_value = normalize_input_path(payload.get("read1Path"))
@@ -887,6 +1009,85 @@ def run_alignment_pipeline(job_dir: Path, payload: dict, reference: dict, store:
         store.write_status(job_dir, status)
 
 
+def create_uploaded_job(
+    handler: BaseHTTPRequestHandler,
+    catalog: ReferenceCatalog,
+    store: JobStore,
+) -> None:
+    job_dir = store.create_job_dir()
+    upload_dir = job_dir / "uploads"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    status = {
+        "jobId": job_dir.name,
+        "state": "uploading",
+        "createdAt": now_iso(),
+        "steps": [{"name": "upload_fastq", "state": "running"}],
+        "reportPath": str(job_dir / "report.json"),
+    }
+    store.write_status(job_dir, status)
+
+    try:
+        fields, files = read_multipart_upload(handler, upload_dir)
+        selection_id = str(fields.get("organismId") or fields.get("referenceId") or "")
+        reference, organism = catalog.get_selected_reference(selection_id)
+        if not reference:
+            raise ValueError("Unknown organism.")
+
+        read1_path = files.get("read1File") or files.get("read1")
+        read2_path = files.get("read2File") or files.get("read2")
+        if not read1_path:
+            raise ValueError("Upload a Read 1 FASTQ file.")
+
+        payload = {
+            "organismId": selection_id,
+            "organismName": organism["speciesName"] if organism else "",
+            "read1Path": str(read1_path),
+            "read2Path": str(read2_path) if read2_path else "",
+            "inputMode": "upload",
+        }
+        status.update(
+            {
+                "state": "queued",
+                "organism": reference.get("organismName", ""),
+                "reference": reference,
+                "read1Path": str(read1_path),
+                "read2Path": str(read2_path) if read2_path else "",
+                "steps": [{"name": "upload_fastq", "state": "done"}],
+                "uploads": {
+                    "read1File": read1_path.name,
+                    "read2File": read2_path.name if read2_path else "",
+                    "uploadDirectory": str(upload_dir),
+                },
+            }
+        )
+        store.write_status(job_dir, status)
+        thread = threading.Thread(
+            target=run_alignment_pipeline,
+            args=(job_dir, payload, reference, store),
+            daemon=True,
+        )
+        thread.start()
+        write_json(handler, 202, status)
+    except Exception as exc:
+        status["state"] = "failed"
+        status["error"] = str(exc)
+        status["steps"] = [{"name": "upload_fastq", "state": "failed"}]
+        store.write_status(job_dir, status)
+        (job_dir / "report.json").write_text(
+            json.dumps(
+                {
+                    "jobId": job_dir.name,
+                    "failedAt": now_iso(),
+                    "error": str(exc),
+                    "traceback": traceback.format_exc(),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        write_json(handler, 400, {"error": str(exc), "jobId": job_dir.name})
+
+
 def build_handler(catalog: ReferenceCatalog, store: JobStore):
     class Handler(BaseHTTPRequestHandler):
         server_version = "WahjLocalNGS/0.1"
@@ -984,6 +1185,9 @@ def build_handler(catalog: ReferenceCatalog, store: JobStore):
 
         def do_POST(self) -> None:
             parsed = urlparse(self.path)
+            if parsed.path == "/api/jobs/upload":
+                create_uploaded_job(self, catalog, store)
+                return
             if parsed.path == "/api/jobs":
                 try:
                     payload = read_json(self)

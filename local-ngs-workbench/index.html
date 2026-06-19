@@ -39,8 +39,8 @@
             <span class="section-chip">MacBook as NGS server</span>
             <h1>Local NGS Workflow</h1>
             <p class="hero-lead">
-              Choose an organism, paste the FASTQ path, and let the local Mac backend select
-              the complete reference genome and analysis settings.
+              Choose an organism, drop FASTQ files into the workbench, and let the local Mac
+              backend select the complete reference genome and analysis settings.
             </p>
             <div class="local-ngs-note">
               <p class="eyebrow">Backend URL</p>
@@ -73,8 +73,9 @@
             <span class="section-chip">Submit</span>
             <h2>Run NGS analysis</h2>
             <p>
-              Use FASTQ files already present on the Mac. The server automatically chooses
-              trimming, alignment, indexing, statistics, and annotation summary steps.
+              Drop Read 1 and, when paired-end data is available, Read 2. The server
+              automatically chooses trimming, alignment, indexing, statistics, and annotation
+              summary steps.
             </p>
           </div>
 
@@ -100,14 +101,28 @@
                 <span class="section-chip">FASTQ</span>
                 <h3>FASTQ files</h3>
               </div>
-              <label class="field">
-                <span>FASTQ path</span>
-                <input id="read1-path" type="text" placeholder="/Users/.../sample_R1.fastq.gz" />
-              </label>
-              <label class="field">
-                <span>Read 2 path, optional</span>
-                <input id="read2-path" type="text" placeholder="/Users/.../sample_R2.fastq.gz" />
-              </label>
+              <div class="local-ngs-dropzone" id="upload-dropzone" role="button" tabindex="0">
+                <input
+                  id="fastq-files"
+                  type="file"
+                  accept=".fastq,.fq,.fastq.gz,.fq.gz,.gz"
+                  multiple
+                />
+                <strong>Drop FASTQ files here</strong>
+                <span>or click to choose Read 1 and optional Read 2</span>
+              </div>
+              <div class="local-ngs-selected-files" id="selected-files">No FASTQ files selected.</div>
+              <details class="local-ngs-path-fallback">
+                <summary>Use file paths instead</summary>
+                <label class="field">
+                  <span>FASTQ path</span>
+                  <input id="read1-path" type="text" placeholder="/Users/.../sample_R1.fastq.gz" />
+                </label>
+                <label class="field">
+                  <span>Read 2 path, optional</span>
+                  <input id="read2-path" type="text" placeholder="/Users/.../sample_R2.fastq.gz" />
+                </label>
+              </details>
               <button class="primary-action" type="button" id="submit-job-button">
                 Start analysis
               </button>

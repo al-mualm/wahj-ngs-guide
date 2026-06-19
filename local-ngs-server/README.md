@@ -32,17 +32,21 @@ local workbench URL is served by the same Python process as the analysis API.
 - serves the local workbench page from `http://127.0.0.1:8787/local-ngs-workbench/`
 - exposes only curated complete-genome organism choices to the website
 - creates local analysis jobs under `~/Downloads/Wahj_NGS_Jobs`
-- accepts FASTQ paths already present on the Mac
+- accepts drag-and-drop FASTQ uploads and copies them into the job folder
+- keeps local FASTQ paths available as a fallback for very large files
 - automatically selects `fastp`, thread count, complete reference genome, BWA indexing, and `bwa mem`
 - auto-detects Read 2 when common paired-end names are used and Read 2 is left blank
 - runs `samtools sort/index`
 - reports `samtools flagstat`, `samtools stats`, genome structure from `.fai`, and annotation feature counts when GFF/GTF is found
 
-## Why FASTQ paths, not browser upload?
+## Uploads and local paths
 
-Large FASTQ files should not be pushed through the browser into the same Mac.
-For a local server, the fastest and safest method is to paste local FASTQ paths
-into the website. The backend reads them directly from disk.
+Drag-and-drop is simpler for students. The browser uploads the selected FASTQ
+files to the local backend, and the backend stores those copies under the job
+folder before analysis starts.
+
+For multi-GB files, local paths are still available in the workbench because
+they avoid making another copy of the FASTQ files.
 
 ## Important
 

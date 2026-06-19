@@ -72,6 +72,72 @@
   overflow-wrap: anywhere;
 }
 
+.local-ngs-dropzone {
+  position: relative;
+  display: grid;
+  min-height: 178px;
+  place-items: center;
+  gap: 0.4rem;
+  padding: 1.25rem;
+  border: 2px dashed rgba(24, 79, 103, 0.34);
+  border-radius: 8px;
+  background: rgba(237, 247, 246, 0.72);
+  color: #21384c;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.local-ngs-dropzone strong {
+  font-size: 1.05rem;
+}
+
+.local-ngs-dropzone span {
+  color: #526a7d;
+  font-weight: 700;
+}
+
+.local-ngs-dropzone input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.local-ngs-dropzone.is-dragging,
+.local-ngs-dropzone:focus-within {
+  border-color: #3f8968;
+  background: rgba(218, 244, 233, 0.9);
+  box-shadow: 0 0 0 4px rgba(63, 137, 104, 0.14);
+}
+
+.local-ngs-selected-files,
+.local-ngs-path-fallback {
+  margin-top: 1rem;
+}
+
+.local-ngs-selected-files {
+  padding: 0.8rem 0.9rem;
+  border: 1px solid rgba(24, 79, 103, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #2f465c;
+  overflow-wrap: anywhere;
+}
+
+.local-ngs-path-fallback summary {
+  color: #184f67;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.local-ngs-path-fallback .field {
+  margin-top: 0.8rem;
+}
+
 .local-ngs-option-row,
 .local-ngs-action-row {
   display: flex;
