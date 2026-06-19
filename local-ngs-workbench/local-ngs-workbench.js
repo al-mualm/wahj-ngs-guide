@@ -7,6 +7,9 @@
     serverStatus: document.querySelector("#server-status"),
     organismSelect: document.querySelector("#organism-select"),
     referenceDetail: document.querySelector("#reference-detail"),
+    uploadDropzone: document.querySelector("#upload-dropzone"),
+    fastqFiles: document.querySelector("#fastq-files"),
+    selectedFiles: document.querySelector("#selected-files"),
     read1Path: document.querySelector("#read1-path"),
     read2Path: document.querySelector("#read2-path"),
     submitJobButton: document.querySelector("#submit-job-button"),
@@ -16,6 +19,8 @@
     jobStatus: document.querySelector("#job-status"),
   };
   let organisms = [];
+  let selectedRead1File = null;
+  let selectedRead2File = null;
   let pollTimer = null;
 
   function pretty(value) {
@@ -55,6 +60,42 @@
       text = text.slice(1, -1).trim();
     }
     return text;
+  }
+
+  function isRead2Name(name) {
+    return /(^|[._-])r?2([._-]|$)/i.test(name) || /_2\.f(ast)?q/i.test(name);
+  }
+
+  function isRead1Name(name) {
+    return /(^|[._-])r?1([._-]|$)/i.test(name) || /_1\.f(ast)?q/i.test(name);
+  }
+
+  function renderSelectedFiles() {
+    if (!selectedRead1File && !selectedRead2File) {
+      elements.selectedFiles.textContent = "No FASTQ files selected.";
+      return;
+    }
+    const lines = [];
+    if (selectedRead1File) {
+      lines.push(`Read 1: ${selectedRead1File.name} (${formatBytes(selectedRead1File.size)})`);
+    }
+    if (selectedRead2File) {
+      lines.push(`Read 2: ${selectedRead2File.name} (${formatBytes(selectedRead2File.size)})`);
+    }
+    elements.selectedFiles.textContent = lines.join("\n");
+  }
+
+  function assignFastqFiles(fileList) {
+    const files = Array.from(fileList || []);
+    if (!files.length) {
+      return;
+    }
+    selectedRead1File = files.find((file) => isRead1Name(file.name)) || files[0];
+    selectedRead2File =
+      files.find((file) => file !== selectedRead1File && isRead2Name(file.name)) ||
+      files.find((file) => file !== selectedRead1File) ||
+      null;
+    renderSelectedFiles();
   }
 
   async function request(path, options = {}) {
@@ -141,10 +182,18 @@
       setText(elements.jobStatus, "Select an organism first.");
       return;
     }
-    if (!elements.read1Path.value.trim()) {
-      setText(elements.jobStatus, "Enter the FASTQ path.");
+    if (selectedRead1File) {
+      uploadAndSubmitJob(organism);
       return;
     }
+    if (!elements.read1Path.value.trim()) {
+      setText(elements.jobStatus, "Drop a FASTQ file or enter a FASTQ path.");
+      return;
+    }
+    submitPathJob(organism);
+  }
+
+  async function submitPathJob(organism) {
     const read1Path = normalizePathInput(elements.read1Path.value);
     const read2Path = normalizePathInput(elements.read2Path.value);
     elements.read1Path.value = read1Path;
@@ -166,6 +215,47 @@
     } catch (error) {
       setText(elements.jobStatus, `Job submission failed:\n${error.message}`);
     }
+  }
+
+  function uploadAndSubmitJob(organism) {
+    const formData = new FormData();
+    formData.append("organismId", organism.id);
+    formData.append("read1File", selectedRead1File, selectedRead1File.name);
+    if (selectedRead2File) {
+      formData.append("read2File", selectedRead2File, selectedRead2File.name);
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${apiUrl}/api/jobs/upload`);
+    xhr.upload.addEventListener("progress", (event) => {
+      if (event.lengthComputable) {
+        const percent = ((event.loaded / event.total) * 100).toFixed(1);
+        setText(elements.jobStatus, `Uploading FASTQ files... ${percent}%`);
+      } else {
+        setText(elements.jobStatus, "Uploading FASTQ files...");
+      }
+    });
+    xhr.addEventListener("load", () => {
+      let payload = {};
+      try {
+        payload = JSON.parse(xhr.responseText || "{}");
+      } catch (error) {
+        setText(elements.jobStatus, `Upload failed:\n${xhr.responseText || error.message}`);
+        return;
+      }
+      if (xhr.status < 200 || xhr.status >= 300) {
+        setText(elements.jobStatus, `Upload failed:\n${payload.error || xhr.statusText}`);
+        return;
+      }
+      elements.jobId.value = payload.jobId;
+      setText(elements.jobStatus, payload);
+      startPolling(payload.jobId);
+    });
+    xhr.addEventListener("error", () => {
+      setText(elements.jobStatus, "Upload failed. Check that the local backend is still running.");
+    });
+    setText(elements.jobStatus, "Uploading FASTQ files...");
+    xhr.send(formData);
   }
 
   async function refreshJob(loadReport = false) {
@@ -205,6 +295,19 @@
   elements.apiUrlLabel.textContent = apiUrl;
   elements.checkServerButton.addEventListener("click", checkServer);
   elements.organismSelect.addEventListener("change", renderReferenceDetail);
+  elements.fastqFiles.addEventListener("change", () => assignFastqFiles(elements.fastqFiles.files));
+  elements.uploadDropzone.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    elements.uploadDropzone.classList.add("is-dragging");
+  });
+  elements.uploadDropzone.addEventListener("dragleave", () => {
+    elements.uploadDropzone.classList.remove("is-dragging");
+  });
+  elements.uploadDropzone.addEventListener("drop", (event) => {
+    event.preventDefault();
+    elements.uploadDropzone.classList.remove("is-dragging");
+    assignFastqFiles(event.dataTransfer.files);
+  });
   elements.submitJobButton.addEventListener("click", submitJob);
   elements.refreshJobButton.addEventListener("click", () => refreshJob(false));
   elements.loadReportButton.addEventListener("click", () => refreshJob(true));

@@ -116,9 +116,10 @@ Then open:
 
 The backend reads the centralized reference collection in
 `~/Downloads/Reference_Genomes_Collected_2026-06-19`, shows only curated
-complete-genome organism choices, accepts FASTQ file paths that already exist
-on the Mac, and automatically runs the available local tools: `fastp`, `bwa`,
-and `samtools`.
+complete-genome organism choices, accepts drag-and-drop FASTQ uploads or local
+FASTQ paths, and automatically runs the available local tools: `fastp`, `bwa`,
+and `samtools`. Uploaded FASTQ files are copied into that job's folder under
+`~/Downloads/Wahj_NGS_Jobs`.
 
 ## Apps Script deployment
 
