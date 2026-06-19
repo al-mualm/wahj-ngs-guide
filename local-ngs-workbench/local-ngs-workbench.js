@@ -110,6 +110,7 @@
       setText(
         elements.serverStatus,
         `Could not reach ${apiUrl}.\n\nStart the backend with:\npython3 local-ngs-server/server.py\n\n${error.message}`
+          + `\n\nIf this page is open from GitHub Pages, use the local workbench instead:\nhttp://127.0.0.1:8787/local-ngs-workbench/`
       );
     }
   }

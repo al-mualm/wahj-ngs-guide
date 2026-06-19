@@ -16,9 +16,20 @@ Default URL:
 http://127.0.0.1:8787
 ```
 
+Open the workbench here after the server starts:
+
+```text
+http://127.0.0.1:8787/local-ngs-workbench/
+```
+
+The GitHub Pages copy is useful for navigation and publishing, but some
+browsers block a public HTTPS page from calling a local loopback server. The
+local workbench URL is served by the same Python process as the analysis API.
+
 ## What it does now
 
 - reads the centralized reference manifest in `~/Downloads/Reference_Genomes_Collected_2026-06-19`
+- serves the local workbench page from `http://127.0.0.1:8787/local-ngs-workbench/`
 - exposes references to the website
 - creates local analysis jobs under `~/Downloads/Wahj_NGS_Jobs`
 - accepts FASTQ paths already present on the Mac

@@ -13,6 +13,7 @@ import argparse
 import csv
 import hashlib
 import json
+import mimetypes
 import os
 import re
 import shutil
@@ -22,10 +23,11 @@ import time
 import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 
 
 HOME = Path.home()
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REFERENCE_COLLECTION = (
     HOME / "Downloads" / "Reference_Genomes_Collected_2026-06-19"
 )
@@ -34,6 +36,22 @@ DEFAULT_REFERENCE_FILES = DEFAULT_REFERENCE_COLLECTION / "files"
 DEFAULT_JOB_ROOT = HOME / "Downloads" / "Wahj_NGS_Jobs"
 REFERENCE_EXTENSIONS = (".fa", ".fasta", ".fna", ".fas", ".fa.gz", ".fasta.gz", ".fna.gz")
 ANNOTATION_EXTENSIONS = (".gff3", ".gff", ".gtf")
+STATIC_EXTENSIONS = {
+    ".css",
+    ".gif",
+    ".html",
+    ".ico",
+    ".jpeg",
+    ".jpg",
+    ".js",
+    ".json",
+    ".png",
+    ".svg",
+    ".txt",
+    ".webp",
+    ".woff",
+    ".woff2",
+}
 
 
 def now_iso() -> str:
@@ -65,8 +83,48 @@ def write_json(handler: BaseHTTPRequestHandler, status: int, payload: dict) -> N
     handler.send_header("Access-Control-Allow-Origin", "*")
     handler.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
     handler.send_header("Access-Control-Allow-Headers", "Content-Type")
+    handler.send_header("Access-Control-Allow-Private-Network", "true")
     handler.end_headers()
     handler.wfile.write(body)
+
+
+def write_redirect(handler: BaseHTTPRequestHandler, location: str) -> None:
+    handler.send_response(302)
+    handler.send_header("Location", location)
+    handler.send_header("Content-Length", "0")
+    handler.end_headers()
+
+
+def write_static_file(handler: BaseHTTPRequestHandler, path: Path) -> None:
+    body = path.read_bytes()
+    content_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+    handler.send_response(200)
+    handler.send_header("Content-Type", content_type)
+    handler.send_header("Content-Length", str(len(body)))
+    handler.send_header("Cache-Control", "no-store")
+    handler.send_header("Access-Control-Allow-Origin", "*")
+    handler.end_headers()
+    handler.wfile.write(body)
+
+
+def resolve_static_path(request_path: str) -> Path | None:
+    if request_path == "/favicon.ico":
+        return PROJECT_ROOT / "assets" / "wahj-logo.png"
+    if request_path in {"/", "/local-ngs-workbench/"}:
+        return PROJECT_ROOT / "local-ngs-workbench" / "index.html"
+    decoded = unquote(request_path).lstrip("/")
+    if not decoded:
+        return None
+    candidate = (PROJECT_ROOT / decoded).resolve()
+    try:
+        candidate.relative_to(PROJECT_ROOT.resolve())
+    except ValueError:
+        return None
+    if not candidate.is_file():
+        return None
+    if candidate.suffix.lower() not in STATIC_EXTENSIONS:
+        return None
+    return candidate
 
 
 def command_exists(name: str) -> bool:
@@ -531,10 +589,35 @@ def build_handler(catalog: ReferenceCatalog, store: JobStore):
             self.send_header("Access-Control-Allow-Origin", "*")
             self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
             self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            self.send_header("Access-Control-Allow-Private-Network", "true")
+            self.send_header("Vary", "Access-Control-Request-Private-Network")
             self.end_headers()
+
+        def do_HEAD(self) -> None:
+            parsed = urlparse(self.path)
+            if parsed.path == "/local-ngs-workbench":
+                self.send_response(302)
+                self.send_header("Location", "/local-ngs-workbench/")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
+            static_path = resolve_static_path(parsed.path)
+            if static_path:
+                content_type = mimetypes.guess_type(static_path.name)[0] or "application/octet-stream"
+                self.send_response(200)
+                self.send_header("Content-Type", content_type)
+                self.send_header("Content-Length", str(static_path.stat().st_size))
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                return
+            write_json(self, 404, {"error": "Not found."})
 
         def do_GET(self) -> None:
             parsed = urlparse(self.path)
+            if parsed.path == "/local-ngs-workbench":
+                write_redirect(self, "/local-ngs-workbench/")
+                return
             if parsed.path == "/api/health":
                 write_json(
                     self,
@@ -575,6 +658,10 @@ def build_handler(catalog: ReferenceCatalog, store: JobStore):
                         write_json(self, 200, json.loads(report_path.read_text()))
                         return
                 write_json(self, 200, status)
+                return
+            static_path = resolve_static_path(parsed.path)
+            if static_path:
+                write_static_file(self, static_path)
                 return
             write_json(self, 404, {"error": "Not found."})
 
