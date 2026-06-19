@@ -5,6 +5,7 @@ This project is a static educational website for Wahj Al-DNA. It currently inclu
 - a learning hub homepage
 - an English Next-Generation Sequencing guide
 - a browser-side FASTQ QC Analyzer for NGS read files
+- a local Mac NGS workflow workbench and backend scaffold
 - an Arabic NGS guide
 - a Real-Time PCR teaching page with a gene expression calculator
 - a Sanger Sequence Analysis & BLAST Alignment page for teaching sequence cleaning, taxonomy lookup, and BLAST interpretation
@@ -20,6 +21,8 @@ This project is a static educational website for Wahj Al-DNA. It currently inclu
 - `fastq-analyzer/fastq-core.js` — FASTQ parser and QC metric engine
 - `fastq-analyzer/fastq-analyzer.js` — FASTQ Analyzer UI and export workflow
 - `fastq-analyzer/fastq-analyzer.css` — FASTQ Analyzer styling
+- `local-ngs-workbench/index.html` — website page for submitting local Mac NGS jobs
+- `local-ngs-server/server.py` — local-only Python backend for reference listing, job creation, fastp, BWA, and samtools reporting
 - `ar/index.html` — Arabic NGS guide
 - `real-time-pcr/index.html` — Real-Time PCR guide
 - `pcr-calculator.js` — qPCR expression calculator logic
@@ -96,6 +99,25 @@ The FASTQ QC Analyzer supports:
 - read-length and GC-distribution charts
 - adapter-like sequence and overrepresented-read warnings
 - CSV, JSON, and plain-text report export
+
+## Local Mac NGS workflow notes
+
+The local workflow is designed for running analysis on this MacBook instead of hiring a
+server. Start the backend locally:
+
+```bash
+cd "/Users/mahmoodalmoalm/Documents/New project/wahj-ngs-guide-local-ngs"
+python3 local-ngs-server/server.py
+```
+
+Then open:
+
+- `local-ngs-workbench/index.html`
+
+The backend reads the centralized reference collection in
+`~/Downloads/Reference_Genomes_Collected_2026-06-19`, accepts FASTQ file paths that
+already exist on the Mac, and runs the available local tools: `fastp`, `bwa`,
+and `samtools`.
 
 ## Apps Script deployment
 
