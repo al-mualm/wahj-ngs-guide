@@ -50,6 +50,7 @@
           <a href="#applications">Applications</a>
           <a href="#glossary">Terms</a>
           <a href="#qc">Quality Control</a>
+          <a href="../fastq-analyzer/">FASTQ Analyzer</a>
           <a href="#platforms">Platforms</a>
           <a href="#bioinformatics">Bioinformatics</a>
           <a href="#choose">Choose</a>
@@ -809,6 +810,36 @@
               be misleading if its technical quality is poor.
             </p>
           </figure>
+        </section>
+
+        <section class="section" id="fastq-tool">
+          <div class="section-heading reveal">
+            <span class="section-chip">Practical FASTQ QC</span>
+            <h2>Analyze NGS FASTQ files directly in the browser</h2>
+            <p>
+              After sequencing, FASTQ files should be checked before alignment or downstream
+              interpretation. The FASTQ QC Analyzer reviews read counts, read lengths, GC
+              content, N content, Q20/Q30 bases, per-cycle quality, base composition,
+              adapter-like sequences, and overrepresented reads without uploading files.
+            </p>
+          </div>
+          <div class="insight-grid reveal">
+            <article class="insight-card">
+              <h3>Upload FASTQ</h3>
+              <p>Use standard <code>.fastq</code>, <code>.fq</code>, or gzip-compressed files.</p>
+            </article>
+            <article class="insight-card">
+              <h3>Review QC flags</h3>
+              <p>Check common warnings before trimming, alignment, assembly, or quantification.</p>
+            </article>
+            <article class="insight-card">
+              <h3>Export outputs</h3>
+              <p>Download CSV, JSON, or text summaries for records and teaching reports.</p>
+            </article>
+          </div>
+          <p class="reveal">
+            <a class="hub-link hub-link-primary" href="../fastq-analyzer/">Open FASTQ QC Analyzer</a>
+          </p>
         </section>
 
         <section class="section" id="library-prep">

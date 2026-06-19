@@ -58,6 +58,14 @@ const homepageCopy = {
             href: "ngs/#workflow",
             chips: ["Workflow", "QC", "Decision guide"],
           },
+          {
+            badge: "Tool",
+            title: "FASTQ QC analyzer",
+            description:
+              "Upload NGS FASTQ files in the browser, review read counts, GC content, Q20/Q30 metrics, per-cycle quality, adapter flags, and export QC summaries.",
+            href: "fastq-analyzer/",
+            chips: ["FASTQ upload", "Q30", "Adapter flags"],
+          },
         ],
       },
       sanger: {
@@ -234,6 +242,14 @@ const homepageCopy = {
               "انتقل مباشرة إلى أقسام سير العمل وضبط الجودة والمنصات ودليل اختيار التقنية داخل صفحة NGS.",
             href: "ar/#workflow",
             chips: ["Workflow", "QC", "Decision guide"],
+          },
+          {
+            badge: "أداة",
+            title: "محلل FASTQ لضبط الجودة",
+            description:
+              "ارفع ملفات FASTQ داخل المتصفح وراجع عدد القراءات وGC وQ20/Q30 وجودة الدورات وإشارات المحولات ثم صدّر ملخصات QC.",
+            href: "fastq-analyzer/",
+            chips: ["FASTQ upload", "Q30", "Adapter flags"],
           },
         ],
       },

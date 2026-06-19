@@ -1,0 +1,372 @@
+.fastq-analyzer-page {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(47, 149, 184, 0.12), transparent 28%),
+    linear-gradient(180deg, #f8fbfc 0%, #eef4f7 50%, #f7faf9 100%);
+}
+
+.fastq-analyzer-page .section {
+  padding-inline: clamp(1rem, 2vw, 1.6rem);
+}
+
+.fastq-workbench-section {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(340px, 1.1fr);
+  gap: 1.4rem;
+  align-items: start;
+}
+
+.fastq-workbench-copy h1 {
+  margin-bottom: 0.8rem;
+}
+
+.fastq-privacy-note,
+.fastq-panel,
+.fastq-metric-card,
+.fastq-chart-card,
+.fastq-report-preview {
+  border: 1px solid rgba(23, 39, 57, 0.11);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 14px 34px rgba(20, 42, 62, 0.08);
+}
+
+.fastq-privacy-note {
+  margin-top: 1.1rem;
+  padding: 1rem;
+  border-left: 4px solid #3f8968;
+}
+
+.fastq-privacy-note p {
+  margin: 0;
+}
+
+.fastq-privacy-note p + p {
+  margin-top: 0.35rem;
+}
+
+.fastq-panel {
+  min-width: 0;
+  padding: clamp(1rem, 2vw, 1.35rem);
+}
+
+.fastq-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.fastq-panel-heading h2,
+.fastq-panel-heading h3 {
+  margin: 0;
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+}
+
+.fastq-dropzone {
+  display: grid;
+  gap: 0.4rem;
+  min-height: 156px;
+  align-content: center;
+  border: 2px dashed rgba(24, 79, 103, 0.28);
+  border-radius: 8px;
+  padding: 1.25rem;
+  background: linear-gradient(180deg, rgba(243, 249, 251, 0.96), rgba(250, 252, 253, 0.96));
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.fastq-dropzone:hover,
+.fastq-dropzone:focus-within,
+.fastq-dropzone.is-dragover {
+  border-color: rgba(24, 79, 103, 0.66);
+  background: #f1f8fb;
+}
+
+.fastq-dropzone input {
+  display: none;
+}
+
+.fastq-dropzone strong {
+  color: #18364a;
+  font-size: 1.08rem;
+}
+
+.fastq-dropzone span,
+.fastq-file-list,
+.fastq-status {
+  color: #587086;
+}
+
+.fastq-file-list {
+  margin-top: 0.9rem;
+  border-radius: 8px;
+  padding: 0.85rem 0.95rem;
+  background: rgba(242, 247, 250, 0.92);
+  font-size: 0.94rem;
+}
+
+.fastq-control-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.fastq-control-grid select,
+.fastq-control-grid input {
+  width: 100%;
+}
+
+.fastq-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.button-secondary {
+  border: 1px solid rgba(24, 79, 103, 0.18);
+  border-radius: 999px;
+  padding: 0.85rem 1.1rem;
+  background: rgba(255, 255, 255, 0.96);
+  color: #184f67;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.button-secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.fastq-status {
+  margin-top: 1rem;
+  border-radius: 8px;
+  padding: 0.85rem 0.95rem;
+  background: rgba(238, 245, 249, 0.95);
+  border-left: 4px solid rgba(47, 149, 184, 0.72);
+}
+
+.fastq-status.is-success {
+  background: rgba(232, 246, 239, 0.96);
+  border-left-color: #3f8968;
+  color: #21583b;
+}
+
+.fastq-status.is-warning {
+  background: rgba(251, 244, 225, 0.96);
+  border-left-color: #c7a860;
+  color: #705018;
+}
+
+.fastq-status.is-error {
+  background: rgba(253, 235, 235, 0.96);
+  border-left-color: #c96a58;
+  color: #842b25;
+}
+
+.fastq-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-top: 1.2rem;
+}
+
+.fastq-metric-card {
+  padding: 1rem;
+  min-height: 118px;
+}
+
+.fastq-metric-card span {
+  display: block;
+  color: #57697d;
+  font-weight: 800;
+  font-size: 0.86rem;
+  text-transform: uppercase;
+}
+
+.fastq-metric-card strong {
+  display: block;
+  margin-top: 0.45rem;
+  color: #172739;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  line-height: 1.1;
+}
+
+.fastq-metric-card small {
+  display: block;
+  margin-top: 0.45rem;
+  color: #60758a;
+  line-height: 1.35;
+}
+
+.fastq-summary-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.75fr) minmax(0, 1.25fr);
+  gap: 1rem;
+  align-items: start;
+  margin-top: 1rem;
+}
+
+.fastq-detail-layout {
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+}
+
+.fastq-warning-list {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fastq-warning-list li {
+  border-radius: 8px;
+  padding: 0.8rem 0.9rem;
+  background: rgba(241, 247, 249, 0.95);
+  color: #30475c;
+}
+
+.fastq-warning-list li[data-severity="pass"] {
+  background: rgba(232, 246, 239, 0.96);
+  color: #21583b;
+}
+
+.fastq-warning-list li[data-severity="warn"] {
+  background: rgba(251, 244, 225, 0.96);
+  color: #705018;
+}
+
+.fastq-warning-list li[data-severity="fail"] {
+  background: rgba(253, 235, 235, 0.96);
+  color: #842b25;
+}
+
+.fastq-table-shell {
+  overflow-x: auto;
+}
+
+.fastq-data-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.fastq-data-table th,
+.fastq-data-table td {
+  border: 1px solid rgba(23, 39, 57, 0.1);
+  padding: 0.7rem 0.78rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.fastq-data-table th {
+  background: #edf5f8;
+  color: #17374b;
+  font-size: 0.88rem;
+}
+
+.fastq-data-table td {
+  color: #2e4357;
+}
+
+.fastq-status-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  font-weight: 800;
+  font-size: 0.82rem;
+}
+
+.fastq-status-pill[data-status="pass"] {
+  background: rgba(63, 137, 104, 0.14);
+  color: #21583b;
+}
+
+.fastq-status-pill[data-status="warn"] {
+  background: rgba(199, 168, 96, 0.18);
+  color: #705018;
+}
+
+.fastq-status-pill[data-status="fail"] {
+  background: rgba(201, 106, 88, 0.18);
+  color: #842b25;
+}
+
+.fastq-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.fastq-chart-card {
+  margin: 0;
+  padding: 1rem;
+}
+
+.fastq-chart-card figcaption {
+  margin-bottom: 0.75rem;
+  font-weight: 800;
+  color: #18364a;
+}
+
+.fastq-chart-card canvas {
+  display: block;
+  width: 100%;
+  height: 280px;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.fastq-data-table code {
+  word-break: break-all;
+  white-space: normal;
+}
+
+.fastq-export-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.fastq-report-preview {
+  margin: 0;
+  min-height: 260px;
+  max-height: 420px;
+  overflow: auto;
+  padding: 1rem;
+  color: #21384c;
+  white-space: pre-wrap;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 980px) {
+  .fastq-workbench-section,
+  .fastq-summary-layout,
+  .fastq-detail-layout,
+  .fastq-chart-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fastq-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .fastq-control-grid,
+  .fastq-metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fastq-action-row > button {
+    width: 100%;
+  }
+
+  .fastq-chart-card canvas {
+    height: 240px;
+  }
+}
