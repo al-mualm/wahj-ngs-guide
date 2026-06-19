@@ -30,11 +30,12 @@ local workbench URL is served by the same Python process as the analysis API.
 
 - reads the centralized reference manifest in `~/Downloads/Reference_Genomes_Collected_2026-06-19`
 - serves the local workbench page from `http://127.0.0.1:8787/local-ngs-workbench/`
-- exposes references to the website
+- exposes only curated complete-genome organism choices to the website
 - creates local analysis jobs under `~/Downloads/Wahj_NGS_Jobs`
 - accepts FASTQ paths already present on the Mac
-- runs `fastp` when available
-- runs `bwa mem` + `samtools sort/index` when a BWA index exists beside the selected reference
+- automatically selects `fastp`, thread count, complete reference genome, BWA indexing, and `bwa mem`
+- auto-detects Read 2 when common paired-end names are used and Read 2 is left blank
+- runs `samtools sort/index`
 - reports `samtools flagstat`, `samtools stats`, genome structure from `.fai`, and annotation feature counts when GFF/GTF is found
 
 ## Why FASTQ paths, not browser upload?

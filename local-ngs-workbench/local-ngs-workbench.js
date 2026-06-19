@@ -5,19 +5,17 @@
     apiUrlLabel: document.querySelector("#api-url-label"),
     checkServerButton: document.querySelector("#check-server-button"),
     serverStatus: document.querySelector("#server-status"),
-    referenceSelect: document.querySelector("#reference-select"),
+    organismSelect: document.querySelector("#organism-select"),
     referenceDetail: document.querySelector("#reference-detail"),
     read1Path: document.querySelector("#read1-path"),
     read2Path: document.querySelector("#read2-path"),
-    runFastp: document.querySelector("#run-fastp"),
-    threads: document.querySelector("#threads"),
     submitJobButton: document.querySelector("#submit-job-button"),
     jobId: document.querySelector("#job-id"),
     refreshJobButton: document.querySelector("#refresh-job-button"),
     loadReportButton: document.querySelector("#load-report-button"),
     jobStatus: document.querySelector("#job-status"),
   };
-  let references = [];
+  let organisms = [];
   let pollTimer = null;
 
   function pretty(value) {
@@ -62,37 +60,49 @@
     return payload;
   }
 
-  function renderReferences() {
-    elements.referenceSelect.innerHTML =
-      '<option value="">Select a reference genome</option>' +
-      references
+  function renderOrganisms() {
+    elements.organismSelect.innerHTML =
+      '<option value="">Select organism</option>' +
+      organisms
         .map(
-          (reference) =>
-            `<option value="${escapeHtml(reference.id)}">${escapeHtml(reference.kind)}: ${escapeHtml(
-              reference.label
+          (organism) =>
+            `<option value="${escapeHtml(organism.id)}">${escapeHtml(
+              organism.speciesName || organism.label
             )}</option>`
         )
         .join("");
   }
 
-  function selectedReference() {
-    return references.find((reference) => reference.id === elements.referenceSelect.value);
+  function selectedOrganism() {
+    return organisms.find((organism) => organism.id === elements.organismSelect.value);
   }
 
   function renderReferenceDetail() {
-    const reference = selectedReference();
-    if (!reference) {
-      elements.referenceDetail.textContent = "No reference selected.";
+    const organism = selectedOrganism();
+    if (!organism) {
+      elements.referenceDetail.textContent = "Select an organism to see the chosen complete reference.";
       return;
     }
+    const defaults = organism.analysisDefaults || {};
     elements.referenceDetail.innerHTML = `
-      <strong>${escapeHtml(reference.label)}</strong><br>
-      <span>Size: ${escapeHtml(formatBytes(reference.sizeBytes))}</span><br>
-      <span>BWA index: ${reference.bwaIndexReady ? "ready" : "missing"}</span><br>
-      <span>FAI: ${reference.faiReady ? "ready" : "will be created if needed"}</span><br>
-      <span>Annotation: ${escapeHtml(reference.annotationPath || "not detected")}</span><br>
-      <code>${escapeHtml(reference.path)}</code>
+      <strong>${escapeHtml(organism.speciesName || organism.label)}</strong><br>
+      <span>Reference: ${escapeHtml(organism.referenceName || "complete genome")}</span><br>
+      <span>Size: ${escapeHtml(formatBytes(organism.sizeBytes))}</span><br>
+      <span>Workflow: ${escapeHtml(defaults.qualityControl || "fastp")} -> ${escapeHtml(
+        defaults.aligner || "bwa mem"
+      )} -> ${escapeHtml(defaults.postAlignment || "samtools statistics")}</span>
     `;
+  }
+
+  function renderServerStatus(health, loadedOrganisms) {
+    const tools = health.tools || {};
+    const availableTools = Object.keys(tools).filter((name) => tools[name]);
+    setText(
+      elements.serverStatus,
+      `Local server ready.\nComplete organisms loaded: ${loadedOrganisms}\nAnalysis tools: ${availableTools.join(
+        ", "
+      )}\nJobs folder: ${health.jobRoot}`
+    );
   }
 
   async function checkServer() {
@@ -100,12 +110,10 @@
     try {
       const health = await request("/api/health");
       const referencePayload = await request("/api/references");
-      references = referencePayload.references || [];
-      renderReferences();
-      setText(elements.serverStatus, {
-        ...health,
-        loadedReferences: references.length,
-      });
+      organisms = referencePayload.organisms || referencePayload.references || [];
+      renderOrganisms();
+      renderReferenceDetail();
+      renderServerStatus(health, organisms.length);
     } catch (error) {
       setText(
         elements.serverStatus,
@@ -116,21 +124,19 @@
   }
 
   async function submitJob() {
-    const reference = selectedReference();
-    if (!reference) {
-      setText(elements.jobStatus, "Select a reference first.");
+    const organism = selectedOrganism();
+    if (!organism) {
+      setText(elements.jobStatus, "Select an organism first.");
       return;
     }
     if (!elements.read1Path.value.trim()) {
-      setText(elements.jobStatus, "Enter the Read 1 FASTQ path.");
+      setText(elements.jobStatus, "Enter the FASTQ path.");
       return;
     }
     const payload = {
-      referenceId: reference.id,
+      organismId: organism.id,
       read1Path: elements.read1Path.value.trim(),
       read2Path: elements.read2Path.value.trim(),
-      runFastp: elements.runFastp.checked,
-      threads: Number(elements.threads.value || 4),
     };
     setText(elements.jobStatus, "Submitting job...");
     try {
@@ -182,7 +188,7 @@
 
   elements.apiUrlLabel.textContent = apiUrl;
   elements.checkServerButton.addEventListener("click", checkServer);
-  elements.referenceSelect.addEventListener("change", renderReferenceDetail);
+  elements.organismSelect.addEventListener("change", renderReferenceDetail);
   elements.submitJobButton.addEventListener("click", submitJob);
   elements.refreshJobButton.addEventListener("click", () => refreshJob(false));
   elements.loadReportButton.addEventListener("click", () => refreshJob(true));

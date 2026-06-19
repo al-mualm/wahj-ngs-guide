@@ -52,6 +52,80 @@ STATIC_EXTENSIONS = {
     ".woff",
     ".woff2",
 }
+ORGANISM_RULES = [
+    {
+        "id": "homo-sapiens",
+        "speciesName": "Homo sapiens",
+        "referenceName": "GRCh38 complete genome",
+        "match": ["homo sapiens", "homo_sapiens_assembly38", "grch38"],
+        "prefer": ["homo_sapiens_assembly38.fasta", "grch38_gatk", "assembly38.fasta"],
+        "exclude": ["_chr", "chr20", "chr22", "chrx", "complete cds", " gene,"],
+    },
+    {
+        "id": "escherichia-coli",
+        "speciesName": "Escherichia coli",
+        "referenceName": "complete bacterial genome",
+        "match": ["escherichia coli", "ecoli"],
+        "prefer": ["ecoli_o157h7_sakai", "sakai", "nc_002695", "mg1655", "nc_000913"],
+        "exclude": ["cds_from_genomic", "[gbkey=cds]", "protein_id="],
+    },
+    {
+        "id": "klebsiella-pneumoniae",
+        "speciesName": "Klebsiella pneumoniae",
+        "referenceName": "complete bacterial genome",
+        "match": ["klebsiella pneumoniae", "kp_mgh78578"],
+        "prefer": ["kp_mgh78578", "mgh 78578", "nc_009648"],
+        "exclude": ["cds_from_genomic", "[gbkey=cds]", "protein_id="],
+    },
+    {
+        "id": "helicobacter-pylori",
+        "speciesName": "Helicobacter pylori",
+        "referenceName": "complete bacterial genome",
+        "match": ["helicobacter pylori", "hpylori"],
+        "prefer": ["hpylori_26695", "26695", "ae000511"],
+        "exclude": ["cds_from_genomic", "[gbkey=cds]", "protein_id="],
+    },
+    {
+        "id": "phoenix-dactylifera",
+        "speciesName": "Phoenix dactylifera",
+        "referenceName": "date palm genome assembly",
+        "match": ["phoenix dactylifera", "phoenix_ref", "palm"],
+        "prefer": ["phoenix_ref.fasta", "barhee", "chromosome"],
+        "exclude": ["cds_from_genomic", "[gbkey=cds]", "protein_id="],
+    },
+    {
+        "id": "newcastle-disease-virus",
+        "speciesName": "Newcastle disease virus",
+        "referenceName": "complete viral genome",
+        "match": ["newcastle disease virus", "ndv_ref", "ulster/67"],
+        "prefer": ["ndv_ref.fasta", "nc_075404", "complete genome"],
+        "exclude": ["cds_from_genomic", "[gbkey=cds]", "protein_id="],
+    },
+    {
+        "id": "cucumber-mosaic-virus",
+        "speciesName": "Cucumber mosaic virus",
+        "referenceName": "complete viral genome",
+        "match": ["cucumber mosaic virus", "cmv_ref", "cmv"],
+        "prefer": ["cmv_ref.fasta", "nc_002034", "complete sequence"],
+        "exclude": ["cds_from_genomic", "[gbkey=cds]", "protein_id="],
+    },
+    {
+        "id": "agaricus-bisporus",
+        "speciesName": "Agaricus bisporus",
+        "referenceName": "genome assembly",
+        "match": ["agaricus bisporus", "agabi", "asm827154"],
+        "prefer": ["gcf_000300575", "h97", "genomic.fna"],
+        "exclude": ["cds_from_genomic", "[gbkey=cds]", "protein_id="],
+    },
+    {
+        "id": "gardnerella-vaginalis",
+        "speciesName": "Gardnerella vaginalis",
+        "referenceName": "genome assembly",
+        "match": ["gardnerella vaginalis", "ugent 25.49"],
+        "prefer": ["gcf_003397605", "genomic.fna"],
+        "exclude": ["cds_from_genomic", "[gbkey=cds]", "protein_id="],
+    },
+]
 
 
 def now_iso() -> str:
@@ -196,6 +270,101 @@ def guess_reference_kind(path: Path, header: str) -> str:
     return "genome"
 
 
+def reference_text(reference: dict) -> str:
+    return " ".join(
+        str(reference.get(key, ""))
+        for key in ["label", "header", "fileName", "path", "kind"]
+    ).lower()
+
+
+def is_partial_or_derived_reference(reference: dict) -> bool:
+    text = reference_text(reference)
+    file_name = str(reference.get("fileName", "")).lower()
+    label = str(reference.get("label", "")).lower()
+    bad_terms = [
+        "cds_from_genomic",
+        "transcripts.fa",
+        "protein.faa",
+        "complete cds",
+        "[gbkey=cds]",
+        "protein_id=",
+        "gene=",
+        "hbb",
+        "tlr3",
+        "il1b",
+        "card8",
+        "drd4",
+        "faah",
+    ]
+    if any(term in text for term in bad_terms):
+        return True
+    if file_name == "homo_sapiens_assembly38.fasta":
+        return False
+    if re.search(r"chr[0-9xy]+[:_ -]", text) or re.search(r"\bchr[0-9xy]+\b", label):
+        return True
+    if re.search(r"\b[0-9]+:[0-9]+-[0-9]+", text):
+        return True
+    if file_name in {"20.fa.gz", "22_20-21m.fa"}:
+        return True
+    return False
+
+
+def reference_completeness_score(reference: dict) -> int:
+    text = reference_text(reference)
+    if is_partial_or_derived_reference(reference):
+        return -1000
+    score = 0
+    if "complete genome" in text:
+        score += 90
+    if "complete sequence" in text:
+        score += 80
+    if "whole genome shotgun sequence" in text:
+        score += 65
+    if "genomic.fna" in text or "genomic.fna.gz" in text:
+        score += 45
+    if "homo_sapiens_assembly38.fasta" in text:
+        score += 100
+    if "phoenix_ref.fasta" in text or "cmv_ref.fasta" in text or "ndv_ref.fasta" in text:
+        score += 90
+    if reference.get("bwaIndexReady"):
+        score += 25
+    if reference.get("faiReady"):
+        score += 8
+    if reference.get("annotationPath"):
+        score += 6
+    size = int(reference.get("sizeBytes") or 0)
+    if size > 3_000_000_000:
+        score += 25
+    elif size > 500_000_000:
+        score += 18
+    elif size > 1_000_000:
+        score += 8
+    return score
+
+
+def reference_rule_score(reference: dict, rule: dict) -> int:
+    text = reference_text(reference)
+    if any(term in text for term in rule.get("exclude", [])):
+        return -1000
+    if not any(term in text for term in rule.get("match", [])):
+        return -1000
+    score = reference_completeness_score(reference)
+    for index, term in enumerate(rule.get("prefer", [])):
+        if term in text:
+            score += 60 - min(index, 20)
+    return score
+
+
+def recommended_threads(reference: dict) -> int:
+    cpu_count = os.cpu_count() or 4
+    size = int(reference.get("sizeBytes") or 0)
+    if size > 1_000_000_000:
+        return max(1, min(cpu_count, 8))
+    if size > 100_000_000:
+        return max(1, min(cpu_count, 6))
+    return max(1, min(cpu_count, 4))
+
+
 def has_bwa_index(reference_path: Path) -> bool:
     return all(reference_path.with_suffix(reference_path.suffix + suffix).exists() for suffix in [".bwt", ".pac", ".ann", ".amb", ".sa"])
 
@@ -240,6 +409,7 @@ class ReferenceCatalog:
         self.manifest = manifest
         self.files_root = files_root
         self.references: dict[str, dict] = {}
+        self.organisms: dict[str, dict] = {}
         self.reload()
 
     def reload(self) -> None:
@@ -263,6 +433,7 @@ class ReferenceCatalog:
                 if path.is_file() and path.name.lower().endswith(REFERENCE_EXTENSIONS):
                     self._add_reference(references, path, "")
         self.references = dict(sorted(references.items(), key=lambda item: item[1]["label"].lower()))
+        self.organisms = self._build_organisms()
 
     def _add_reference(self, references: dict[str, dict], path: Path, header: str) -> None:
         header = header or parse_fasta_header(path)
@@ -287,6 +458,70 @@ class ReferenceCatalog:
 
     def get(self, reference_id: str) -> dict | None:
         return self.references.get(reference_id)
+
+    def _build_organisms(self) -> dict[str, dict]:
+        organisms: dict[str, dict] = {}
+        for rule in ORGANISM_RULES:
+            scored = [
+                (reference_rule_score(reference, rule), reference)
+                for reference in self.references.values()
+            ]
+            scored = [(score, reference) for score, reference in scored if score > 0]
+            if not scored:
+                continue
+            score, reference = sorted(
+                scored,
+                key=lambda item: (
+                    item[0],
+                    bool(item[1].get("bwaIndexReady")),
+                    int(item[1].get("sizeBytes") or 0),
+                ),
+                reverse=True,
+            )[0]
+            threads = recommended_threads(reference)
+            organisms[rule["id"]] = {
+                "id": rule["id"],
+                "organismId": rule["id"],
+                "label": rule["speciesName"],
+                "speciesName": rule["speciesName"],
+                "referenceName": rule["referenceName"],
+                "referenceId": reference["id"],
+                "referenceLabel": reference["label"],
+                "referenceFileName": reference["fileName"],
+                "path": reference["path"],
+                "sizeBytes": reference["sizeBytes"],
+                "kind": reference["kind"],
+                "bwaIndexReady": reference["bwaIndexReady"],
+                "faiReady": reference["faiReady"],
+                "annotationPath": reference["annotationPath"],
+                "analysisDefaults": {
+                    "qualityControl": "fastp when available",
+                    "aligner": "bwa mem",
+                    "postAlignment": "samtools sort, index, flagstat, stats",
+                    "threads": threads,
+                },
+                "selectionScore": score,
+            }
+        return dict(sorted(organisms.items(), key=lambda item: item[1]["label"].lower()))
+
+    def list_organisms(self) -> list[dict]:
+        return list(self.organisms.values())
+
+    def get_organism(self, organism_id: str) -> dict | None:
+        return self.organisms.get(organism_id)
+
+    def get_selected_reference(self, selection_id: str) -> tuple[dict | None, dict | None]:
+        organism = self.get_organism(selection_id)
+        if organism:
+            reference = self.get(organism["referenceId"])
+            if reference:
+                reference = dict(reference)
+                reference["organismId"] = organism["id"]
+                reference["organismName"] = organism["speciesName"]
+                reference["referenceName"] = organism["referenceName"]
+                return reference, organism
+        reference = self.get(selection_id)
+        return reference, None
 
 
 class JobStore:
@@ -322,6 +557,37 @@ def ensure_fai(reference_path: Path, commands: list[dict]) -> Path | None:
     result = run_command(["samtools", "faidx", str(reference_path)])
     commands.append(result)
     return fai if result["returncode"] == 0 and fai.exists() else None
+
+
+def ensure_bwa_index(reference_path: Path, commands: list[dict]) -> bool:
+    if has_bwa_index(reference_path):
+        return True
+    if not command_exists("bwa"):
+        return False
+    result = run_command(["bwa", "index", str(reference_path)])
+    commands.append(result)
+    return result["returncode"] == 0 and has_bwa_index(reference_path)
+
+
+def infer_read2_path(read1: Path) -> Path | None:
+    name = read1.name
+    replacements = [
+        ("_R1_", "_R2_"),
+        ("_R1.", "_R2."),
+        ("_R1.fastq", "_R2.fastq"),
+        ("_R1.fq", "_R2.fq"),
+        ("_1.fastq", "_2.fastq"),
+        ("_1.fq", "_2.fq"),
+        ("-R1-", "-R2-"),
+        ("-R1.", "-R2."),
+        (".R1.", ".R2."),
+    ]
+    for before, after in replacements:
+        if before in name:
+            candidate = read1.with_name(name.replace(before, after, 1))
+            if candidate.exists():
+                return candidate
+    return None
 
 
 def genome_structure_from_fai(fai_path: Path | None) -> dict:
@@ -421,6 +687,7 @@ def run_alignment_pipeline(job_dir: Path, payload: dict, reference: dict, store:
         "jobId": job_id,
         "state": "running",
         "createdAt": now_iso(),
+        "organism": reference.get("organismName", ""),
         "reference": reference,
         "read1Path": payload.get("read1Path", ""),
         "read2Path": payload.get("read2Path", ""),
@@ -430,7 +697,12 @@ def run_alignment_pipeline(job_dir: Path, payload: dict, reference: dict, store:
     store.write_status(job_dir, status)
 
     try:
-        threads = str(max(1, min(int(payload.get("threads") or 4), os.cpu_count() or 4)))
+        requested_threads = payload.get("threads")
+        if requested_threads:
+            thread_count = max(1, min(int(requested_threads), os.cpu_count() or 4))
+        else:
+            thread_count = recommended_threads(reference)
+        threads = str(thread_count)
         read1 = Path(str(payload.get("read1Path") or "")).expanduser()
         read2_raw = str(payload.get("read2Path") or "").strip()
         read2 = Path(read2_raw).expanduser() if read2_raw else None
@@ -440,8 +712,24 @@ def run_alignment_pipeline(job_dir: Path, payload: dict, reference: dict, store:
             raise FileNotFoundError(f"Read 1 file does not exist: {read1}")
         if read2 and not read2.exists():
             raise FileNotFoundError(f"Read 2 file does not exist: {read2}")
+        read2_auto_detected = False
+        if not read2:
+            inferred_read2 = infer_read2_path(read1)
+            if inferred_read2:
+                read2 = inferred_read2
+                read2_auto_detected = True
         if not reference_path.exists():
             raise FileNotFoundError(f"Reference file does not exist: {reference_path}")
+
+        status["read2Path"] = str(read2) if read2 else ""
+        status["read2AutoDetected"] = read2_auto_detected
+        status["analysisPreset"] = {
+            "qualityControl": "fastp" if command_exists("fastp") else "skipped; fastp not installed",
+            "aligner": "bwa mem",
+            "postAlignment": "samtools sort, index, flagstat, stats",
+            "threads": thread_count,
+        }
+        store.write_status(job_dir, status)
 
         fai = ensure_fai(reference_path, commands)
         genome_structure = genome_structure_from_fai(fai)
@@ -451,7 +739,9 @@ def run_alignment_pipeline(job_dir: Path, payload: dict, reference: dict, store:
         trimmed_2 = read2
         fastp_json = job_dir / "fastp.json"
         fastp_html = job_dir / "fastp.html"
-        if payload.get("runFastp", True) and command_exists("fastp"):
+        run_fastp = payload.get("runFastp")
+        run_fastp = command_exists("fastp") if run_fastp is None else bool(run_fastp)
+        if run_fastp and command_exists("fastp"):
             status["steps"].append({"name": "fastp", "state": "running"})
             store.write_status(job_dir, status)
             trimmed_1 = job_dir / "trimmed_R1.fastq.gz"
@@ -483,10 +773,16 @@ def run_alignment_pipeline(job_dir: Path, payload: dict, reference: dict, store:
         if not command_exists("samtools"):
             raise RuntimeError("samtools is not installed or not in PATH.")
         if not has_bwa_index(reference_path):
+            status["steps"].append({"name": "bwa_index", "state": "running"})
+            store.write_status(job_dir, status)
+        if not ensure_bwa_index(reference_path, commands):
             raise RuntimeError(
-                f"BWA index not found beside reference: {reference_path}. "
-                "Build it with: bwa index <reference.fasta>"
+                f"BWA index could not be created beside reference: {reference_path}. "
+                "Check disk space and reference file permissions."
             )
+        if status["steps"] and status["steps"][-1]["name"] == "bwa_index":
+            status["steps"][-1]["state"] = "done"
+            store.write_status(job_dir, status)
 
         status["steps"].append({"name": "bwa_mem_alignment", "state": "running"})
         store.write_status(job_dir, status)
@@ -539,13 +835,16 @@ def run_alignment_pipeline(job_dir: Path, payload: dict, reference: dict, store:
         report = {
             "jobId": job_id,
             "completedAt": now_iso(),
+            "organism": reference.get("organismName", ""),
             "reference": reference,
             "inputs": {
                 "read1Path": str(read1),
                 "read2Path": str(read2) if read2 else "",
+                "read2AutoDetected": read2_auto_detected,
                 "trimmedRead1Path": str(trimmed_1),
                 "trimmedRead2Path": str(trimmed_2) if trimmed_2 else "",
             },
+            "analysisPreset": status["analysisPreset"],
             "outputs": {
                 "jobDirectory": str(job_dir),
                 "bam": str(bam_path),
@@ -627,7 +926,8 @@ def build_handler(catalog: ReferenceCatalog, store: JobStore):
                         "service": "Wahj Local NGS Server",
                         "time": now_iso(),
                         "jobRoot": str(store.root),
-                        "referenceCount": len(catalog.list()),
+                        "organismCount": len(catalog.list_organisms()),
+                        "rawReferenceCount": len(catalog.list()),
                         "tools": {
                             "bwa": command_exists("bwa"),
                             "samtools": command_exists("samtools"),
@@ -640,7 +940,16 @@ def build_handler(catalog: ReferenceCatalog, store: JobStore):
                 return
             if parsed.path == "/api/references":
                 catalog.reload()
-                write_json(self, 200, {"references": catalog.list()})
+                organisms = catalog.list_organisms()
+                write_json(
+                    self,
+                    200,
+                    {
+                        "organisms": organisms,
+                        "references": organisms,
+                        "rawReferenceCount": len(catalog.list()),
+                    },
+                )
                 return
             if parsed.path.startswith("/api/jobs/"):
                 job_id = parsed.path.split("/")[-1]
@@ -670,16 +979,20 @@ def build_handler(catalog: ReferenceCatalog, store: JobStore):
             if parsed.path == "/api/jobs":
                 try:
                     payload = read_json(self)
-                    reference_id = str(payload.get("referenceId") or "")
-                    reference = catalog.get(reference_id)
+                    selection_id = str(payload.get("organismId") or payload.get("referenceId") or "")
+                    reference, organism = catalog.get_selected_reference(selection_id)
                     if not reference:
-                        write_json(self, 400, {"error": "Unknown referenceId."})
+                        write_json(self, 400, {"error": "Unknown organism."})
                         return
+                    if organism:
+                        payload["organismId"] = organism["id"]
+                        payload["organismName"] = organism["speciesName"]
                     job_dir = store.create_job_dir()
                     status = {
                         "jobId": job_dir.name,
                         "state": "queued",
                         "createdAt": now_iso(),
+                        "organism": reference.get("organismName", ""),
                         "reference": reference,
                         "reportPath": str(job_dir / "report.json"),
                     }
@@ -728,7 +1041,8 @@ def main() -> None:
     handler = build_handler(catalog, store)
     server = ThreadingHTTPServer((args.host, args.port), handler)
     print(f"Wahj Local NGS Server running at http://{args.host}:{args.port}")
-    print(f"References: {len(catalog.list())}")
+    print(f"Organisms: {len(catalog.list_organisms())}")
+    print(f"Raw references: {len(catalog.list())}")
     print(f"Jobs: {store.root}")
     server.serve_forever()
 
