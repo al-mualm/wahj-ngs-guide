@@ -112,11 +112,12 @@ python3 local-ngs-server/server.py
 
 Then open:
 
-- `local-ngs-workbench/index.html`
+- `http://127.0.0.1:8787/local-ngs-workbench/`
 
 The backend reads the centralized reference collection in
-`~/Downloads/Reference_Genomes_Collected_2026-06-19`, accepts FASTQ file paths that
-already exist on the Mac, and runs the available local tools: `fastp`, `bwa`,
+`~/Downloads/Reference_Genomes_Collected_2026-06-19`, shows only curated
+complete-genome organism choices, accepts FASTQ file paths that already exist
+on the Mac, and automatically runs the available local tools: `fastp`, `bwa`,
 and `samtools`.
 
 ## Apps Script deployment
