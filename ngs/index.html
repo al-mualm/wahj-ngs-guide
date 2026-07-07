@@ -3,17 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Next-Generation Sequencing (NGS): A Beginner-Friendly Guide</title>
+    <title>Clinical NGS Lecture: From DNA Extraction to Interpreted Results</title>
     <meta
       name="description"
-      content="A polished educational webpage that teaches Next-Generation Sequencing (NGS) from the ground up for beginners in molecular biology and bioinformatics."
+      content="A clinically grounded NGS lecture for students and researchers that teaches the full path from specimen acceptance and DNA extraction to FASTQ, BAM, VCF, ACMG-style interpretation, and signed reporting."
     />
     <script>
       document.documentElement.classList.add("js");
     </script>
     <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./ngs-lecture.css" />
   </head>
-  <body>
+  <body class="ngs-lecture-page">
     <div class="site-shell">
       <header class="site-header" id="top">
         <div class="brand-lockup">
@@ -45,30 +46,34 @@
         </button>
         <nav class="primary-nav" id="primary-nav" aria-label="Primary">
           <a href="#intro">Intro</a>
-          <a href="#what-is-ngs">What Is NGS?</a>
-          <a href="#workflow">Workflow</a>
-          <a href="#applications">Applications</a>
-          <a href="#glossary">Terms</a>
-          <a href="#qc">Quality Control</a>
-          <a href="#platforms">Platforms</a>
-          <a href="#bioinformatics">Bioinformatics</a>
-          <a href="#choose">Choose</a>
-          <a href="#summary">Remember</a>
+          <a href="#chain">Clinical chain</a>
+          <a href="#specimen">Specimen QC</a>
+          <a href="#library">Library</a>
+          <a href="#thermo">Ion Torrent</a>
+          <a href="#depth">Depth</a>
+          <a href="#files">FASTQ/BAM/VCF</a>
+          <a href="#variant-atlas">Variant atlas</a>
+          <a href="#interpretation">Interpretation</a>
+          <a href="#report">Report</a>
+          <a href="#report-lab">Report lab</a>
+          <a href="#troubleshooting">Troubleshooting</a>
+          <a href="#sanger">Sanger</a>
+          <a href="../fastq-analyzer/">FASTQ Analyzer</a>
           <a href="#comments">Comments</a>
         </nav>
       </header>
 
       <main>
-        <section class="hero section" id="intro">
+        <section class="section ngs-hero" id="intro">
           <div class="hero-copy reveal">
-            <span class="section-chip">Modern genomics for new learners</span>
-            <h1>Next-Generation Sequencing (NGS): A Beginner-Friendly Guide</h1>
+            <span class="section-chip">From DNA to data to report</span>
+            <h1>Clinical NGS from specimen to signed report</h1>
             <p class="hero-lead">
-              A visual introduction for students who are just starting in molecular biology
-              and bioinformatics. This mini handbook explains what NGS is, how it works,
-              what files it produces, and how to think about sequencing data with confidence.
+              This lecture teaches the real chain behind a trustworthy sequencing result:
+              specimen selection, extraction quality, library design, sequencing chemistry,
+              FASTQ QC, alignment, variant calling, annotation, ACMG-style evidence review,
+              and the final report.
             </p>
-
             <div class="author-panel">
               <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="author-logo" />
               <div>
@@ -82,1267 +87,2672 @@
                 </p>
               </div>
             </div>
+            <div class="ngs-hero-note">
+              <p>
+                This lecture is aligned with the <strong>Clinical WES/WGS and NGS Master Book
+                - Second Edition</strong> and uses ACMG-style germline interpretation logic as a
+                teaching framework.
+              </p>
+              <p>
+                It is educational. It does not replace validated SOPs, accredited assay
+                performance claims, or director sign-out.
+              </p>
+            </div>
 
-            <p>
-              NGS matters because modern biology increasingly depends on seeing DNA and RNA
-              at scale. It supports medicine, cancer research, microbiology, microbial
-              ecology, pathogen genomics, and many other fields where small targeted methods
-              are not enough.
-            </p>
-
-            <div class="hero-highlights">
-              <article class="mini-card">
-                <span class="mini-icon">MD</span>
-                <h3>Medicine</h3>
-                <p>Detects mutations linked to inherited disease and cancer.</p>
+            <div class="ngs-pillars">
+              <article class="ngs-pillar">
+                <span class="ngs-micro-label">A</span>
+                <h3>Analytical truth</h3>
+                <p>Read support, mapping quality, depth, contamination, and local context.</p>
               </article>
-              <article class="mini-card">
-                <span class="mini-icon">MB</span>
-                <h3>Microbiology</h3>
-                <p>Profiles microbes, pathogens, and microbial communities.</p>
+              <article class="ngs-pillar">
+                <span class="ngs-micro-label">C</span>
+                <h3>Clinical truth</h3>
+                <p>Phenotype fit, gene-disease validity, inheritance, and disease mechanism.</p>
               </article>
-              <article class="mini-card">
-                <span class="mini-icon">GX</span>
-                <h3>Genomics</h3>
-                <p>Supports large-scale DNA and RNA discovery across many samples.</p>
+              <article class="ngs-pillar">
+                <span class="ngs-micro-label">R</span>
+                <h3>Reporting truth</h3>
+                <p>Validated scope, reportable range, limitations, review, and sign-out discipline.</p>
               </article>
             </div>
           </div>
 
-          <div class="hero-visual reveal">
-            <div class="hero-figure">
-              <div class="hero-grid">
-                <div class="hero-stat">
-                  <p class="stat-number">Millions</p>
-                  <p class="stat-label">reads can be produced in a single sequencing run</p>
+          <div class="ngs-hero-board reveal">
+            <div class="ngs-hero-board-header">
+              <div>
+                <p class="figure-label">Clinical chain</p>
+                <h2>Trust is built in layers, not in one final PDF</h2>
+                <p>Question, specimen, molecules, reads, evidence, then interpretation.</p>
+              </div>
+              <div class="ngs-hero-badge">Educational schematic</div>
+            </div>
+
+            <div class="ngs-hero-map" role="img" aria-label="Clinical NGS chain from order to final report">
+              <div class="ngs-hero-track">
+                <article class="ngs-track-node">
+                  <span class="ngs-micro-label">1</span>
+                  <h3>Order</h3>
+                  <p>Choose the assay that fits the mechanism.</p>
+                  <span>Question defined</span>
+                </article>
+                <article class="ngs-track-node">
+                  <span class="ngs-micro-label">2</span>
+                  <h3>Specimen</h3>
+                  <p>Identity and collection quality come first.</p>
+                  <span>Accepted sample</span>
+                </article>
+                <article class="ngs-track-node">
+                  <span class="ngs-micro-label">3</span>
+                  <h3>Extraction</h3>
+                  <p>Quantity, purity, and integrity are measured.</p>
+                  <span>Usable nucleic acid</span>
+                </article>
+                <article class="ngs-track-node">
+                  <span class="ngs-micro-label">4</span>
+                  <h3>Library</h3>
+                  <p>Adapters, capture, and design set scope.</p>
+                  <span>Machine-ready molecules</span>
+                </article>
+                <article class="ngs-track-node">
+                  <span class="ngs-micro-label">5</span>
+                  <h3>FASTQ</h3>
+                  <p>Reads and base qualities are reviewed.</p>
+                  <span>Raw sequencing data</span>
+                </article>
+                <article class="ngs-track-node">
+                  <span class="ngs-micro-label">6</span>
+                  <h3>BAM</h3>
+                  <p>Reads become aligned genomic evidence.</p>
+                  <span>Callable regions</span>
+                </article>
+                <article class="ngs-track-node">
+                  <span class="ngs-micro-label">7</span>
+                  <h3>VCF</h3>
+                  <p>Candidate variants are filtered and annotated.</p>
+                  <span>Short list only</span>
+                </article>
+                <article class="ngs-track-node">
+                  <span class="ngs-micro-label">8</span>
+                  <h3>Report</h3>
+                  <p>Evidence is reviewed before wording is signed out.</p>
+                  <span>Controlled conclusion</span>
+                </article>
+              </div>
+
+              <div class="ngs-hero-focus">
+                <article class="ngs-focus-card">
+                  <h3>Pre-analytic risk</h3>
+                  <p>Wrong specimen, low integrity, contamination, and low tumor content cannot be repaired later.</p>
+                </article>
+                <article class="ngs-focus-card">
+                  <h3>Analytic risk</h3>
+                  <p>Coverage gaps, duplicate burden, reference mismatch, and weak local evidence distort the candidate list.</p>
+                </article>
+                <article class="ngs-focus-card">
+                  <h3>Interpretive risk</h3>
+                  <p>Filtering is not classification. A plausible candidate can still remain a VUS or out-of-scope finding.</p>
+                </article>
+              </div>
+            </div>
+
+            <div class="ngs-hero-signals">
+              <article class="ngs-signal-card">
+                <h3>Question one</h3>
+                <p>Was the specimen and assay appropriate for the biological question?</p>
+              </article>
+              <article class="ngs-signal-card">
+                <h3>Question two</h3>
+                <p>Did the relevant gene or exon actually reach the validated callable depth?</p>
+              </article>
+              <article class="ngs-signal-card">
+                <h3>Question three</h3>
+                <p>Was the final wording limited to the real evidence and assay scope?</p>
+              </article>
+            </div>
+            <p class="ngs-schematic-note">
+              Schematic, not to scale. Real laboratory workflows include platform-specific
+              controls, lot tracking, and validated thresholds.
+            </p>
+          </div>
+        </section>
+
+        <section class="section" id="chain">
+          <div class="section-heading reveal">
+            <span class="section-chip">1. The controlled chain</span>
+            <h2>Teach NGS as a linked process, not a single machine</h2>
+            <p>
+              A reportable NGS result is not a single output file. It is a controlled chain
+              of biological, technical, and interpretive steps. The explorer below lets
+              students move through the chain one stage at a time.
+            </p>
+          </div>
+
+          <div class="ngs-stage-explorer reveal" data-stage-explorer>
+            <div class="ngs-stage-nav" role="tablist" aria-label="Clinical sequencing stages">
+              <button
+                class="ngs-stage-tab is-active"
+                id="tab-stage-order"
+                type="button"
+                role="tab"
+                aria-controls="stage-order"
+                data-target="stage-order"
+              >
+                <strong>Order</strong>
+                <span>Choose the right assay</span>
+              </button>
+              <button
+                class="ngs-stage-tab"
+                id="tab-stage-specimen"
+                type="button"
+                role="tab"
+                aria-controls="stage-specimen"
+                data-target="stage-specimen"
+              >
+                <strong>Specimen</strong>
+                <span>Accept the right sample</span>
+              </button>
+              <button
+                class="ngs-stage-tab"
+                id="tab-stage-extraction"
+                type="button"
+                role="tab"
+                aria-controls="stage-extraction"
+                data-target="stage-extraction"
+              >
+                <strong>Extraction QC</strong>
+                <span>Measure quantity and integrity</span>
+              </button>
+              <button
+                class="ngs-stage-tab"
+                id="tab-stage-library"
+                type="button"
+                role="tab"
+                aria-controls="stage-library"
+                data-target="stage-library"
+              >
+                <strong>Library</strong>
+                <span>Build machine-ready molecules</span>
+              </button>
+              <button
+                class="ngs-stage-tab"
+                id="tab-stage-sequencing"
+                type="button"
+                role="tab"
+                aria-controls="stage-sequencing"
+                data-target="stage-sequencing"
+              >
+                <strong>Sequencing</strong>
+                <span>Choose chemistry and read design</span>
+              </button>
+              <button
+                class="ngs-stage-tab"
+                id="tab-stage-fastq"
+                type="button"
+                role="tab"
+                aria-controls="stage-fastq"
+                data-target="stage-fastq"
+              >
+                <strong>FASTQ QC</strong>
+                <span>Check raw reads first</span>
+              </button>
+              <button
+                class="ngs-stage-tab"
+                id="tab-stage-bam"
+                type="button"
+                role="tab"
+                aria-controls="stage-bam"
+                data-target="stage-bam"
+              >
+                <strong>Alignment + BAM</strong>
+                <span>Convert reads into genomic evidence</span>
+              </button>
+              <button
+                class="ngs-stage-tab"
+                id="tab-stage-vcf"
+                type="button"
+                role="tab"
+                aria-controls="stage-vcf"
+                data-target="stage-vcf"
+              >
+                <strong>VCF + annotation</strong>
+                <span>Generate candidates</span>
+              </button>
+              <button
+                class="ngs-stage-tab"
+                id="tab-stage-report"
+                type="button"
+                role="tab"
+                aria-controls="stage-report"
+                data-target="stage-report"
+              >
+                <strong>Interpret + report</strong>
+                <span>Evidence review and final wording</span>
+              </button>
+            </div>
+
+            <article class="ngs-stage-panel is-active" id="stage-order" role="tabpanel">
+              <h3>Start with the question, not the machine</h3>
+              <p>
+                The first decision is whether the phenotype, disease mechanism, specimen
+                quality, and reporting need are best served by WES, WGS, a panel, RNA
+                fusion testing, or another assay.
+              </p>
+              <div class="ngs-panel-grid">
+                <article>
+                  <h4>What happens</h4>
+                  <p>The team defines the intended use, required variant classes, turnaround time, and reportable scope.</p>
+                </article>
+                <article>
+                  <h4>What to check</h4>
+                  <p>Phenotype breadth, inheritance model, suspected mechanism, and whether RNA, CNV, SV, or repeat evidence is needed.</p>
+                </article>
+                <article>
+                  <h4>Main output</h4>
+                  <p>A justified test choice: WES, WGS, panel, RNA assay, or reflex pathway.</p>
+                </article>
+                <article>
+                  <h4>If weak</h4>
+                  <p>The most common failure is ordering the wrong assay and then treating a negative result as if it excluded disease.</p>
+                </article>
+              </div>
+            </article>
+
+            <article class="ngs-stage-panel" id="stage-specimen" role="tabpanel" hidden>
+              <h3>Specimen quality decides whether the later files can be trusted</h3>
+              <p>
+                Germline and somatic workflows fail differently. Blood, saliva, FFPE tumor,
+                bone marrow, and plasma cfDNA each carry their own contamination, degradation,
+                and identity risks.
+              </p>
+              <div class="ngs-panel-grid">
+                <article>
+                  <h4>What happens</h4>
+                  <p>The laboratory checks identifiers, specimen type, collection conditions, and storage history.</p>
+                </article>
+                <article>
+                  <h4>What to check</h4>
+                  <p>Post-transplant donor DNA risk, FFPE artifact risk, bacterial DNA in saliva, tumor purity, and fixative effects.</p>
+                </article>
+                <article>
+                  <h4>Main output</h4>
+                  <p>An accepted specimen with defined clinical use and documented chain of custody.</p>
+                </article>
+                <article>
+                  <h4>If weak</h4>
+                  <p>A later BAM or VCF cannot rescue unresolved specimen identity or severe pre-analytic degradation.</p>
+                </article>
+              </div>
+            </article>
+
+            <article class="ngs-stage-panel" id="stage-extraction" role="tabpanel" hidden>
+              <h3>Extraction QC comes before the first FASTQ file exists</h3>
+              <p>
+                Quantity, purity, and integrity determine whether the library will be complex,
+                whether duplicates will be high, and whether certain targets may drop out.
+              </p>
+              <div class="ngs-panel-grid">
+                <article>
+                  <h4>What happens</h4>
+                  <p>DNA or RNA is extracted, quantified, checked for purity, and screened for fragmentation.</p>
+                </article>
+                <article>
+                  <h4>What to check</h4>
+                  <p>Qubit for concentration, 260/280 for purity, DIN for DNA integrity, RIN or DV200 for RNA quality, and contamination signals.</p>
+                </article>
+                <article>
+                  <h4>Main output</h4>
+                  <p>Nucleic acid that meets the validated input requirement for the chosen library protocol.</p>
+                </article>
+                <article>
+                  <h4>If weak</h4>
+                  <p>Low input and degraded molecules cause high duplicate rate, library failure, and uneven coverage later.</p>
+                </article>
+              </div>
+            </article>
+
+            <article class="ngs-stage-panel" id="stage-library" role="tabpanel" hidden>
+              <h3>Library design controls what the bioinformatician can claim later</h3>
+              <p>
+                Clinical WES is usually hybrid-capture based. The capture kit, target BED,
+                PCR design, and index strategy directly shape coverage breadth, GC behavior,
+                duplicates, and the reportable region.
+              </p>
+              <div class="ngs-panel-grid">
+                <article>
+                  <h4>What happens</h4>
+                  <p>Fragments receive adapters and indexes, then may undergo capture or amplification depending on the assay.</p>
+                </article>
+                <article>
+                  <h4>What to check</h4>
+                  <p>Capture kit version, target BED matching the reference build, unique dual indexes when needed, and whether UMIs are validated.</p>
+                </article>
+                <article>
+                  <h4>Main output</h4>
+                  <p>A machine-ready library with documented chemistry and expected reportable target.</p>
+                </article>
+                <article>
+                  <h4>If weak</h4>
+                  <p>A WES BAM without the correct target BED cannot support clinical exon coverage claims.</p>
+                </article>
+              </div>
+            </article>
+
+            <article class="ngs-stage-panel" id="stage-sequencing" role="tabpanel" hidden>
+              <h3>Platform and read design should match the biological question</h3>
+              <p>
+                Short-read systems often use paired-end 100 bp or 150 bp designs for WES and
+                WGS. Long-read systems are chosen when repeats, structural variants, phasing,
+                or difficult homologous regions matter.
+              </p>
+              <div class="ngs-panel-grid">
+                <article>
+                  <h4>What happens</h4>
+                  <p>The library is sequenced with platform-specific chemistry and instrument controls.</p>
+                </article>
+                <article>
+                  <h4>What to check</h4>
+                  <p>Read length, single-end vs paired-end configuration, lane balance, throughput, and batch design.</p>
+                </article>
+                <article>
+                  <h4>Main output</h4>
+                  <p>Base calls and qualities that become FASTQ files, plus run metrics such as Q30 and yield.</p>
+                </article>
+                <article>
+                  <h4>If weak</h4>
+                  <p>Longer reads do not fix poor capture design, pseudogene problems, or an assay that lacks the required depth.</p>
+                </article>
+              </div>
+            </article>
+
+            <article class="ngs-stage-panel" id="stage-fastq" role="tabpanel" hidden>
+              <h3>FASTQ QC tells you whether the raw data can support the downstream analysis</h3>
+              <p>
+                It does not diagnose the patient. It tells you whether the run produced usable
+                reads or whether adapter signal, severe quality decay, or duplication should
+                trigger trimming or investigation.
+              </p>
+              <div class="ngs-panel-grid">
+                <article>
+                  <h4>What happens</h4>
+                  <p>Per-base quality, adapter content, GC pattern, duplication, and read length distribution are reviewed.</p>
+                </article>
+                <article>
+                  <h4>What to check</h4>
+                  <p>Q30, late-cycle quality collapse, abnormal GC pattern, severe adapter rise, and unexpectedly high duplication.</p>
+                </article>
+                <article>
+                  <h4>Main output</h4>
+                  <p>Raw reads that are accepted as-is, trimmed, or stopped for root-cause analysis.</p>
+                </article>
+                <article>
+                  <h4>If weak</h4>
+                  <p>Never trim just to make a QC plot look prettier while hiding a failed library.</p>
+                </article>
+              </div>
+            </article>
+
+            <article class="ngs-stage-panel" id="stage-bam" role="tabpanel" hidden>
+              <h3>Alignment turns reads into genomic evidence</h3>
+              <p>
+                BAM or CRAM QC is where reference policy, mapping behavior, insert size,
+                duplicate burden, contamination, and callable regions become visible.
+              </p>
+              <div class="ngs-panel-grid">
+                <article>
+                  <h4>What happens</h4>
+                  <p>Reads are aligned to a locked reference build, sorted, indexed, and summarized.</p>
+                </article>
+                <article>
+                  <h4>What to check</h4>
+                  <p>Mapping rate, proper pairing, insert size, duplicate rate, contamination, and local coverage at clinically relevant loci.</p>
+                </article>
+                <article>
+                  <h4>Main output</h4>
+                  <p>Analysis-ready BAM/CRAM plus coverage and QC metrics that show whether the sample is callable.</p>
+                </article>
+                <article>
+                  <h4>If weak</h4>
+                  <p>Do not mix builds casually. Reference, transcript set, target BED, and annotation resources must agree.</p>
+                </article>
+              </div>
+            </article>
+
+            <article class="ngs-stage-panel" id="stage-vcf" role="tabpanel" hidden>
+              <h3>VCF generation and annotation produce candidates, not final truth</h3>
+              <p>
+                Variant callers, filters, annotation versions, and prioritization logic should
+                all be documented. The final candidate list is only the start of evidence review.
+              </p>
+              <div class="ngs-panel-grid">
+                <article>
+                  <h4>What happens</h4>
+                  <p>SNVs, indels, CNVs, SVs, or expression results are called and annotated with transcript and database context.</p>
+                </article>
+                <article>
+                  <h4>What to check</h4>
+                  <p>Plausible variant counts, database versioning, transcript policy, and whether filtering logic is recorded.</p>
+                </article>
+                <article>
+                  <h4>Main output</h4>
+                  <p>A candidate set that is ready for phenotype correlation and evidence-based classification.</p>
+                </article>
+                <article>
+                  <h4>If weak</h4>
+                  <p>Filtering is not classification. A candidate should not be upgraded before evidence review.</p>
+                </article>
+              </div>
+            </article>
+
+            <article class="ngs-stage-panel" id="stage-report" role="tabpanel" hidden>
+              <h3>Interpretation and reporting are controlled human gates</h3>
+              <p>
+                The final report should be readable, traceable, and defensible. It must not
+                hide limitations behind software output, and it must not overstate VUS or
+                out-of-scope findings.
+              </p>
+              <div class="ngs-panel-grid">
+                <article>
+                  <h4>What happens</h4>
+                  <p>Evidence is reviewed, a classification or tier is assigned, and the result is written in clinical language.</p>
+                </article>
+                <article>
+                  <h4>What to check</h4>
+                  <p>Phenotype fit, inheritance, evidence codes, assay scope, callable gaps, and whether confirmation is required.</p>
+                </article>
+                <article>
+                  <h4>Main output</h4>
+                  <p>A signed report with variant table, QC summary, interpretation, recommendations, and stated limitations.</p>
+                </article>
+                <article>
+                  <h4>If weak</h4>
+                  <p>A VUS is not a diagnosis, and mean depth alone cannot replace local gene or exon coverage review.</p>
+                </article>
+              </div>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Decision table</p>
+              <h3>Choose the assay that matches the mechanism</h3>
+            </div>
+            <div class="table-wrap">
+              <table class="ngs-test-table">
+                <thead>
+                  <tr>
+                    <th>Assay</th>
+                    <th>Best use</th>
+                    <th>Common false assumption</th>
+                    <th>When another test should be added</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>WES</strong></td>
+                    <td>Rare disease SNV/indel discovery and phenotype-driven coding review.</td>
+                    <td>A negative WES excludes genetic disease.</td>
+                    <td>Poor gene coverage, CNV suspicion, repeat expansion, mitochondrial, or deep intronic suspicion.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>WGS</strong></td>
+                    <td>Broader SNV/indel, CNV, SV, noncoding, and reanalysis workflows.</td>
+                    <td>Every WGS result covers every variant class equally well.</td>
+                    <td>Long-read, RNA, methylation, or orthogonal confirmation may still be required.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Targeted panel</strong></td>
+                    <td>Fast, deep, focused testing for known genes or oncology actionability.</td>
+                    <td>A smaller panel is always inferior to WES or WGS.</td>
+                    <td>Use WES or WGS when the phenotype is broad or the prior panel is negative.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>RNA / fusion assay</strong></td>
+                    <td>Expression, splice, and fusion evidence.</td>
+                    <td>DNA-only testing is enough for every splice or fusion question.</td>
+                    <td>Add RNA when the disease mechanism is transcript-level or rearrangement-driven.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <figcaption>
+              A negative result is only useful if the chosen assay had the power to detect the suspected mechanism.
+            </figcaption>
+          </figure>
+        </section>
+
+        <section class="section section-alt" id="specimen">
+          <div class="section-heading reveal">
+            <span class="section-chip">2. Pre-analytic control</span>
+            <h2>Specimen acceptance, extraction, and nucleic-acid quality</h2>
+            <p>
+              Most bad sequencing reports begin before the first read exists. Students need to
+              recognize which specimen failures later become uneven coverage, false positives,
+              duplicate inflation, or uninterpretable regions.
+            </p>
+          </div>
+
+          <div class="ngs-specimen-grid reveal">
+            <article class="ngs-specimen-card">
+              <span class="ngs-micro-label">PB</span>
+              <h3>Peripheral blood</h3>
+              <p>Usually preferred for routine germline DNA.</p>
+              <p><strong>Watch for:</strong> post-transplant donor DNA, hematologic contamination, low volume.</p>
+            </article>
+            <article class="ngs-specimen-card">
+              <span class="ngs-micro-label">SB</span>
+              <h3>Saliva / buccal</h3>
+              <p>Useful when blood is not available.</p>
+              <p><strong>Watch for:</strong> bacterial DNA, food contamination, low human DNA fraction.</p>
+            </article>
+            <article class="ngs-specimen-card">
+              <span class="ngs-micro-label">FF</span>
+              <h3>FFPE tumor</h3>
+              <p>Common in solid tumor workflows.</p>
+              <p><strong>Watch for:</strong> fragmentation, deamination artifacts, low tumor purity.</p>
+            </article>
+            <article class="ngs-specimen-card">
+              <span class="ngs-micro-label">CF</span>
+              <h3>Plasma cfDNA</h3>
+              <p>Useful for liquid biopsy contexts.</p>
+              <p><strong>Watch for:</strong> low allele fraction, molecule scarcity, and ctDNA-specific library needs.</p>
+            </article>
+          </div>
+
+          <div class="ngs-metric-grid reveal">
+            <article class="ngs-metric-card">
+              <h4>Concentration</h4>
+              <p>Use Qubit for input mass before library preparation.</p>
+              <strong>Low input often means high duplicates later</strong>
+            </article>
+            <article class="ngs-metric-card">
+              <h4>Purity</h4>
+              <p>Check 260/280 and other contamination indicators.</p>
+              <strong>Protein, phenol, or RNA carryover can distort library behavior</strong>
+            </article>
+            <article class="ngs-metric-card">
+              <h4>Integrity</h4>
+              <p>DIN for DNA and RIN or DV200 for RNA show fragmentation burden.</p>
+              <strong>Degraded input drives dropout and uneven coverage</strong>
+            </article>
+            <article class="ngs-metric-card">
+              <h4>Identity</h4>
+              <p>Use two identifiers and verify trio or tumor-normal relationships before interpretation.</p>
+              <strong>Identity errors are stop rules, not minor warnings</strong>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Acceptance matrix</p>
+              <h3>Specimen type, failure pattern, and immediate action</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Specimen</th>
+                    <th>Good for</th>
+                    <th>Typical failure pattern</th>
+                    <th>Immediate action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Peripheral blood EDTA</td>
+                    <td>Most germline WES or WGS workflows</td>
+                    <td>Post-transplant donor DNA or hematologic malignancy contamination</td>
+                    <td>Use alternative specimen or pre-transplant sample when appropriate</td>
+                  </tr>
+                  <tr>
+                    <td>Saliva / buccal</td>
+                    <td>Germline when blood is unavailable</td>
+                    <td>Low human DNA, bacterial carryover, collection inconsistency</td>
+                    <td>Check mapping fraction and recollect when the human fraction is poor</td>
+                  </tr>
+                  <tr>
+                    <td>FFPE tumor</td>
+                    <td>Solid tumor DNA or RNA panels and broader sequencing</td>
+                    <td>Deamination artifacts, fragmentation, low tumor purity</td>
+                    <td>Use FFPE-aware QC, consider UMI strategy, and macrodissect if needed</td>
+                  </tr>
+                  <tr>
+                    <td>Bone marrow / blood tumor</td>
+                    <td>Hematologic malignancy workups</td>
+                    <td>Normal-cell dilution, heparin inhibition, clonal hematopoiesis</td>
+                    <td>Interpret together with morphology, flow, cytogenetics, and RNA fusion evidence</td>
+                  </tr>
+                  <tr>
+                    <td>Plasma cfDNA</td>
+                    <td>ctDNA and liquid biopsy use cases</td>
+                    <td>Low tumor fraction, low molecule count, poor plasma handling</td>
+                    <td>Use cfDNA-specific extraction and validated low-VAF workflows</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="interpretation">
+              <strong>Teaching point:</strong> do not ask the VCF to solve a specimen problem
+              that should have stopped the case before library preparation.
+            </p>
+          </figure>
+        </section>
+
+        <section class="section" id="library">
+          <div class="section-heading reveal">
+            <span class="section-chip">3. Wet-lab design</span>
+            <h2>Library preparation, read design, and sequencing platforms</h2>
+            <p>
+              This is the stage where biology is converted into machine-readable molecules.
+              It is also where many later coverage and duplication problems are created.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Figure</p>
+              <h3>Library preparation from extracted DNA to indexed library</h3>
+            </div>
+            <div class="ngs-library-figure" role="img" aria-label="Library preparation schematic">
+              <div class="ngs-library-track">
+                <article class="ngs-library-stage">
+                  <span class="ngs-micro-label">1</span>
+                  <div class="ngs-molecule"><div class="ngs-fragment"></div></div>
+                  <h4>Fragmentation</h4>
+                  <p>Long DNA is broken into shorter pieces that can be sequenced efficiently.</p>
+                </article>
+                <article class="ngs-library-stage">
+                  <span class="ngs-micro-label">2</span>
+                  <div class="ngs-molecule"><div class="ngs-fragment is-adapted"></div></div>
+                  <h4>Adapter ligation</h4>
+                  <p>Technical adapter sequences are attached to both ends so the instrument can read the fragment.</p>
+                </article>
+                <article class="ngs-library-stage">
+                  <span class="ngs-micro-label">3</span>
+                  <div class="ngs-molecule"><div class="ngs-fragment is-indexed"></div></div>
+                  <h4>Indexing</h4>
+                  <p>Barcodes identify each sample after multiplexing and demultiplexing.</p>
+                </article>
+                <article class="ngs-library-stage">
+                  <span class="ngs-micro-label">4</span>
+                  <div class="ngs-molecule"><div class="ngs-fragment is-indexed"></div></div>
+                  <h4>Capture or amplification</h4>
+                  <p>WES commonly uses hybrid capture; some workflows use PCR or UMI-aware chemistry.</p>
+                </article>
+                <article class="ngs-library-stage">
+                  <span class="ngs-micro-label">5</span>
+                  <div class="ngs-molecule"><div class="ngs-cluster-grid"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div>
+                  <h4>Sequencing-ready cluster or DNB</h4>
+                  <p>The final molecules enter a flow cell, patterned array, or nanoball architecture depending on platform.</p>
+                </article>
+              </div>
+
+              <div class="ngs-library-note">
+                <article>
+                  <h4>WES capture truth</h4>
+                  <p>The BED file must match the exact capture kit version and reference build.</p>
+                </article>
+                <article>
+                  <h4>PCR-free WGS</h4>
+                  <p>Prefer it when input and DNA quality allow, because uniformity usually improves.</p>
+                </article>
+                <article>
+                  <h4>UMIs</h4>
+                  <p>Useful when input is low or low-VAF detection is required, but only if validated.</p>
+                </article>
+                <article>
+                  <h4>Index strategy</h4>
+                  <p>Unique dual indexes help when index hopping matters, especially on high-throughput patterned flow cells.</p>
+                </article>
+              </div>
+            </div>
+            <p class="interpretation">
+              <strong>Teaching point:</strong> a library is not raw DNA. It is a designed
+              molecule system that determines target scope, bias, duplicate behavior, and
+              the later reportable region.
+            </p>
+          </figure>
+
+          <div class="ngs-platform-grid reveal">
+            <article class="ngs-platform-card">
+              <div class="ngs-platform-head">
+                <span class="ngs-platform-icon">IL</span>
+                <h3>Illumina short reads</h3>
+              </div>
+              <p>Sequencing-by-synthesis, commonly PE100 or PE150 in WES and WGS.</p>
+              <ul>
+                <li>Strong ecosystem and high routine accuracy</li>
+                <li>Short reads can struggle with repeats and large SVs</li>
+              </ul>
+            </article>
+            <article class="ngs-platform-card">
+              <div class="ngs-platform-head">
+                <span class="ngs-platform-icon">MG</span>
+                <h3>MGI / DNBSEQ</h3>
+              </div>
+              <p>Short-read platform using DNA nanoballs and cPAS chemistry.</p>
+              <ul>
+                <li>Still follows the same FASTQ-to-BAM-to-VCF logic later</li>
+                <li>Validate data-conversion, quality behavior, and capture compatibility</li>
+              </ul>
+            </article>
+            <article class="ngs-platform-card">
+              <div class="ngs-platform-head">
+                <span class="ngs-platform-icon">ON</span>
+                <h3>Oxford Nanopore</h3>
+              </div>
+              <p>Long reads are useful for repeats, structural variation, and rapid flexible workflows.</p>
+              <ul>
+                <li>Helps when read length matters more than classical short-read density</li>
+                <li>Error profiles differ from short-read systems</li>
+              </ul>
+            </article>
+            <article class="ngs-platform-card">
+              <div class="ngs-platform-head">
+                <span class="ngs-platform-icon">PB</span>
+                <h3>PacBio HiFi</h3>
+              </div>
+              <p>Long-read sequencing with strong consensus accuracy in many workflows.</p>
+              <ul>
+                <li>Useful for phasing, complex regions, and some difficult variant classes</li>
+                <li>Different throughput and cost trade-offs from short-read platforms</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="thermo">
+          <div class="section-heading reveal">
+            <span class="section-chip">Thermo Fisher workflow</span>
+            <h2>Ion Torrent from AmpliSeq library to Ion Reporter result</h2>
+            <p>
+              This workshop is built around a Thermo Fisher Ion Torrent environment, so
+              students should see how the general NGS chain maps onto Ion AmpliSeq,
+              Ion Chef, Ion GeneStudio S5, Torrent Suite, and Ion Reporter.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Platform map</p>
+              <h3>Thermo Fisher clinical-research style workflow</h3>
+            </div>
+            <div class="ngs-thermo-flow" role="img" aria-label="Ion Torrent workflow from sample to report">
+              <article class="ngs-thermo-step">
+                <span class="ngs-micro-label">1</span>
+                <h4>Ion AmpliSeq panel</h4>
+                <p>Target selection defines the amplicons, genes, hotspots, and reportable range.</p>
+                <strong>Scope control</strong>
+              </article>
+              <article class="ngs-thermo-step">
+                <span class="ngs-micro-label">2</span>
+                <h4>Ion Chef</h4>
+                <p>Automated library preparation, templating, enrichment, and chip loading reduce manual variability.</p>
+                <strong>Hands-on standardization</strong>
+              </article>
+              <article class="ngs-thermo-step">
+                <span class="ngs-micro-label">3</span>
+                <h4>Ion GeneStudio S5</h4>
+                <p>Semiconductor sequencing detects nucleotide incorporation electronically on Ion chips.</p>
+                <strong>Signal to reads</strong>
+              </article>
+              <article class="ngs-thermo-step">
+                <span class="ngs-micro-label">4</span>
+                <h4>Torrent Suite</h4>
+                <p>Primary and secondary analysis review run quality, base calling, alignment, and plugins.</p>
+                <strong>Run QC gate</strong>
+              </article>
+              <article class="ngs-thermo-step">
+                <span class="ngs-micro-label">5</span>
+                <h4>Ion Reporter</h4>
+                <p>Variant calling, annotation, filtering, CNV or fusion workflows, and export/report review.</p>
+                <strong>Candidate interpretation</strong>
+              </article>
+            </div>
+            <p class="interpretation">
+              <strong>Teaching point:</strong> Thermo integration is a strength, but every step
+              still needs validated thresholds, documented versioning, and a human sign-out gate.
+            </p>
+          </figure>
+
+          <div class="ngs-thermo-grid reveal">
+            <article class="ngs-thermo-card">
+              <h3>Semiconductor principle</h3>
+              <p>
+                Ion Torrent chemistry converts nucleotide incorporation into an electronic
+                signal on a semiconductor chip. The practical teaching message is simple:
+                signal behavior, chip loading, templating, and local sequence context all
+                matter before interpretation.
+              </p>
+            </article>
+            <article class="ngs-thermo-card">
+              <h3>Ion Torrent QC vocabulary</h3>
+              <p>
+                Teach loading, usable reads, read length, mapped reads, on-target rate,
+                uniformity, mean depth, amplicon dropout, polyclonal reads, low-quality
+                reads, and no-call regions as connected signals, not isolated numbers.
+              </p>
+            </article>
+            <article class="ngs-thermo-card">
+              <h3>Homopolymer caution</h3>
+              <p>
+                Repeated bases can make small indel interpretation more delicate. The
+                report should not hide low local confidence behind a strong global run
+                summary.
+              </p>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Ion Torrent metric table</p>
+              <h3>What to ask when a Thermo Fisher run looks weak</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Signal</th>
+                    <th>What it may mean</th>
+                    <th>Teaching response</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Low chip loading</td>
+                    <td>Under-templating, weak library concentration, chip loading issue</td>
+                    <td>Review library quantification, templating setup, and chip run record</td>
+                  </tr>
+                  <tr>
+                    <td>High polyclonal reads</td>
+                    <td>Too many templates on beads or suboptimal templating balance</td>
+                    <td>Check input dilution, library pool balance, and Chef templating conditions</td>
+                  </tr>
+                  <tr>
+                    <td>Poor uniformity</td>
+                    <td>Amplicon imbalance, GC-rich regions, degraded FFPE DNA</td>
+                    <td>Review amplicon-level coverage and state failed reportable regions</td>
+                  </tr>
+                  <tr>
+                    <td>Low on-target rate</td>
+                    <td>Non-specific amplification, contamination, poor panel/sample match</td>
+                    <td>Check sample identity, panel selection, and library quality</td>
+                  </tr>
+                  <tr>
+                    <td>Indel near homopolymer</td>
+                    <td>Platform-context artifact risk or weak local evidence</td>
+                    <td>Inspect reads, strand balance, repeat context, and confirmation policy</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </figure>
+
+          <div class="ngs-source-grid reveal">
+            <a
+              class="ngs-source-card"
+              href="https://www.thermofisher.com/us/en/home/life-science/sequencing/next-generation-sequencing/ion-torrent-next-generation-sequencing-workflow/prepare-template/ion-torrent-next-generation-sequencing-ion-chef-system.html"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>Ion Chef System</strong>
+              <span>Official Thermo Fisher workflow reference</span>
+            </a>
+            <a
+              class="ngs-source-card"
+              href="https://www.thermofisher.com/us/en/home/life-science/sequencing/next-generation-sequencing/ion-torrent-next-generation-sequencing-technology.html"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>Ion Torrent technology</strong>
+              <span>Semiconductor sequencing principle</span>
+            </a>
+            <a
+              class="ngs-source-card"
+              href="https://www.thermofisher.com/us/en/home/life-science/sequencing/next-generation-sequencing/ion-torrent-next-generation-sequencing-workflow/ion-torrent-next-generation-sequencing-data-analysis-workflow/ion-reporter-software.html"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>Ion Reporter Software</strong>
+              <span>Annotation, filtering, analysis, and reporting</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="section" id="depth">
+          <div class="section-heading reveal">
+            <span class="section-chip">4. Coverage logic</span>
+            <h2>Depth, coverage breadth, and why mean depth can mislead</h2>
+            <p>
+              Depth is local, not global. A sample can have a strong-looking mean depth and
+              still miss clinically important exons or low-VAF events. Use the slider below to
+              move short reads into alignment and see how a hotspot can reach 20x while other
+              loci stay at 0x.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Interactive figure</p>
+              <h3>Reference ribbon with aligned short reads</h3>
+            </div>
+            <div class="ngs-coverage-demo">
+              <div class="ngs-coverage-toolbar">
+                <label for="coverage-progress">Move the read pool into alignment</label>
+                <input id="coverage-progress" type="range" min="0" max="100" value="0" />
+                <button class="ngs-coverage-button" type="button" id="coverage-sweep">
+                  Sweep reads
+                </button>
+              </div>
+              <div class="ngs-coverage-stage">
+                <div class="ngs-coverage-legend">
+                  <span><i class="read-chip"></i> Short reads of about 150 bp (schematic)</span>
+                  <span><i class="gap-chip"></i> Uncovered loci remain 0x</span>
                 </div>
-                <div class="hero-stat">
-                  <p class="stat-number">Stepwise</p>
-                  <p class="stat-label">good biology and good bioinformatics work together</p>
-                </div>
-                <div class="hero-stat">
-                  <p class="stat-number">Question-driven</p>
-                  <p class="stat-label">the best assay depends on the biological goal</p>
+                <div class="ngs-coverage-layers">
+                  <div class="ngs-read-layer" id="coverage-read-layer" aria-hidden="true"></div>
+                  <div class="ngs-reference-ribbon"></div>
+                  <div class="ngs-depth-layer" id="coverage-depth-layer" aria-hidden="true"></div>
+                  <div class="ngs-depth-annotation hotspot">
+                    <strong>Hotspot example</strong>
+                    Many overlapping reads can push a local site to 20x while other positions still fail.
+                  </div>
+                  <div class="ngs-depth-annotation gap">
+                    <strong>Coverage gap example</strong>
+                    Zero reads at a clinically important locus means the site is not callable.
+                  </div>
                 </div>
               </div>
-              <div class="learning-card">
-                <h3>What students will learn</h3>
-                <ul>
-                  <li>How NGS differs from Sanger sequencing</li>
-                  <li>How samples become reads, files, and biological results</li>
-                  <li>How to interpret common file formats and QC concepts</li>
-                  <li>How to choose an NGS strategy for different questions</li>
-                </ul>
+
+              <div class="ngs-coverage-summary">
+                <article class="ngs-mini-kpi">
+                  <h4>Aligned reads</h4>
+                  <strong id="coverage-kpi-aligned">0 / 20</strong>
+                  <p>Read count that has moved from the pool toward the reference.</p>
+                </article>
+                <article class="ngs-mini-kpi">
+                  <h4>Peak local depth</h4>
+                  <strong id="coverage-kpi-peak">0x</strong>
+                  <p>Local peaks can look strong even while nearby bases remain weak.</p>
+                </article>
+                <article class="ngs-mini-kpi">
+                  <h4>Coverage breadth</h4>
+                  <strong id="coverage-kpi-breadth">0.0% at 20x</strong>
+                  <p>Ask what fraction of the reportable region reached the validated threshold.</p>
+                </article>
+                <article class="ngs-mini-kpi is-gap">
+                  <h4>Uncovered loci</h4>
+                  <strong id="coverage-kpi-gap">16 loci</strong>
+                  <p>Uncovered positions are no-call positions until another validated method fixes them.</p>
+                </article>
               </div>
             </div>
-          </div>
-        </section>
-
-        <section class="section" id="what-is-ngs">
-          <div class="section-heading reveal">
-            <span class="section-chip">1. Foundations</span>
-            <h2>What is NGS?</h2>
-            <p>
-              Sequencing means reading the order of nucleotides in DNA or RNA. Traditional
-              sequencing usually reads one fragment at a time, while NGS reads enormous
-              numbers of fragments in parallel.
+            <p class="ngs-coverage-formula">
+              Planning estimate from the book:
+              <code>required read pairs ≈ target size × desired mean depth / effective read bases</code>.
+              This is only a starting estimate because duplication, on-target rate, GC bias,
+              trimming, and sample quality change the final coverage.
             </p>
-          </div>
-
-          <div class="card-grid three-column reveal">
-            <article class="info-card">
-              <span class="card-badge">A</span>
-              <h3>What sequencing means</h3>
-              <p>
-                DNA stores biological information as a sequence of bases: A, T, C, and G.
-                Sequencing tells us that order.
-              </p>
-            </article>
-            <article class="info-card">
-              <span class="card-badge">B</span>
-              <h3>Why it is called next-generation</h3>
-              <p>
-                These methods improved scale dramatically by reading many fragments at the
-                same time instead of reading only a few.
-              </p>
-            </article>
-            <article class="info-card">
-              <span class="card-badge">C</span>
-              <h3>Why it is powerful</h3>
-              <p>
-                NGS lowers cost per base and makes genome-wide analysis possible in both
-                research and applied biology.
-              </p>
-            </article>
-          </div>
+          </figure>
 
           <figure class="figure-card reveal">
             <div class="figure-heading">
-              <p class="figure-label">Table 1</p>
-              <h3>Sanger sequencing vs NGS</h3>
+              <p class="figure-label">Metric table</p>
+              <h3>Depth and LoD terms that students should use correctly</h3>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Feature</th>
-                    <th>Sanger sequencing</th>
-                    <th>Next-Generation Sequencing</th>
+                    <th>Metric</th>
+                    <th>Meaning</th>
+                    <th>Main question it answers</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Throughput</td>
-                    <td>Low, usually one fragment at a time</td>
-                    <td>Very high, many fragments in parallel</td>
+                    <td>Mean depth</td>
+                    <td>Average read depth across the target or genome.</td>
+                    <td>Was the sample broadly sequenced enough overall?</td>
                   </tr>
                   <tr>
-                    <td>Speed for large projects</td>
-                    <td>Slow</td>
-                    <td>Fast</td>
+                    <td>Percent ≥20x</td>
+                    <td>Fraction of reportable bases that reached at least 20 reads.</td>
+                    <td>Can routine heterozygous germline SNVs usually be interpreted?</td>
                   </tr>
                   <tr>
-                    <td>Cost per base</td>
-                    <td>High</td>
-                    <td>Much lower</td>
+                    <td>Uniformity</td>
+                    <td>How evenly reads are distributed across the target.</td>
+                    <td>Are there dropout regions despite a good mean depth?</td>
                   </tr>
                   <tr>
-                    <td>Typical use cases</td>
-                    <td>Plasmids, single amplicons, confirmation</td>
-                    <td>Whole genomes, transcriptomes, panels, microbiomes</td>
+                    <td>Unique depth</td>
+                    <td>Independent molecules after duplicate removal or UMI collapse.</td>
+                    <td>Is low-VAF or ctDNA calling technically reliable?</td>
+                  </tr>
+                  <tr>
+                    <td>Limit of detection</td>
+                    <td>Validated lowest detectable allele fraction or event size.</td>
+                    <td>Does a negative result really rule out what was asked?</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <figcaption>
-              Sanger sequencing is still useful, but NGS made large-scale genomics practical.
-            </figcaption>
             <p class="interpretation">
-              <strong>How to interpret this table:</strong> NGS becomes especially useful
-              when the question involves many genes, many samples, or a large genome.
+              <strong>Teaching point:</strong> mean depth alone is never enough. Students
+              should always ask about local coverage, breadth at threshold, and the validated
+              limit of detection.
             </p>
           </figure>
 
-          <div class="insight-grid reveal">
-            <article class="insight-card">
-              <h3>What this means</h3>
-              <p>NGS is not simply a faster machine. It changes the scale of biology.</p>
-            </article>
-            <article class="insight-card">
-              <h3>Why this matters</h3>
-              <p>Large biological questions often cannot be answered one fragment at a time.</p>
-            </article>
-            <article class="insight-card">
-              <h3>Student takeaway</h3>
-              <p>Choose sequencing methods according to the question, not only the buzzword.</p>
-            </article>
-          </div>
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Interactive figure</p>
+              <h3>Exon coverage dropout across one clinically important gene</h3>
+            </div>
+            <div class="ngs-dropout-demo">
+              <div class="ngs-dropout-toolbar">
+                <label for="dropout-severity">Move from uniform capture to severe dropout</label>
+                <input id="dropout-severity" type="range" min="0" max="100" value="18" />
+                <button class="ngs-coverage-button" type="button" id="dropout-sweep">
+                  Simulate dropout
+                </button>
+              </div>
+              <div class="ngs-dropout-stage">
+                <div class="ngs-dropout-header">
+                  <div>
+                    <p class="figure-label">Gene model</p>
+                    <h4>Exons 1 to 8 aligned to the reportable region</h4>
+                  </div>
+                  <div class="ngs-dropout-legend">
+                    <span><i class="is-strong"></i> Above threshold</span>
+                    <span><i class="is-risk"></i> Low coverage</span>
+                    <span><i class="is-gap"></i> Dropout</span>
+                  </div>
+                </div>
+                <div class="ngs-dropout-track" id="dropout-track" aria-hidden="true"></div>
+                <div class="ngs-dropout-notes">
+                  <article class="ngs-dropout-note">
+                    <strong>GC-rich exon risk</strong>
+                    Exon 5 is highlighted because local sequence context can create a dropout
+                    even when the sample-level mean depth still looks acceptable.
+                  </article>
+                  <article class="ngs-dropout-note">
+                    <strong>Clinical consequence</strong>
+                    If the disease-causing exon drops below the validated threshold, the
+                    report should state that the region is not confidently excluded.
+                  </article>
+                </div>
+              </div>
+              <div class="ngs-dropout-summary">
+                <article class="ngs-mini-kpi">
+                  <h4>Mean exon depth</h4>
+                  <strong id="dropout-kpi-mean">118x</strong>
+                  <p>High mean depth can still hide weak exons.</p>
+                </article>
+                <article class="ngs-mini-kpi">
+                  <h4>Lowest exon</h4>
+                  <strong id="dropout-kpi-lowest">42x</strong>
+                  <p>Always inspect the minimum, not only the average.</p>
+                </article>
+                <article class="ngs-mini-kpi">
+                  <h4>Exons below 20x</h4>
+                  <strong id="dropout-kpi-failed">0</strong>
+                  <p>Any failed exon should trigger a limitation statement or rescue plan.</p>
+                </article>
+                <article class="ngs-mini-kpi is-gap">
+                  <h4>Most likely interpretation</h4>
+                  <strong id="dropout-kpi-call">Callable</strong>
+                  <p>Callability changes with local coverage, not with overall confidence alone.</p>
+                </article>
+              </div>
+            </div>
+            <p class="interpretation">
+              <strong>Teaching point:</strong> students should learn to ask, “Which exon
+              failed?” not only “What was the overall depth?”
+            </p>
+          </figure>
         </section>
 
-        <section class="section section-alt" id="workflow">
+        <section class="section" id="files">
           <div class="section-heading reveal">
-            <span class="section-chip">2. From sample to answer</span>
-            <h2>The Big Picture Workflow</h2>
+            <span class="section-chip">5. Bioinformatics chain</span>
+            <h2>FASTQ, BAM/CRAM, VCF, and annotation from a student’s point of view</h2>
             <p>
-              NGS is a connected chain of laboratory and computational steps. Each step
-              affects the quality and meaning of the final result.
+              These file types mark the transition from raw sequencing signal to biological
+              interpretation. Students should understand what each file means before trying to
+              interpret the final result.
+            </p>
+          </div>
+
+          <div class="ngs-file-tabs reveal" data-file-tabs>
+            <div class="ngs-tab-list" role="tablist" aria-label="NGS file formats">
+              <button
+                class="ngs-file-tab is-active"
+                id="tab-file-fastq"
+                type="button"
+                role="tab"
+                aria-controls="file-fastq"
+                data-target="file-fastq"
+              >
+                <strong>FASTQ</strong>
+                <span>Raw reads + quality scores</span>
+              </button>
+              <button
+                class="ngs-file-tab"
+                id="tab-file-bam"
+                type="button"
+                role="tab"
+                aria-controls="file-bam"
+                data-target="file-bam"
+              >
+                <strong>BAM / CRAM</strong>
+                <span>Aligned genomic evidence</span>
+              </button>
+              <button
+                class="ngs-file-tab"
+                id="tab-file-vcf"
+                type="button"
+                role="tab"
+                aria-controls="file-vcf"
+                data-target="file-vcf"
+              >
+                <strong>VCF</strong>
+                <span>Candidate variants</span>
+              </button>
+              <button
+                class="ngs-file-tab"
+                id="tab-file-annotation"
+                type="button"
+                role="tab"
+                aria-controls="file-annotation"
+                data-target="file-annotation"
+              >
+                <strong>Annotation</strong>
+                <span>Gene, transcript, and evidence context</span>
+              </button>
+            </div>
+
+            <article class="ngs-file-panel is-active" id="file-fastq" role="tabpanel">
+              <h3>FASTQ is where the sequencer becomes data</h3>
+              <p>
+                Every record carries a read sequence and its base-quality string. FASTQ QC asks
+                whether the run can support later alignment and calling. It does not diagnose
+                the patient.
+              </p>
+              <div class="ngs-file-grid">
+                <div class="ngs-file-list">
+                  <article>
+                    <h4>What it stores</h4>
+                    <p>Read names, nucleotide strings, plus quality strings that encode base-call confidence.</p>
+                  </article>
+                  <article>
+                    <h4>Student checks</h4>
+                    <p>Per-base quality, Q30, adapter rise, duplication estimate, GC pattern, and read count.</p>
+                  </article>
+                  <article>
+                    <h4>Important caution</h4>
+                    <p>Trimming is a corrective step, not a way to hide a failed run.</p>
+                  </article>
+                </div>
+                <pre class="ngs-code-block">@READ_0001
+ACTGCTAGATCGATCGTAGCTA
++
+FFFFFFFFFFFFFIIIIIIIII</pre>
+              </div>
+            </article>
+
+            <article class="ngs-file-panel" id="file-bam" role="tabpanel" hidden>
+              <h3>BAM or CRAM turns reads into mapped genomic evidence</h3>
+              <p>
+                Alignment tells you where each read fits relative to the locked reference
+                build. BAM QC is where coverage, duplication, contamination, and local
+                callability become visible.
+              </p>
+              <div class="ngs-file-grid">
+                <div class="ngs-file-list">
+                  <article>
+                    <h4>What it stores</h4>
+                    <p>Reference coordinates, mapping flags, base qualities, CIGAR strings, and read groups.</p>
+                  </article>
+                  <article>
+                    <h4>Student checks</h4>
+                    <p>Mapping rate, proper pairs, insert size, duplicate burden, contamination, and local depth.</p>
+                  </article>
+                  <article>
+                    <h4>Important caution</h4>
+                    <p>The reference build, target BED, and transcript policy must match the validated pipeline.</p>
+                  </article>
+                </div>
+                <pre class="ngs-code-block">READ_0001  99  chr7  140453136  60
+76M  =  140453295  235
+NM:i:0  MD:Z:76</pre>
+              </div>
+            </article>
+
+            <article class="ngs-file-panel" id="file-vcf" role="tabpanel" hidden>
+              <h3>VCF is the candidate list, not the final diagnosis</h3>
+              <p>
+                A VCF contains called variants and technical fields. It is useful only after
+                QC, annotation, phenotype matching, and evidence review.
+              </p>
+              <div class="ngs-file-grid">
+                <div class="ngs-file-list">
+                  <article>
+                    <h4>What it stores</h4>
+                    <p>Chromosome, position, REF/ALT, genotype, depth, allele balance, and caller-level annotations.</p>
+                  </article>
+                  <article>
+                    <h4>Student checks</h4>
+                    <p>Plausible variant counts, genotype depth, quality filters, allele balance, and family consistency.</p>
+                  </article>
+                  <article>
+                    <h4>Important caution</h4>
+                    <p>Filtering narrows candidates; it does not replace ACMG evidence review or tumor tiering logic.</p>
+                  </article>
+                </div>
+                <pre class="ngs-code-block">chr7  140453136  .  A  T  742.3  PASS
+DP=132;AF=0.48;MQ=60
+GT:AD:DP  0/1:68,64:132</pre>
+              </div>
+            </article>
+
+            <article class="ngs-file-panel" id="file-annotation" role="tabpanel" hidden>
+              <h3>Annotation adds biological and reporting context</h3>
+              <p>
+                Annotation connects a variant to genes, transcripts, protein consequences,
+                population frequency, ClinVar history, and other evidence families used during
+                classification.
+              </p>
+              <div class="ngs-file-grid">
+                <div class="ngs-file-list">
+                  <article>
+                    <h4>What it adds</h4>
+                    <p>Gene, transcript, exon, protein effect, disease associations, and database references.</p>
+                  </article>
+                  <article>
+                    <h4>Student checks</h4>
+                    <p>Transcript policy, annotation version, database date, and build consistency.</p>
+                  </article>
+                  <article>
+                    <h4>Important caution</h4>
+                    <p>A clinical annotation layer should be versioned so that the result is reproducible later.</p>
+                  </article>
+                </div>
+                <pre class="ngs-code-block">GENE=CFTR
+TRANSCRIPT=NM_000492.4
+HGVS.c=c.1521_1523delCTT
+HGVS.p=p.Phe508del
+CLINVAR=Pathogenic</pre>
+              </div>
+            </article>
+          </div>
+
+          <div class="ngs-qc-strip reveal">
+            <article>
+              <h4>FASTQ</h4>
+              <p>Q30, read count, GC pattern, adapter signal, duplication estimate.</p>
+            </article>
+            <article>
+              <h4>Alignment</h4>
+              <p>Reference build, read groups, mapping rate, proper pairing.</p>
+            </article>
+            <article>
+              <h4>Coverage</h4>
+              <p>Mean depth, percent ≥20x, gene or exon gaps, uniformity.</p>
+            </article>
+            <article>
+              <h4>Calling</h4>
+              <p>Plausible variant counts, genotype quality, allele balance, Ti/Tv sanity checks.</p>
+            </article>
+            <article>
+              <h4>Annotation</h4>
+              <p>VEP or ANNOVAR version, transcript set, ClinVar date, gnomAD version.</p>
+            </article>
+            <article>
+              <h4>Release</h4>
+              <p>Failed regions, LoD, confirmation policy, and report wording all must be clear.</p>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Interactive figure</p>
+              <h3>Variant filtering funnel from raw calls to review-ready candidates</h3>
+            </div>
+            <div class="ngs-filter-demo">
+              <div class="ngs-filter-toolbar">
+                <label for="filter-stage">Move through the filtering checkpoints</label>
+                <input id="filter-stage" type="range" min="0" max="4" step="1" value="0" />
+                <button class="ngs-coverage-button" type="button" id="filter-next">
+                  Next filter
+                </button>
+              </div>
+              <div class="ngs-filter-layout">
+                <div class="ngs-filter-funnel" id="filter-funnel" aria-hidden="true"></div>
+                <aside class="ngs-filter-inspector">
+                  <p class="figure-label">Current checkpoint</p>
+                  <h4 id="filter-title">Raw variant universe</h4>
+                  <p id="filter-description">
+                    Start with every technically detected site before any relevance logic is applied.
+                  </p>
+                  <div class="ngs-filter-grid">
+                    <article>
+                      <h5>Count</h5>
+                      <p id="filter-count">4.2M candidate positions</p>
+                    </article>
+                    <article>
+                      <h5>Main rule</h5>
+                      <p id="filter-rule">No clinical filtering yet.</p>
+                    </article>
+                    <article>
+                      <h5>What was removed</h5>
+                      <p id="filter-removed">Nothing removed yet.</p>
+                    </article>
+                    <article>
+                      <h5>Teaching caution</h5>
+                      <p id="filter-caution">A large raw list is normal before QC and relevance filters.</p>
+                    </article>
+                  </div>
+                  <div class="ngs-filter-warning">
+                    Filtering narrows the list, but classification still requires phenotype
+                    fit, evidence review, and report-scope control.
+                  </div>
+                </aside>
+              </div>
+            </div>
+            <p class="interpretation">
+              <strong>Teaching point:</strong> a short candidate list can still end with a
+              VUS, a benign finding, or no reportable answer after evidence review.
+            </p>
+          </figure>
+        </section>
+
+        <section class="section section-alt" id="variant-atlas">
+          <div class="section-heading reveal">
+            <span class="section-chip">Variant types workshop atlas</span>
+            <h2>High-yield variant types, diseases, and reporting traps</h2>
+            <p>
+              Do not try to memorize every famous mutation in a 45-minute lecture. Use a
+              representative atlas: one visual example, one disease link, one clinical use,
+              and one limitation for each major variant class.
             </p>
           </div>
 
           <figure class="figure-card reveal">
             <div class="figure-heading">
-              <p class="figure-label">Figure 1</p>
-              <h3>Full NGS workflow</h3>
+              <p class="figure-label">Mutation map</p>
+              <h3>One gene model, five variant classes</h3>
             </div>
-            <div class="workflow-map" role="img" aria-label="Full NGS workflow">
-              <div class="workflow-step"><span>1</span><strong>Sample collection</strong></div>
-              <div class="workflow-arrow">→</div>
-              <div class="workflow-step"><span>2</span><strong>DNA or RNA extraction</strong></div>
-              <div class="workflow-arrow">→</div>
-              <div class="workflow-step"><span>3</span><strong>Quality control</strong></div>
-              <div class="workflow-arrow">→</div>
-              <div class="workflow-step"><span>4</span><strong>Library preparation</strong></div>
-              <div class="workflow-arrow">→</div>
-              <div class="workflow-step"><span>5</span><strong>Sequencing run</strong></div>
-              <div class="workflow-arrow">→</div>
-              <div class="workflow-step"><span>6</span><strong>Raw reads</strong></div>
-              <div class="workflow-arrow">→</div>
-              <div class="workflow-step"><span>7</span><strong>Read QC</strong></div>
-              <div class="workflow-arrow">→</div>
-              <div class="workflow-step"><span>8</span><strong>Alignment or assembly</strong></div>
-              <div class="workflow-arrow">→</div>
-              <div class="workflow-step"><span>9</span><strong>Variant calling or quantification</strong></div>
-              <div class="workflow-arrow">→</div>
-              <div class="workflow-step"><span>10</span><strong>Biological interpretation</strong></div>
+            <div class="ngs-mutation-map" role="img" aria-label="Gene model showing SNV, indel, splice, CNV, and fusion variants">
+              <div class="ngs-gene-line">
+                <span class="ngs-exon exon-1">Exon 1</span>
+                <span class="ngs-intron"></span>
+                <span class="ngs-exon exon-2">Exon 2</span>
+                <span class="ngs-intron"></span>
+                <span class="ngs-exon exon-3">Exon 3</span>
+                <span class="ngs-intron"></span>
+                <span class="ngs-exon exon-4">Exon 4</span>
+              </div>
+              <div class="ngs-variant-markers">
+                <article class="marker-snv">
+                  <strong>SNV</strong>
+                  <span>EGFR p.Leu858Arg</span>
+                </article>
+                <article class="marker-indel">
+                  <strong>Indel</strong>
+                  <span>EGFR exon 19 del</span>
+                </article>
+                <article class="marker-splice">
+                  <strong>Splice</strong>
+                  <span>MLH1 splice-site</span>
+                </article>
+                <article class="marker-cnv">
+                  <strong>CNV</strong>
+                  <span>ERBB2 amplification</span>
+                </article>
+                <article class="marker-fusion">
+                  <strong>Fusion</strong>
+                  <span>EML4::ALK</span>
+                </article>
+              </div>
             </div>
-            <figcaption>
-              Every box affects the next one. Weak samples, poor libraries, or poor-quality
-              reads reduce the value of the final analysis.
-            </figcaption>
             <p class="interpretation">
-              <strong>What students should notice:</strong> the sequencer is only one part
-              of the story. Good biology, careful handling, and correct analysis all matter.
+              <strong>Teaching point:</strong> a variant type is not only a DNA shape. It
+              changes the assay needed, the QC evidence required, and the wording in the report.
             </p>
           </figure>
 
-          <div class="step-grid reveal">
-            <article class="step-card">
-              <span class="step-icon">SC</span>
-              <h3>1. Sample collection</h3>
-              <p>The biological material is collected, such as blood, tissue, cells, or an environmental sample.</p>
-              <p><strong>Why this step matters:</strong> poor sampling can introduce degradation or contamination before sequencing even begins.</p>
+          <div class="ngs-variant-tabs reveal" data-variant-tabs>
+            <div class="ngs-tab-list" role="tablist" aria-label="Variant type examples">
+              <button
+                class="ngs-file-tab is-active"
+                id="tab-variant-small"
+                type="button"
+                role="tab"
+                aria-controls="variant-small"
+                data-target="variant-small"
+              >
+                <strong>SNV / indel</strong>
+                <span>Point and small coding changes</span>
+              </button>
+              <button
+                class="ngs-file-tab"
+                id="tab-variant-splice"
+                type="button"
+                role="tab"
+                aria-controls="variant-splice"
+                data-target="variant-splice"
+              >
+                <strong>Splice</strong>
+                <span>Transcript disruption</span>
+              </button>
+              <button
+                class="ngs-file-tab"
+                id="tab-variant-cnv"
+                type="button"
+                role="tab"
+                aria-controls="variant-cnv"
+                data-target="variant-cnv"
+              >
+                <strong>CNV</strong>
+                <span>Copy gain/loss</span>
+              </button>
+              <button
+                class="ngs-file-tab"
+                id="tab-variant-fusion"
+                type="button"
+                role="tab"
+                aria-controls="variant-fusion"
+                data-target="variant-fusion"
+              >
+                <strong>Fusion</strong>
+                <span>Rearranged genes</span>
+              </button>
+              <button
+                class="ngs-file-tab"
+                id="tab-variant-signature"
+                type="button"
+                role="tab"
+                aria-controls="variant-signature"
+                data-target="variant-signature"
+              >
+                <strong>MSI / TMB</strong>
+                <span>Genomic signatures</span>
+              </button>
+            </div>
+
+            <article class="ngs-file-panel is-active" id="variant-small" role="tabpanel">
+              <h3>SNVs and small indels are the most familiar, but not always simple</h3>
+              <div class="ngs-example-grid">
+                <article>
+                  <h4>EGFR p.Leu858Arg</h4>
+                  <p>Classic NSCLC predictive hotspot; report with VAF, coverage, tumor context, and therapy relevance.</p>
+                </article>
+                <article>
+                  <h4>KRAS p.Gly12Cys</h4>
+                  <p>Actionable in selected NSCLC contexts and important in colorectal cancer resistance interpretation.</p>
+                </article>
+                <article>
+                  <h4>BRAF p.Val600Glu</h4>
+                  <p>Seen in melanoma, thyroid cancer, colorectal cancer, and others; actionability depends on tumor type.</p>
+                </article>
+                <article>
+                  <h4>CFTR p.Phe508del</h4>
+                  <p>Three-base deletion causing cystic fibrosis; a good example that not every deletion is a frameshift.</p>
+                </article>
+                <article>
+                  <h4>BRCA1 frameshift</h4>
+                  <p>Germline loss-of-function example tied to hereditary breast and ovarian cancer risk.</p>
+                </article>
+                <article>
+                  <h4>FLT3-ITD</h4>
+                  <p>AML internal tandem duplication; a reminder that some indels need special detection/reporting logic.</p>
+                </article>
+              </div>
             </article>
-            <article class="step-card">
-              <span class="step-icon">EX</span>
-              <h3>2. DNA or RNA extraction</h3>
-              <p>Nucleic acids are purified from the sample so they can be measured and processed.</p>
-              <p><strong>Why this step matters:</strong> impure or degraded material causes weak downstream results.</p>
+
+            <article class="ngs-file-panel" id="variant-splice" role="tabpanel" hidden>
+              <h3>Splice variants need transcript-level thinking</h3>
+              <div class="ngs-example-grid">
+                <article>
+                  <h4>MLH1 / MSH2 splice-site</h4>
+                  <p>Can support Lynch syndrome when variant evidence and phenotype/family history fit.</p>
+                </article>
+                <article>
+                  <h4>BRCA1 canonical splice</h4>
+                  <p>Often treated as loss-of-function evidence when the affected transcript and mechanism are validated.</p>
+                </article>
+                <article>
+                  <h4>Deep intronic splice</h4>
+                  <p>May be missed by focused panels if outside reportable intronic boundaries.</p>
+                </article>
+                <article>
+                  <h4>RNA rescue</h4>
+                  <p>RNA evidence can clarify whether a DNA variant truly disrupts splicing.</p>
+                </article>
+              </div>
             </article>
-            <article class="step-card">
-              <span class="step-icon">QC</span>
-              <h3>3. Input quality control</h3>
-              <p>Concentration, purity, and integrity are checked before library preparation.</p>
-              <p><strong>Why this step matters:</strong> poor starting material often leads to poor libraries.</p>
+
+            <article class="ngs-file-panel" id="variant-cnv" role="tabpanel" hidden>
+              <h3>CNVs are dosage calls, not ordinary SNVs</h3>
+              <div class="ngs-example-grid">
+                <article>
+                  <h4>ERBB2 amplification</h4>
+                  <p>Breast and gastric cancer actionability example; orthogonal confirmation may depend on assay policy.</p>
+                </article>
+                <article>
+                  <h4>MYCN amplification</h4>
+                  <p>Neuroblastoma risk marker; shows why copy number can be prognostic.</p>
+                </article>
+                <article>
+                  <h4>DMD exon deletion</h4>
+                  <p>Duchenne/Becker example; exon-level resolution and reading frame matter.</p>
+                </article>
+                <article>
+                  <h4>PMP22 duplication</h4>
+                  <p>Charcot-Marie-Tooth disease type 1A; a clean germline dosage example.</p>
+                </article>
+              </div>
             </article>
-            <article class="step-card">
-              <span class="step-icon">LP</span>
-              <h3>4. Library preparation</h3>
-              <p>DNA or cDNA fragments are converted into machine-readable molecules by adding adapters and indexes.</p>
-              <p><strong>Why this step matters:</strong> most sequencers cannot read untreated genomic material directly.</p>
+
+            <article class="ngs-file-panel" id="variant-fusion" role="tabpanel" hidden>
+              <h3>Fusions are structure and expression events</h3>
+              <div class="ngs-example-grid">
+                <article>
+                  <h4>BCR::ABL1</h4>
+                  <p>CML-defining fusion and a strong example of diagnostic plus treatment relevance.</p>
+                </article>
+                <article>
+                  <h4>EML4::ALK</h4>
+                  <p>NSCLC predictive fusion; RNA-based assays often help because expressed fusion evidence matters.</p>
+                </article>
+                <article>
+                  <h4>NTRK fusion</h4>
+                  <p>Tumor-agnostic actionability example, but detection and fusion partner interpretation still matter.</p>
+                </article>
+                <article>
+                  <h4>PML::RARA</h4>
+                  <p>APL-defining fusion where rapid recognition changes urgent management.</p>
+                </article>
+              </div>
             </article>
-            <article class="step-card">
-              <span class="step-icon">SR</span>
-              <h3>5. Sequencing run</h3>
-              <p>The instrument reads bases from library fragments and records them as digital signal.</p>
-              <p><strong>Why this step matters:</strong> this is where molecules become computational data.</p>
-            </article>
-            <article class="step-card">
-              <span class="step-icon">FQ</span>
-              <h3>6. Raw reads</h3>
-              <p>The output is usually a FASTQ file containing sequences and base quality scores.</p>
-              <p><strong>Why this step matters:</strong> FASTQ is the starting point for most analyses.</p>
-            </article>
-            <article class="step-card">
-              <span class="step-icon">RQ</span>
-              <h3>7. Read quality check</h3>
-              <p>Software examines quality trends, adapter contamination, duplication, and other issues.</p>
-              <p><strong>Why this step matters:</strong> not every read is equally trustworthy.</p>
-            </article>
-            <article class="step-card">
-              <span class="step-icon">AL</span>
-              <h3>8. Alignment or assembly</h3>
-              <p>Reads are matched to a reference genome or assembled into longer sequences.</p>
-              <p><strong>Why this step matters:</strong> genomic context is needed before many questions can be answered.</p>
-            </article>
-            <article class="step-card">
-              <span class="step-icon">VC</span>
-              <h3>9. Variant calling or quantification</h3>
-              <p>Depending on the experiment, software detects mutations, counts transcripts, or profiles taxa.</p>
-              <p><strong>Why this step matters:</strong> this step turns aligned data into measurable results.</p>
-            </article>
-            <article class="step-card">
-              <span class="step-icon">BI</span>
-              <h3>10. Biological interpretation</h3>
-              <p>Results are linked back to disease, function, ecology, evolution, or the original research question.</p>
-              <p><strong>Why this step matters:</strong> data becomes useful only when interpreted in context.</p>
+
+            <article class="ngs-file-panel" id="variant-signature" role="tabpanel" hidden>
+              <h3>MSI and TMB are signatures, not single-gene variants</h3>
+              <div class="ngs-example-grid">
+                <article>
+                  <h4>MSI-high</h4>
+                  <p>Important in colorectal, endometrial, and other cancers; may suggest mismatch repair deficiency.</p>
+                </article>
+                <article>
+                  <h4>TMB-high</h4>
+                  <p>Can support immunotherapy discussion in selected settings, but threshold and assay validation matter.</p>
+                </article>
+                <article>
+                  <h4>Negative MSI/TMB</h4>
+                  <p>Does not exclude all immune-response biology; report method and limitations clearly.</p>
+                </article>
+                <article>
+                  <h4>Panel size effect</h4>
+                  <p>Small panels may be less robust for broad signature estimation than validated large panels.</p>
+                </article>
+              </div>
             </article>
           </div>
-        </section>
 
-        <section class="section" id="applications">
-          <div class="section-heading reveal">
-            <span class="section-chip">3. Major use cases</span>
-            <h2>Types of NGS applications</h2>
-            <p>
-              Different NGS experiments answer different questions. The right method depends
-              on whether you care about whole genomes, coding regions, RNA, microbes, or a
-              small group of known targets.
-            </p>
-          </div>
+          <div class="ngs-visual-grid reveal">
+            <figure class="figure-card ngs-vaf-card">
+              <div class="figure-heading">
+                <p class="figure-label">Interactive pileup</p>
+                <h3>VAF, depth, and coverage in one sentence</h3>
+              </div>
+              <div class="ngs-vaf-demo">
+                <div class="ngs-vaf-toolbar">
+                  <label for="vaf-slider">Mutant reads out of 100</label>
+                  <input id="vaf-slider" type="range" min="0" max="100" value="40" />
+                </div>
+                <div class="ngs-vaf-reads" id="vaf-reads" aria-hidden="true"></div>
+                <div class="ngs-vaf-summary">
+                  <article>
+                    <h4>Depth</h4>
+                    <strong>100x</strong>
+                    <p>Total reads covering the locus.</p>
+                  </article>
+                  <article>
+                    <h4>Alt reads</h4>
+                    <strong id="vaf-alt-count">40</strong>
+                    <p>Reads supporting the alternate allele.</p>
+                  </article>
+                  <article>
+                    <h4>VAF</h4>
+                    <strong id="vaf-percent">40%</strong>
+                    <p>Alt reads divided by total depth.</p>
+                  </article>
+                </div>
+              </div>
+            </figure>
 
-          <div class="card-grid applications-grid reveal">
-            <article class="application-card">
-              <h3>Whole Genome Sequencing (WGS)</h3>
-              <p><strong>What it studies:</strong> almost the entire genome.</p>
-              <p><strong>When it is used:</strong> broad mutation discovery and genome-wide analysis.</p>
-              <p><strong>What data it gives:</strong> reads and variants across the genome.</p>
-              <p><strong>Example:</strong> finding resistance mutations across a bacterial genome.</p>
-            </article>
-            <article class="application-card">
-              <h3>Whole Exome Sequencing (WES)</h3>
-              <p><strong>What it studies:</strong> protein-coding regions.</p>
-              <p><strong>When it is used:</strong> rare disease studies and many clinical variant projects.</p>
-              <p><strong>What data it gives:</strong> variants in captured exonic regions.</p>
-              <p><strong>Example:</strong> searching for coding mutations linked to an inherited condition.</p>
-            </article>
-            <article class="application-card">
-              <h3>RNA-Seq</h3>
-              <p><strong>What it studies:</strong> RNA molecules and gene expression.</p>
-              <p><strong>When it is used:</strong> transcriptomics and expression comparison.</p>
-              <p><strong>What data it gives:</strong> transcript counts and expression patterns.</p>
-              <p><strong>Example:</strong> comparing gene expression in tumor versus normal tissue.</p>
-            </article>
-            <article class="application-card">
-              <h3>16S rRNA sequencing</h3>
-              <p><strong>What it studies:</strong> bacterial community composition using a marker gene.</p>
-              <p><strong>When it is used:</strong> microbiome surveys.</p>
-              <p><strong>What data it gives:</strong> relative abundance of bacterial taxa.</p>
-              <p><strong>Example:</strong> comparing gut microbiota between groups.</p>
-            </article>
-            <article class="application-card">
-              <h3>Metagenomics</h3>
-              <p><strong>What it studies:</strong> all DNA in a mixed community.</p>
-              <p><strong>When it is used:</strong> complex environmental or host-associated microbiomes.</p>
-              <p><strong>What data it gives:</strong> taxonomic and functional information.</p>
-              <p><strong>Example:</strong> analyzing all microbial DNA in soil or wastewater.</p>
-            </article>
-            <article class="application-card">
-              <h3>Targeted sequencing</h3>
-              <p><strong>What it studies:</strong> selected genes or hotspot regions.</p>
-              <p><strong>When it is used:</strong> focused diagnostics or known candidate genes.</p>
-              <p><strong>What data it gives:</strong> deep coverage over chosen targets.</p>
-              <p><strong>Example:</strong> screening a focused cancer panel.</p>
-            </article>
-            <article class="application-card">
-              <h3>Small RNA or microRNA sequencing</h3>
-              <p><strong>What it studies:</strong> short regulatory RNAs.</p>
-              <p><strong>When it is used:</strong> biomarker or regulation studies.</p>
-              <p><strong>What data it gives:</strong> counts of small RNA species.</p>
-              <p><strong>Example:</strong> detecting microRNAs linked to inflammation or cancer.</p>
-            </article>
+            <figure class="figure-card">
+              <div class="figure-heading">
+                <p class="figure-label">Artifact screen</p>
+                <h3>Strand bias and homopolymer context</h3>
+              </div>
+              <div class="ngs-artifact-board">
+                <article>
+                  <h4>Balanced evidence</h4>
+                  <div class="ngs-strand-row">
+                    <span>Forward</span>
+                    <i class="read-ref"></i><i class="read-alt"></i><i class="read-ref"></i><i class="read-alt"></i>
+                  </div>
+                  <div class="ngs-strand-row">
+                    <span>Reverse</span>
+                    <i class="read-alt"></i><i class="read-ref"></i><i class="read-alt"></i><i class="read-ref"></i>
+                  </div>
+                </article>
+                <article>
+                  <h4>Strand-biased warning</h4>
+                  <div class="ngs-strand-row">
+                    <span>Forward</span>
+                    <i class="read-alt"></i><i class="read-alt"></i><i class="read-alt"></i><i class="read-alt"></i>
+                  </div>
+                  <div class="ngs-strand-row">
+                    <span>Reverse</span>
+                    <i class="read-ref"></i><i class="read-ref"></i><i class="read-ref"></i><i class="read-ref"></i>
+                  </div>
+                </article>
+                <article class="ngs-homopolymer-card">
+                  <h4>Ion Torrent homopolymer caution</h4>
+                  <div class="ngs-base-run">
+                    <span>A</span><span>A</span><span>A</span><span>A</span><span>A</span><span class="is-risk">?</span><span>T</span>
+                  </div>
+                  <p>Repeated bases can make small indel confidence depend heavily on local evidence.</p>
+                </article>
+              </div>
+            </figure>
           </div>
 
           <figure class="figure-card reveal">
             <div class="figure-heading">
-              <p class="figure-label">Table 2</p>
-              <h3>NGS applications comparison</h3>
+              <p class="figure-label">Teaching table</p>
+              <h3>How to choose examples without overloading the 45 minutes</h3>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Application</th>
-                    <th>Best for</th>
-                    <th>Main data type</th>
-                    <th>Simple example</th>
+                    <th>Variant class</th>
+                    <th>High-yield examples</th>
+                    <th>Clinical message</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>WGS</td>
-                    <td>Genome-wide mutation discovery</td>
-                    <td>Genome reads and variants</td>
-                    <td>Pathogen outbreak genomics</td>
+                    <td>SNV hotspot</td>
+                    <td>EGFR L858R, KRAS G12C, BRAF V600E, JAK2 V617F, IDH1 R132H</td>
+                    <td>Hotspot does not automatically mean same action in every disease</td>
                   </tr>
                   <tr>
-                    <td>WES</td>
-                    <td>Coding-region variants</td>
-                    <td>Exonic variants</td>
-                    <td>Rare disease gene search</td>
+                    <td>Small indel</td>
+                    <td>EGFR exon 19 deletion, CFTR F508del, BRCA1 frameshift, FLT3-ITD</td>
+                    <td>Different indels need different detection confidence and reporting wording</td>
                   </tr>
                   <tr>
-                    <td>RNA-Seq</td>
-                    <td>Expression and transcript structure</td>
-                    <td>Transcript counts</td>
-                    <td>Tumor versus normal expression</td>
+                    <td>Splice</td>
+                    <td>BRCA1, MLH1, MSH2 canonical splice-site examples</td>
+                    <td>Transcript policy and RNA evidence can change confidence</td>
                   </tr>
                   <tr>
-                    <td>16S</td>
-                    <td>Bacterial community profiling</td>
-                    <td>Taxonomic composition</td>
-                    <td>Gut microbiome survey</td>
+                    <td>CNV</td>
+                    <td>ERBB2 amplification, MYCN amplification, DMD deletion, PMP22 duplication</td>
+                    <td>Dosage evidence and orthogonal confirmation policy matter</td>
                   </tr>
                   <tr>
-                    <td>Metagenomics</td>
-                    <td>Whole community DNA</td>
-                    <td>Taxonomic and functional profiles</td>
-                    <td>Wastewater microbiome</td>
-                  </tr>
-                  <tr>
-                    <td>Targeted sequencing</td>
-                    <td>Known genes or hotspots</td>
-                    <td>Deep targeted variants</td>
-                    <td>Focused cancer panel</td>
-                  </tr>
-                  <tr>
-                    <td>Small RNA-Seq</td>
-                    <td>Regulatory short RNAs</td>
-                    <td>Small RNA counts</td>
-                    <td>microRNA biomarker study</td>
+                    <td>Fusion</td>
+                    <td>BCR::ABL1, EML4::ALK, NTRK fusions, PML::RARA</td>
+                    <td>DNA-only testing may miss or incompletely characterize some events</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <figcaption>
-              NGS is a family of approaches, not a single experiment. The biological
-              question should guide the method.
-            </figcaption>
-            <p class="interpretation">
-              <strong>Student interpretation:</strong> ask first what you want to measure:
-              variants, expression, or community composition. The method follows from that.
-            </p>
           </figure>
         </section>
 
-        <section class="section section-alt" id="glossary">
+        <section class="section" id="interpretation">
           <div class="section-heading reveal">
-            <span class="section-chip">4. Vocabulary</span>
-            <h2>Important terms every student should know</h2>
+            <span class="section-chip">6. Interpretation</span>
+            <h2>From candidate variants to ACMG-style evidence review</h2>
             <p>
-              NGS becomes much easier once common words in laboratory protocols, file names,
-              reports, and analysis outputs stop feeling unfamiliar.
+              This stage is where many students over-trust software output. The workflow should
+              be taught in the correct order: QC, alignment, coverage, calling, annotation,
+              filtering, phenotype matching, evidence review, then classification.
             </p>
           </div>
 
-          <div class="glossary-tools reveal">
-            <label class="search-label" for="glossary-search">Glossary filter</label>
-            <input
-              id="glossary-search"
-              type="search"
-              placeholder="Type a term like FASTQ, coverage, or SNP"
-              aria-describedby="glossary-help"
-            />
-            <p id="glossary-help">
-              This quick filter makes the glossary easier to review before class, lab work,
-              or bioinformatics practice.
-            </p>
-          </div>
-
-          <div class="glossary-grid reveal" id="glossary-grid">
-            <article class="glossary-card" data-term="read">
-              <h3>Read</h3>
-              <p>A sequence produced by the machine from one library fragment.</p>
-            </article>
-            <article class="glossary-card" data-term="read length">
-              <h3>Read length</h3>
-              <p>The number of bases in each read, such as 75 bp or 150 bp.</p>
-            </article>
-            <article class="glossary-card" data-term="depth coverage">
-              <h3>Depth / coverage</h3>
-              <p>How many times a position is read. Higher coverage often improves confidence.</p>
-            </article>
-            <article class="glossary-card" data-term="reference genome">
-              <h3>Reference genome</h3>
-              <p>A known sequence used as a guide when aligning reads.</p>
-            </article>
-            <article class="glossary-card" data-term="alignment">
-              <h3>Alignment</h3>
-              <p>The process of placing reads onto a reference genome.</p>
-            </article>
-            <article class="glossary-card" data-term="fastq">
-              <h3>FASTQ</h3>
-              <p>A file that stores read sequences and quality scores.</p>
-            </article>
-            <article class="glossary-card" data-term="bam">
-              <h3>BAM</h3>
-              <p>A compressed binary format of aligned reads.</p>
-            </article>
-            <article class="glossary-card" data-term="vcf">
-              <h3>VCF</h3>
-              <p>A file format that stores called variants such as SNPs and indels.</p>
-            </article>
-            <article class="glossary-card" data-term="adapter">
-              <h3>Adapter</h3>
-              <p>A short artificial sequence added during library preparation.</p>
-            </article>
-            <article class="glossary-card" data-term="library">
-              <h3>Library</h3>
-              <p>The prepared collection of fragments that is ready for sequencing.</p>
-            </article>
-            <article class="glossary-card" data-term="paired-end reads">
-              <h3>Paired-end reads</h3>
-              <p>Two reads generated from opposite ends of the same fragment.</p>
-            </article>
-            <article class="glossary-card" data-term="single-end reads">
-              <h3>Single-end reads</h3>
-              <p>One read generated from only one end of each fragment.</p>
-            </article>
-            <article class="glossary-card" data-term="variant snp">
-              <h3>Variant / SNP</h3>
-              <p>A difference from the reference sequence. A SNP is a one-base change.</p>
-            </article>
-            <article class="glossary-card" data-term="qc mapping rate">
-              <h3>QC / mapping rate</h3>
-              <p>QC means quality control. Mapping rate is the fraction of reads that align.</p>
-            </article>
-            <article class="glossary-card" data-term="dna nanoball dnb">
-              <h3>DNA nanoball (DNB)</h3>
-              <p>A compact amplified DNA structure used in MGI DNBSEQ sequencing workflows.</p>
-            </article>
-            <article class="glossary-card" data-term="cpas">
-              <h3>cPAS</h3>
-              <p>Combinatorial Probe-Anchor Synthesis, the sequencing chemistry used in MGI DNBSEQ systems.</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="section" id="file-formats">
-          <div class="section-heading reveal">
-            <span class="section-chip">5. Data literacy</span>
-            <h2>Key file formats</h2>
-            <p>
-              Students often see file names before they understand what those files mean.
-              Learning the formats helps you follow the data through the pipeline.
-            </p>
-          </div>
-
-          <figure class="figure-card reveal">
-            <div class="figure-heading">
-              <p class="figure-label">Table 3</p>
-              <h3>Common NGS file formats</h3>
+          <div class="ngs-report-grid reveal">
+            <div class="ngs-funnel">
+              <article class="ngs-funnel-step">
+                <strong>80k to 5M sites</strong>
+                <p>Raw variant universe before quality, relevance, and evidence filtering.</p>
+              </article>
+              <article class="ngs-funnel-step">
+                <strong>High quality + callable</strong>
+                <p>Remove poor-quality or technically unsupported sites first.</p>
+              </article>
+              <article class="ngs-funnel-step">
+                <strong>Rare or clinically relevant</strong>
+                <p>Frequency, tumor relevance, or assay purpose reduce the candidate set.</p>
+              </article>
+              <article class="ngs-funnel-step">
+                <strong>Consequence + gene fit</strong>
+                <p>Keep candidates whose variant effect and gene biology match the use case.</p>
+              </article>
+              <article class="ngs-funnel-step">
+                <strong>Inheritance + phenotype match</strong>
+                <p>Family structure, zygosity, segregation, and phenotype sharpen the shortlist.</p>
+              </article>
+              <article class="ngs-funnel-step">
+                <strong>Evidence-reviewed result</strong>
+                <p>The final candidate is classified only after evidence review. Filtering alone is never classification.</p>
+              </article>
             </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Format</th>
-                    <th>Full name</th>
-                    <th>What it stores</th>
-                    <th>Why students should care</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>FASTQ</td>
-                    <td>FastQ sequence format</td>
-                    <td>Read sequences plus quality scores</td>
-                    <td>Usually the starting point after sequencing</td>
-                  </tr>
-                  <tr>
-                    <td>FASTA</td>
-                    <td>FastA sequence format</td>
-                    <td>Plain sequences without quality scores</td>
-                    <td>Used for references and assemblies</td>
-                  </tr>
-                  <tr>
-                    <td>SAM</td>
-                    <td>Sequence Alignment/Map</td>
-                    <td>Text-based aligned reads</td>
-                    <td>Helpful for learning alignment structure</td>
-                  </tr>
-                  <tr>
-                    <td>BAM</td>
-                    <td>Binary Alignment/Map</td>
-                    <td>Compressed aligned reads</td>
-                    <td>Common working format for downstream analysis</td>
-                  </tr>
-                  <tr>
-                    <td>VCF</td>
-                    <td>Variant Call Format</td>
-                    <td>Called variants and related fields</td>
-                    <td>Central for mutation analysis</td>
-                  </tr>
-                  <tr>
-                    <td>GTF / GFF</td>
-                    <td>Gene Transfer Format / General Feature Format</td>
-                    <td>Gene and feature annotations</td>
-                    <td>Connects genomic coordinates to genes and transcripts</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <figcaption>
-              These formats represent the journey from raw reads to aligned data, variants,
-              and annotated biology.
-            </figcaption>
-            <p class="interpretation">
-              <strong>How to read this table:</strong> FASTQ is early raw data, BAM and SAM
-              describe aligned reads, and VCF stores called variants.
-            </p>
-          </figure>
 
-          <div class="file-journey reveal" role="img" aria-label="File journey from FASTQ to interpretation">
-            <div class="file-pill">FASTQ</div>
-            <div class="journey-arrow">→</div>
-            <div class="file-pill">Trimmed FASTQ</div>
-            <div class="journey-arrow">→</div>
-            <div class="file-pill">SAM/BAM</div>
-            <div class="journey-arrow">→</div>
-            <div class="file-pill">VCF or count matrix</div>
-            <div class="journey-arrow">→</div>
-            <div class="file-pill">Biological interpretation</div>
-          </div>
-        </section>
-
-        <section class="section section-alt" id="qc">
-          <div class="section-heading reveal">
-            <span class="section-chip">6. Trust the data carefully</span>
-            <h2>Quality control and why it matters</h2>
-            <p>
-              Raw reads are not automatically ready for interpretation. Some are strong,
-              some are weak, and some contain technical artifacts such as adapters or
-              contamination.
-            </p>
-          </div>
-
-          <div class="card-grid two-column reveal">
-            <article class="info-card">
-              <h3>Why reads are not ready immediately</h3>
+            <article class="callout-box">
+              <h3>Filtering is not classification</h3>
               <p>
-                The sequencer can produce uncertainty in base calling, technical sequences,
-                duplicates, and other artifacts that need inspection before analysis.
+                A variant can survive filtering and still remain a VUS or non-reportable.
+                Filtering only selects candidates. Germline classification follows an evidence
+                framework such as ACMG/AMP. Somatic reports use tiered clinical significance,
+                not germline pathogenicity categories.
               </p>
-            </article>
-            <article class="info-card">
-              <h3>What low quality means</h3>
-              <p>
-                A low-quality base is a base call the instrument is less confident about,
-                which increases the chance of mapping or variant errors.
+              <p class="ngs-source-note">
+                The five-tier germline framing here follows ACMG/AMP-style interpretation as
+                summarized in your master book and reflected in the
+                <a
+                  href="https://www.genomatics.net/guides/acmg-variant-classification-guide"
+                  target="_blank"
+                  rel="noreferrer"
+                  >Genomatics ACMG Variant Classification Guide</a
+                >.
               </p>
             </article>
           </div>
 
-          <figure class="figure-card reveal">
-            <div class="figure-heading">
-              <p class="figure-label">Figure 2</p>
-              <h3>Good-quality vs poor-quality reads</h3>
+          <div class="ngs-tier-board reveal" data-tier-tabs>
+            <div class="ngs-tab-list" role="tablist" aria-label="ACMG five-tier classes">
+              <button
+                class="ngs-tier-tab is-active"
+                id="tab-tier-pathogenic"
+                type="button"
+                role="tab"
+                aria-controls="tier-pathogenic"
+                data-target="tier-pathogenic"
+              >
+                <strong>Pathogenic</strong>
+                <span>Sufficient evidence</span>
+              </button>
+              <button
+                class="ngs-tier-tab"
+                id="tab-tier-likely-pathogenic"
+                type="button"
+                role="tab"
+                aria-controls="tier-likely-pathogenic"
+                data-target="tier-likely-pathogenic"
+              >
+                <strong>Likely pathogenic</strong>
+                <span>Strong but not absolute</span>
+              </button>
+              <button
+                class="ngs-tier-tab"
+                id="tab-tier-vus"
+                type="button"
+                role="tab"
+                aria-controls="tier-vus"
+                data-target="tier-vus"
+              >
+                <strong>VUS</strong>
+                <span>Evidence insufficient or conflicting</span>
+              </button>
+              <button
+                class="ngs-tier-tab"
+                id="tab-tier-likely-benign"
+                type="button"
+                role="tab"
+                aria-controls="tier-likely-benign"
+                data-target="tier-likely-benign"
+              >
+                <strong>Likely benign</strong>
+                <span>Evidence against causality</span>
+              </button>
+              <button
+                class="ngs-tier-tab"
+                id="tab-tier-benign"
+                type="button"
+                role="tab"
+                aria-controls="tier-benign"
+                data-target="tier-benign"
+              >
+                <strong>Benign</strong>
+                <span>Strong evidence against disease causality</span>
+              </button>
             </div>
-            <svg class="quality-svg" viewBox="0 0 780 310" role="img" aria-label="Comparison of good and poor quality reads">
-              <rect x="20" y="20" width="350" height="270" rx="18"></rect>
-              <rect x="410" y="20" width="350" height="270" rx="18"></rect>
-              <text x="50" y="60">Good-quality reads</text>
-              <text x="440" y="60">Poor-quality reads</text>
-              <line x1="60" y1="230" x2="330" y2="230"></line>
-              <line x1="60" y1="230" x2="60" y2="90"></line>
-              <line x1="450" y1="230" x2="720" y2="230"></line>
-              <line x1="450" y1="230" x2="450" y2="90"></line>
-              <polyline points="70,120 110,118 150,115 190,116 230,117 270,119 320,122"></polyline>
-              <polyline points="460,120 500,125 540,140 580,165 620,188 660,205 710,220"></polyline>
-              <text x="110" y="255">Read cycle</text>
-              <text x="500" y="255">Read cycle</text>
-              <text x="75" y="95">High base quality</text>
-              <text x="465" y="95">Base quality drops</text>
-              <g class="quality-legend">
-                <rect x="95" y="150" width="18" height="18" rx="4"></rect>
-                <text x="122" y="164">Stable quality across the read</text>
-                <rect x="485" y="150" width="18" height="18" rx="4"></rect>
-                <text x="512" y="164">Quality decreases toward the end</text>
-                <rect x="485" y="182" width="18" height="18" rx="4"></rect>
-                <text x="512" y="196">May need trimming before analysis</text>
-              </g>
-            </svg>
-            <figcaption>
-              Many datasets show weaker base quality toward the ends of reads, which is why
-              trimming and QC review are common early steps.
-            </figcaption>
-            <p class="interpretation">
-              <strong>Beginner interpretation:</strong> if quality stays high across the
-              read, the data is easier to trust. If quality falls sharply, trimming may help.
-            </p>
-          </figure>
 
-          <div class="card-grid three-column reveal">
-            <article class="info-card">
-              <span class="card-badge">Q</span>
-              <h3>Base quality scores</h3>
-              <p>These estimate the confidence of each base call. Higher scores mean lower error probability.</p>
+            <article class="ngs-tier-panel is-active" id="tier-pathogenic" role="tabpanel">
+              <h3>Pathogenic</h3>
+              <p>
+                This class means the evidence is sufficient to support disease causality in the
+                correct phenotype and inheritance context.
+              </p>
+              <div class="ngs-tier-grid">
+                <div class="ngs-tier-list">
+                  <article>
+                    <h4>When it is used</h4>
+                    <p>When validated evidence strongly supports the variant as disease-causing in the relevant mechanism.</p>
+                  </article>
+                  <article>
+                    <h4>Clinical handling</h4>
+                    <p>May support diagnosis, counseling, segregation planning, or a defined clinical action.</p>
+                  </article>
+                </div>
+                <pre class="ngs-code-block">Evidence families may include:
+Population rarity
+Functional evidence
+Segregation / de novo data
+Strong literature and database support</pre>
+              </div>
             </article>
-            <article class="info-card">
-              <span class="card-badge">A</span>
-              <h3>Adapters</h3>
-              <p>If inserts are short, the read may continue into adapter sequence, which is usually removed.</p>
+
+            <article class="ngs-tier-panel" id="tier-likely-pathogenic" role="tabpanel" hidden>
+              <h3>Likely pathogenic</h3>
+              <p>
+                Strong evidence supports causality, but the evidence is not absolute. The
+                wording should reflect that remaining uncertainty honestly.
+              </p>
+              <div class="ngs-tier-grid">
+                <div class="ngs-tier-list">
+                  <article>
+                    <h4>When it is used</h4>
+                    <p>When the evidence is persuasive but does not meet the full standard for pathogenic.</p>
+                  </article>
+                  <article>
+                    <h4>Clinical handling</h4>
+                    <p>Often actionable in the right context, but the report should still align the wording with the evidence strength.</p>
+                  </article>
+                </div>
+                <pre class="ngs-code-block">Do not inflate certainty.
+Keep phenotype and inheritance in view.
+State if confirmation or family testing is still needed.</pre>
+              </div>
             </article>
-            <article class="info-card">
-              <span class="card-badge">D</span>
-              <h3>Duplicate reads</h3>
-              <p>Too many duplicates may reflect PCR bias or low library complexity rather than new information.</p>
+
+            <article class="ngs-tier-panel" id="tier-vus" role="tabpanel" hidden>
+              <h3>Variant of uncertain significance (VUS)</h3>
+              <p>
+                Evidence is insufficient or conflicting. A VUS is not a diagnosis and should
+                not be used alone to direct irreversible management or predictive testing of
+                relatives.
+              </p>
+              <div class="ngs-tier-grid">
+                <div class="ngs-tier-list">
+                  <article>
+                    <h4>What it means</h4>
+                    <p>The variant remains a candidate of interest, but causality is not established.</p>
+                  </article>
+                  <article>
+                    <h4>How it should be handled</h4>
+                    <p>Keep the wording explicitly uncertain. Recommend phenotype refinement, segregation, or orthogonal evidence if appropriate.</p>
+                  </article>
+                </div>
+                <pre class="ngs-code-block">Never teach students:
+"VUS explains the disease"
+
+Safer wording:
+"Clinical significance is uncertain"</pre>
+              </div>
+              <p class="interpretation">
+                <strong>Teaching point:</strong> one of the most important lessons in NGS is
+                learning not to overstate uncertain evidence.
+              </p>
+            </article>
+
+            <article class="ngs-tier-panel" id="tier-likely-benign" role="tabpanel" hidden>
+              <h3>Likely benign</h3>
+              <p>
+                Evidence trends against disease causality, but the supporting record is not as
+                complete as a fully benign classification.
+              </p>
+              <div class="ngs-tier-grid">
+                <div class="ngs-tier-list">
+                  <article>
+                    <h4>What it means</h4>
+                    <p>The variant is usually not clinically actionable as a causal finding.</p>
+                  </article>
+                  <article>
+                    <h4>What to teach</h4>
+                    <p>Students should understand that “not likely causal” is different from “artifact”.</p>
+                  </article>
+                </div>
+                <pre class="ngs-code-block">Evidence may include:
+Population frequency too high
+Weak phenotype fit
+Contradictory disease mechanism</pre>
+              </div>
+            </article>
+
+            <article class="ngs-tier-panel" id="tier-benign" role="tabpanel" hidden>
+              <h3>Benign</h3>
+              <p>
+                Strong evidence argues against disease causality. It should not be reported as
+                a causal explanation.
+              </p>
+              <div class="ngs-tier-grid">
+                <div class="ngs-tier-list">
+                  <article>
+                    <h4>What it means</h4>
+                    <p>The evidence clearly supports that the variant is not the explanation for the disease mechanism under review.</p>
+                  </article>
+                  <article>
+                    <h4>What to teach</h4>
+                    <p>Benign is a classification outcome, not a comment on whether the call was technically real.</p>
+                  </article>
+                </div>
+                <pre class="ngs-code-block">Analytical truth and clinical truth differ.
+A technically real variant can still be benign.</pre>
+              </div>
             </article>
           </div>
 
-          <article class="callout-box reveal">
-            <h3>How a beginner can read a QC report</h3>
+          <div class="ngs-evidence-chips reveal" aria-label="Evidence families used in germline interpretation">
+            <span>Population data</span>
+            <span>Computational prediction</span>
+            <span>Functional evidence</span>
+            <span>Segregation</span>
+            <span>De novo status</span>
+            <span>Allelic data</span>
+            <span>Case-control evidence</span>
+            <span>Previous reports</span>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Somatic oncology</p>
+              <h3>Actionability ladder for tumor variants</h3>
+            </div>
+            <div class="ngs-action-ladder" role="img" aria-label="Somatic variant actionability tiers">
+              <article class="is-strong">
+                <span>Tier 1</span>
+                <h4>Approved or guideline-supported action</h4>
+                <p>Example: EGFR activating mutation in NSCLC with matched targeted therapy context.</p>
+              </article>
+              <article>
+                <span>Tier 2</span>
+                <h4>Clinical evidence in another setting or strong trial relevance</h4>
+                <p>Example: BRAF V600E where tumor type, drug label, and guideline context decide actionability.</p>
+              </article>
+              <article>
+                <span>Tier 3</span>
+                <h4>Biological or preclinical interest</h4>
+                <p>Interesting result, but not enough to direct standard therapy by itself.</p>
+              </article>
+              <article class="is-muted">
+                <span>Tier 4</span>
+                <h4>Benign, likely benign, or no established significance</h4>
+                <p>Do not inflate a detected tumor variant into a treatment recommendation.</p>
+              </article>
+            </div>
+            <p class="interpretation">
+              <strong>Teaching point:</strong> germline pathogenicity and somatic actionability
+              answer different clinical questions. Keep both frameworks separate in your slides.
+            </p>
+          </figure>
+        </section>
+
+        <section class="section" id="report">
+          <div class="section-heading reveal">
+            <span class="section-chip">7. Final output</span>
+            <h2>What the final NGS report should contain</h2>
             <p>
-              Start with a few questions: Are base qualities generally high? Is there adapter
-              contamination? Are duplication levels suspicious? Do reads map well to the
-              expected reference? You do not need to master every plot at once.
+              A final report is a controlled medical or scientific document. It should state
+              what was tested, how well it performed, what was found, how the finding was
+              classified, and what the key limitations are.
+            </p>
+          </div>
+
+          <div class="ngs-report-grid reveal">
+            <figure class="figure-card">
+              <div class="figure-heading">
+                <p class="figure-label">Report anatomy</p>
+                <h3>Readable, traceable, defensible sections</h3>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Section</th>
+                      <th>Must include</th>
+                      <th>Senior review question</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Patient / specimen</td>
+                      <td>Identifiers, specimen type, accession, collection and report dates</td>
+                      <td>Is identity unambiguous?</td>
+                    </tr>
+                    <tr>
+                      <td>Indication</td>
+                      <td>Phenotype, diagnosis context, family history, or tumor type</td>
+                      <td>Did the ordered test match the real clinical question?</td>
+                    </tr>
+                    <tr>
+                      <td>Method</td>
+                      <td>Platform, chemistry, target, reference, caller, annotation version</td>
+                      <td>Could another laboratory understand the assay scope?</td>
+                    </tr>
+                    <tr>
+                      <td>QC</td>
+                      <td>Reads, mapping, coverage, LoD, failed genes or regions when relevant</td>
+                      <td>Were important loci actually callable?</td>
+                    </tr>
+                    <tr>
+                      <td>Results</td>
+                      <td>Variant table, zygosity or VAF, classification or tier</td>
+                      <td>Is each reported result supported by evidence?</td>
+                    </tr>
+                    <tr>
+                      <td>Interpretation</td>
+                      <td>Phenotype and mechanism correlation, cautious wording</td>
+                      <td>Is the wording stronger than the evidence?</td>
+                    </tr>
+                    <tr>
+                      <td>Recommendations</td>
+                      <td>Confirmation, counseling, segregation, therapy, or follow-up</td>
+                      <td>Does the next step logically follow from the result and limitations?</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </figure>
+
+            <div class="ngs-report-checklist">
+              <article>
+                <h4>Negative does not mean impossible</h4>
+                <p>Negative reports still need scope, coverage, LoD, and assay blind spots stated clearly.</p>
+              </article>
+              <article>
+                <h4>Coverage gaps must be visible</h4>
+                <p>If a clinically relevant gene or exon was not callable, the report should say so rather than hide it under a global mean depth value.</p>
+              </article>
+              <article>
+                <h4>VUS wording must stay uncertain</h4>
+                <p>Use cautious language such as “clinical significance is uncertain” rather than diagnosis language.</p>
+              </article>
+              <article>
+                <h4>Versioning protects reproducibility</h4>
+                <p>Reference build, capture kit, pipeline version, annotation database versions, and transcript policy should be recorded.</p>
+              </article>
+              <article>
+                <h4>Somatic is not germline</h4>
+                <p>Somatic cancer reports use AMP/ASCO/CAP-style tiering logic. Do not teach students to force tumor variants into germline ACMG pathogenicity language.</p>
+              </article>
+            </div>
+          </div>
+
+          <article class="callout-box ngs-report-note reveal">
+            <h3>Best teaching summary for the end of the lecture</h3>
+            <p>
+              The final result is never just “a variant found by software.” It is a controlled
+              answer built from specimen quality, validated laboratory design, sequencing
+              performance, bioinformatics QC, local coverage review, evidence-based
+              interpretation, and disciplined report wording.
             </p>
           </article>
-
-          <figure class="figure-card reveal">
-            <div class="figure-heading">
-              <p class="figure-label">Table 4</p>
-              <h3>Common QC problems and what they may indicate</h3>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>QC problem</th>
-                    <th>What it may indicate</th>
-                    <th>Why it matters</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Low base quality</td>
-                    <td>Uncertain base calls, especially at read ends</td>
-                    <td>Can reduce mapping accuracy and variant confidence</td>
-                  </tr>
-                  <tr>
-                    <td>Adapter contamination</td>
-                    <td>Short inserts or incomplete cleanup</td>
-                    <td>Non-biological sequence can interfere with alignment</td>
-                  </tr>
-                  <tr>
-                    <td>High duplication</td>
-                    <td>PCR bias or low library complexity</td>
-                    <td>Apparent depth may be less informative than it looks</td>
-                  </tr>
-                  <tr>
-                    <td>Low mapping rate</td>
-                    <td>Contamination, wrong reference, or poor read quality</td>
-                    <td>Suggests reads do not match the expected genome well</td>
-                  </tr>
-                  <tr>
-                    <td>Unexpected sequence content</td>
-                    <td>Bias, contamination, or protocol artifacts</td>
-                    <td>Can distort taxonomic or expression conclusions</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <figcaption>
-              QC flags do not always mean total failure, but they always deserve interpretation.
-            </figcaption>
-            <p class="interpretation">
-              <strong>Student takeaway:</strong> QC is not optional. A large dataset can still
-              be misleading if its technical quality is poor.
-            </p>
-          </figure>
         </section>
 
-        <section class="section" id="library-prep">
+        <section class="section section-alt" id="report-lab">
           <div class="section-heading reveal">
-            <span class="section-chip">7. Wet-lab logic</span>
-            <h2>Library preparation explained simply</h2>
+            <span class="section-chip">Report-reading exercise</span>
+            <h2>Read reports together like a clinical team</h2>
             <p>
-              Library preparation converts biological molecules into a form the sequencing
-              machine can recognize. This step often feels mysterious at first, but it becomes
-              much easier when broken into a few clear actions.
+              Use public de-identified examples as references, then teach from shorter mock
+              reports that fit the workshop time. The goal is not to read every word. The
+              goal is to find the result, evidence strength, actionability, limitation, and
+              next step quickly.
             </p>
+          </div>
+
+          <div class="ngs-source-grid reveal">
+            <a
+              class="ngs-source-card"
+              href="https://www.genome.gov/sites/default/files/media/files/2020-04/Guide_to_Interpreting_Genomic_Reports_Toolkit.pdf"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>NIH genomic reports guide</strong>
+              <span>Provider-oriented report-reading reference</span>
+            </a>
+            <a
+              class="ngs-source-card"
+              href="https://www.mayocliniclabs.com/-/media/it-mmfiles/test%20notifications/0/6/8/65089%20abn%20sample%20report%2020181107%20nextgeneration%20sequencing%20ngs%20acute%20myeloid%20leukemia%208gene%20panel.pdf"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>Mayo AML NGS sample</strong>
+              <span>Hematology oncology report example</span>
+            </a>
+            <a
+              class="ngs-source-card"
+              href="https://www.blueprintgenetics.com/wp-content/uploads/2021/11/Whole-exome-Plus-sample-report-.pdf"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>Blueprint WES sample</strong>
+              <span>Germline exome report structure</span>
+            </a>
+            <a
+              class="ngs-source-card"
+              href="https://bionanolaboratories.com/wp-content/uploads/2023/02/Whole-Exome-Sequencing-Sample-Report.pdf"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>Bionano WES sample</strong>
+              <span>Positive rare-disease report example</span>
+            </a>
+            <a
+              class="ngs-source-card"
+              href="https://www.illumina.com/content/dam/illumina/gcs/assembled-assets/marketing-literature/tso-comp-us-results-report-m-amr-01525/tso-comp-us-results-report-m-amr-01525.pdf"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <strong>Oncology report example</strong>
+              <span>Companion diagnostic style layout reference</span>
+            </a>
+          </div>
+
+          <div class="ngs-report-lab reveal" data-report-lab>
+            <div class="ngs-tab-list" role="tablist" aria-label="Mock report cases">
+              <button
+                class="ngs-file-tab is-active"
+                id="tab-report-oncology"
+                type="button"
+                role="tab"
+                aria-controls="report-oncology"
+                data-target="report-oncology"
+              >
+                <strong>Oncology case</strong>
+                <span>EGFR-positive NSCLC</span>
+              </button>
+              <button
+                class="ngs-file-tab"
+                id="tab-report-germline"
+                type="button"
+                role="tab"
+                aria-controls="report-germline"
+                data-target="report-germline"
+              >
+                <strong>Germline case</strong>
+                <span>BRCA1 hereditary risk</span>
+              </button>
+              <button
+                class="ngs-file-tab"
+                id="tab-report-negative"
+                type="button"
+                role="tab"
+                aria-controls="report-negative"
+                data-target="report-negative"
+              >
+                <strong>Negative case</strong>
+                <span>Limits still matter</span>
+              </button>
+            </div>
+
+            <article class="ngs-file-panel is-active" id="report-oncology" role="tabpanel">
+              <div class="ngs-mock-report">
+                <div class="ngs-mock-report-header">
+                  <div>
+                    <p class="meta-label">Training mock report</p>
+                    <h3>Targeted Lung Cancer NGS Panel</h3>
+                    <p>Specimen: FFPE lung adenocarcinoma, tumor cellularity 35%</p>
+                  </div>
+                  <strong>Positive</strong>
+                </div>
+                <div class="ngs-report-fields">
+                  <article>
+                    <span>Key result</span>
+                    <p><strong>EGFR</strong> exon 19 deletion, VAF 28%, Tier 1 predictive biomarker.</p>
+                  </article>
+                  <article>
+                    <span>Other biomarkers</span>
+                    <p>ALK/ROS1/RET/NTRK fusions not detected. KRAS/BRAF/MET exon 14 not detected.</p>
+                  </article>
+                  <article>
+                    <span>Interpretation</span>
+                    <p>Finding supports discussion of EGFR-targeted therapy in the correct clinical context.</p>
+                  </article>
+                  <article>
+                    <span>Limitation</span>
+                    <p>Low tumor purity may reduce sensitivity for low-VAF variants and subclonal resistance mutations.</p>
+                  </article>
+                </div>
+              </div>
+            </article>
+
+            <article class="ngs-file-panel" id="report-germline" role="tabpanel" hidden>
+              <div class="ngs-mock-report">
+                <div class="ngs-mock-report-header">
+                  <div>
+                    <p class="meta-label">Training mock report</p>
+                    <h3>Hereditary Breast/Ovarian Cancer Panel</h3>
+                    <p>Specimen: peripheral blood EDTA, germline DNA</p>
+                  </div>
+                  <strong>Pathogenic</strong>
+                </div>
+                <div class="ngs-report-fields">
+                  <article>
+                    <span>Key result</span>
+                    <p><strong>BRCA1</strong> frameshift variant, heterozygous, classified pathogenic.</p>
+                  </article>
+                  <article>
+                    <span>Clinical significance</span>
+                    <p>Consistent with hereditary breast and ovarian cancer predisposition when family history fits.</p>
+                  </article>
+                  <article>
+                    <span>Recommended action</span>
+                    <p>Genetic counseling, cascade testing, and guideline-based risk management discussion.</p>
+                  </article>
+                  <article>
+                    <span>Limitation</span>
+                    <p>Deep intronic variants, complex rearrangements, and low-level mosaicism may not be fully excluded.</p>
+                  </article>
+                </div>
+              </div>
+            </article>
+
+            <article class="ngs-file-panel" id="report-negative" role="tabpanel" hidden>
+              <div class="ngs-mock-report">
+                <div class="ngs-mock-report-header">
+                  <div>
+                    <p class="meta-label">Training mock report</p>
+                    <h3>Inherited Cardiomyopathy Panel</h3>
+                    <p>Specimen: peripheral blood EDTA, phenotype: dilated cardiomyopathy</p>
+                  </div>
+                  <strong>No reportable variant</strong>
+                </div>
+                <div class="ngs-report-fields">
+                  <article>
+                    <span>Result</span>
+                    <p>No pathogenic or likely pathogenic variants detected in the tested genes.</p>
+                  </article>
+                  <article>
+                    <span>Important detail</span>
+                    <p>Two exons in one relevant gene were below the validated coverage threshold.</p>
+                  </article>
+                  <article>
+                    <span>Interpretation</span>
+                    <p>A genetic cause was not identified, but this does not exclude a genetic etiology.</p>
+                  </article>
+                  <article>
+                    <span>Next step</span>
+                    <p>Consider phenotype refinement, family testing strategy, CNV/other assay review, or reanalysis.</p>
+                  </article>
+                </div>
+              </div>
+            </article>
           </div>
 
           <figure class="figure-card reveal">
             <div class="figure-heading">
-              <p class="figure-label">Figure 3</p>
-              <h3>Library preparation process</h3>
+              <p class="figure-label">30-minute exercise</p>
+              <h3>Questions clinicians should answer from any NGS report</h3>
             </div>
-            <div class="library-figure" role="img" aria-label="Library preparation process">
-              <div class="library-stage">
+            <div class="ngs-clinician-questions">
+              <article>
                 <span>1</span>
-                <h4>Fragmentation</h4>
-                <p>Long nucleic acids are broken into shorter pieces.</p>
-              </div>
-              <div class="library-arrow">→</div>
-              <div class="library-stage">
+                <p>Why was the test ordered, and did the assay match the clinical question?</p>
+              </article>
+              <article>
                 <span>2</span>
-                <h4>Adapter ligation</h4>
-                <p>Technical sequences are attached to fragment ends.</p>
-              </div>
-              <div class="library-arrow">→</div>
-              <div class="library-stage">
+                <p>What is the one clinically important result, and what is its classification or tier?</p>
+              </article>
+              <article>
                 <span>3</span>
-                <h4>Amplification</h4>
-                <p>Some protocols copy fragments to produce enough material.</p>
-              </div>
-              <div class="library-arrow">→</div>
-              <div class="library-stage">
+                <p>What evidence supports the result: VAF, depth, zygosity, CNV level, fusion reads, or phenotype fit?</p>
+              </article>
+              <article>
                 <span>4</span>
-                <h4>Indexing / barcoding</h4>
-                <p>Each sample gets a sequence label so it can be recognized later.</p>
-              </div>
-              <div class="library-arrow">→</div>
-              <div class="library-stage">
+                <p>What limitation could change the clinical interpretation of a negative or weak result?</p>
+              </article>
+              <article>
                 <span>5</span>
-                <h4>Multiplexing</h4>
-                <p>Indexed samples are pooled together in one sequencing run.</p>
-              </div>
+                <p>What would you tell the patient or treating clinician without overstating certainty?</p>
+              </article>
             </div>
-            <figcaption>
-              Library preparation adds the physical and informational features the machine
-              needs to read, identify, and separate fragments.
-            </figcaption>
-            <p class="interpretation">
-              <strong>Plain-language interpretation:</strong> fragmentation makes pieces small
-              enough to handle, adapters make them machine-ready, and barcodes let multiple
-              samples share one run.
-            </p>
           </figure>
-
-          <div class="insight-grid reveal">
-            <article class="insight-card">
-              <h3>What this means</h3>
-              <p>The library is a prepared version of the sample, not the untouched original DNA.</p>
-            </article>
-            <article class="insight-card">
-              <h3>Why this matters</h3>
-              <p>Many artifacts begin during library preparation, including PCR duplicates and uneven representation.</p>
-            </article>
-            <article class="insight-card">
-              <h3>Student takeaway</h3>
-              <p>Library quality strongly influences read quality, duplication, and downstream confidence.</p>
-            </article>
-          </div>
-
-          <article class="callout-box reveal">
-            <h3>Where MGI DNA nanoball technology fits</h3>
-            <p>
-              In MGI <strong>DNBSEQ</strong> workflows, prepared fragments can be converted
-              into single-stranded circles and then copied by rolling circle amplification to
-              form <strong>DNA nanoballs (DNBs)</strong>. Those DNBs are loaded onto a
-              patterned array before sequencing chemistry begins.
-            </p>
-            <p>
-              <strong>Why this matters for beginners:</strong> the core NGS logic is still
-              sample to library to sequencing to FASTQ, but some platforms add a specialized
-              preparation stage between library construction and signal detection.
-            </p>
-          </article>
         </section>
 
-        <section class="section section-alt" id="platforms">
+        <section class="section" id="troubleshooting">
           <div class="section-heading reveal">
-            <span class="section-chip">8. Sequencing platforms</span>
-            <h2>How sequencing machines read DNA</h2>
+            <span class="section-chip">Troubleshooting NGS failures</span>
+            <h2>Find the failed stage before blaming the variant caller</h2>
             <p>
-              Different platforms use different chemistries, but the main idea is the same:
-              the instrument detects signals corresponding to nucleotide identities and converts
-              those signals into digital sequence data.
+              Troubleshooting works best when students move backward through the chain:
+              report problem, variant evidence, alignment, run metrics, library behavior,
+              extraction QC, and finally the original specimen.
             </p>
           </div>
-
-          <article class="callout-box reveal">
-            <h3>The first concept beginners should understand</h3>
-            <p>
-              Some platforms usually produce short reads and some produce long reads. Short
-              reads are often highly accurate and cost-effective. Long reads are especially
-              helpful when the goal involves repeats, structural variants, or long molecules.
-            </p>
-          </article>
-
-          <div class="card-grid three-column reveal">
-            <article class="info-card">
-              <span class="card-badge">IL</span>
-              <h3>Illumina in simple terms</h3>
-              <p>
-                Illumina commonly uses sequencing-by-synthesis. Bases are added step by step,
-                and the machine records a signal after each cycle to infer the sequence.
-              </p>
-            </article>
-            <article class="info-card">
-              <span class="card-badge">ON</span>
-              <h3>Oxford Nanopore in simple terms</h3>
-              <p>
-                A molecule passes through a tiny pore, and changes in electrical signal help
-                identify the sequence in real time.
-              </p>
-            </article>
-            <article class="info-card">
-              <span class="card-badge">PB</span>
-              <h3>PacBio in simple terms</h3>
-              <p>
-                PacBio observes DNA synthesis directly as a polymerase works on a single
-                molecule, helping generate long-read information.
-              </p>
-            </article>
-          </div>
-
-          <article class="callout-box reveal">
-            <h3>MGI DNBSEQ and DNA nanoballs in simple terms</h3>
-            <p>
-              MGI short-read platforms use <strong>DNBSEQ</strong> technology. Library
-              molecules are circularized, amplified into <strong>DNA nanoballs</strong>, and
-              loaded onto patterned arrays. Sequencing is then read through
-              <strong>cPAS</strong> chemistry and imaging.
-            </p>
-            <p>
-              <strong>Beginner takeaway:</strong> MGI belongs in the short-read family when
-              you are making first-pass comparisons, but its chemistry and flow-cell design
-              are different from Illumina.
-            </p>
-          </article>
 
           <figure class="figure-card reveal">
             <div class="figure-heading">
-              <p class="figure-label">Figure 4</p>
-              <h3>Short reads vs long reads</h3>
+              <p class="figure-label">Failure map</p>
+              <h3>Workflow stage, failure signal, likely cause, and first action</h3>
             </div>
-            <div class="read-compare" role="img" aria-label="Short read and long read comparison">
-              <div class="read-panel">
-                <h4>Short-read concept</h4>
-                <div class="read-bars short">
-                  <span></span><span></span><span></span><span></span><span></span><span></span>
-                </div>
-                <p>Many short overlapping fragments. Excellent for high-throughput routine sequencing.</p>
-              </div>
-              <div class="read-panel">
-                <h4>Long-read concept</h4>
-                <div class="read-bars long">
-                  <span></span><span></span>
-                </div>
-                <p>Fewer but much longer fragments. Useful for complex regions and large structural changes.</p>
-              </div>
+            <div class="ngs-troubleshoot-map">
+              <article>
+                <span>Sample</span>
+                <h4>Poor DNA/RNA or low tumor fraction</h4>
+                <p>Review fixation, necrosis, tumor percentage, DV200/DIN, macrodissection, and recollection options.</p>
+              </article>
+              <article>
+                <span>Extraction</span>
+                <h4>Low input or inhibitors</h4>
+                <p>Repeat extraction if justified, check Qubit/NanoDrop mismatch, and document proceed-with-caution decisions.</p>
+              </article>
+              <article>
+                <span>Library</span>
+                <h4>Low yield or barcode imbalance</h4>
+                <p>Check input mass, adapter/barcode setup, qPCR quantification, and pool normalization.</p>
+              </article>
+              <article>
+                <span>Templating</span>
+                <h4>Low loading or high polyclonal reads</h4>
+                <p>Review Ion Chef setup, library dilution, chip loading record, and reagent handling.</p>
+              </article>
+              <article>
+                <span>Sequencing</span>
+                <h4>Low reads, poor uniformity, failed amplicons</h4>
+                <p>Inspect run QC, amplicon-level coverage, on-target rate, read length, and local no-call regions.</p>
+              </article>
+              <article>
+                <span>Bioinformatics</span>
+                <h4>Wrong reference, annotation, or panel</h4>
+                <p>Confirm genome build, BED file, transcript version, caller settings, and annotation database date.</p>
+              </article>
+              <article>
+                <span>Report</span>
+                <h4>Result wording stronger than evidence</h4>
+                <p>Downgrade certainty, state limitations, recommend confirmation only when it answers a real question.</p>
+              </article>
             </div>
-            <figcaption>
-              Short reads provide dense coverage, while long reads can span larger genomic regions.
-            </figcaption>
-            <p class="interpretation">
-              <strong>What students should notice:</strong> neither read type is always better.
-              The best platform depends on the biological question and the needed resolution.
-            </p>
           </figure>
 
           <figure class="figure-card reveal">
             <div class="figure-heading">
-              <p class="figure-label">Table 5</p>
-              <h3>Common sequencing platform families</h3>
+              <p class="figure-label">Metric-to-cause table</p>
+              <h3>Quick interpretation of common NGS failure signals</h3>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Platform family</th>
-                    <th>Typical read style</th>
-                    <th>Strengths</th>
-                    <th>Limitations</th>
-                    <th>What beginners should remember</th>
+                    <th>Observed signal</th>
+                    <th>Likely causes</th>
+                    <th>Immediate teaching action</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Illumina</td>
-                    <td>Short reads</td>
-                    <td>High accuracy, high throughput, strong ecosystem</td>
-                    <td>Short reads can struggle with repeats and large structural variation</td>
-                    <td>Very common in many research and clinical workflows</td>
+                    <td>Low library concentration</td>
+                    <td>Low input, degraded DNA/RNA, inhibitors, failed amplification</td>
+                    <td>Review extraction QC and library setup before sequencing</td>
                   </tr>
                   <tr>
-                    <td>MGI DNBSEQ</td>
-                    <td>Short reads</td>
-                    <td>DNA nanoballs, patterned arrays, strong throughput, familiar downstream file types</td>
-                    <td>Platform chemistry differs from other short-read systems, so workflows and reagents are not interchangeable</td>
-                    <td>Think of it as a short-read platform family with its own nanoball-based architecture</td>
+                    <td>Many failed amplicons</td>
+                    <td>FFPE fragmentation, GC-rich targets, primer pool imbalance</td>
+                    <td>Inspect amplicon coverage and report non-callable regions</td>
                   </tr>
                   <tr>
-                    <td>Oxford Nanopore</td>
-                    <td>Long reads</td>
-                    <td>Very long reads and flexible devices</td>
-                    <td>Error patterns differ from short-read systems</td>
-                    <td>Helpful when read length matters a lot</td>
+                    <td>Low uniformity</td>
+                    <td>Uneven amplification/capture, degraded sample, poor pool balance</td>
+                    <td>Do not rely on mean depth; check gene/exon-level coverage</td>
                   </tr>
                   <tr>
-                    <td>PacBio</td>
-                    <td>Long reads</td>
-                    <td>Long reads with strong consensus accuracy in many workflows</td>
-                    <td>Different cost and throughput trade-offs</td>
-                    <td>Strong for assemblies and complex genomic structure</td>
+                    <td>High strand bias</td>
+                    <td>PCR artifact, alignment artifact, FFPE damage, low-support call</td>
+                    <td>Flag or filter before interpretation; inspect read evidence</td>
+                  </tr>
+                  <tr>
+                    <td>Unexpected VAF pattern</td>
+                    <td>Low tumor purity, contamination, mosaicism, CNV, clonal hematopoiesis</td>
+                    <td>Correlate with specimen type and clinical context</td>
+                  </tr>
+                  <tr>
+                    <td>Negative report with coverage gaps</td>
+                    <td>Assay limitation, dropout, wrong test for suspected mechanism</td>
+                    <td>State the limitation and recommend a targeted rescue strategy</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <figcaption>
-              Platform choice is usually a trade-off among read length, accuracy pattern,
-              throughput, and the biological question.
-            </figcaption>
-            <p class="interpretation">
-              <strong>Student takeaway:</strong> learn short-read versus long-read thinking
-              first. Many later details make sense after that.
-            </p>
           </figure>
+
+          <div class="ngs-decision-tree reveal">
+            <article class="callout-box">
+              <h3>Five-minute troubleshooting script</h3>
+              <p>
+                Ask: Was the specimen acceptable? Was extraction adequate? Did the library
+                quantify correctly? Did templating/chip loading pass? Did the relevant locus
+                reach validated coverage? Did the caller and annotation use the correct build?
+                Does the report wording match the evidence?
+              </p>
+            </article>
+            <article class="callout-box">
+              <h3>Prevention checklist</h3>
+              <p>
+                Use two identifiers, verify specimen type, document tumor content, quantify
+                with the correct method, balance barcodes, review amplicon-level coverage,
+                version every database, and never hide no-call regions.
+              </p>
+            </article>
+          </div>
         </section>
 
-        <section class="section" id="bioinformatics">
+        <section class="section section-alt" id="sanger">
           <div class="section-heading reveal">
-            <span class="section-chip">9. After the machine finishes</span>
-            <h2>Basic bioinformatics after sequencing</h2>
+            <span class="section-chip">Sanger confirmation and validation</span>
+            <h2>Sanger is useful, but it is not a universal truth machine</h2>
             <p>
-              The machine creates data, but bioinformatics turns that data into information.
-              The exact pipeline changes by experiment, but the main logic is similar across
-              many workflows.
+              Sanger sequencing is excellent for selected sequence-level confirmation and
+              family testing, but it is weak for low-VAF somatic variants, mosaicism, CNVs,
+              fusions, large indels, and complex mixed samples.
             </p>
+          </div>
+
+          <div class="ngs-sanger-tabs reveal" data-sanger-tabs>
+            <div class="ngs-tab-list" role="tablist" aria-label="Sanger chromatogram examples">
+              <button
+                class="ngs-file-tab is-active"
+                id="tab-sanger-het"
+                type="button"
+                role="tab"
+                aria-controls="sanger-het"
+                data-target="sanger-het"
+              >
+                <strong>Heterozygous</strong>
+                <span>Two peaks at one base</span>
+              </button>
+              <button
+                class="ngs-file-tab"
+                id="tab-sanger-hom"
+                type="button"
+                role="tab"
+                aria-controls="sanger-hom"
+                data-target="sanger-hom"
+              >
+                <strong>Homozygous</strong>
+                <span>Single clean peak</span>
+              </button>
+              <button
+                class="ngs-file-tab"
+                id="tab-sanger-noisy"
+                type="button"
+                role="tab"
+                aria-controls="sanger-noisy"
+                data-target="sanger-noisy"
+              >
+                <strong>Noisy / low VAF</strong>
+                <span>Weak confirmation</span>
+              </button>
+            </div>
+
+            <article class="ngs-file-panel is-active" id="sanger-het" role="tabpanel">
+              <h3>Heterozygous sequence variant</h3>
+              <div class="ngs-chromatogram" data-pattern="heterozygous" aria-label="Schematic heterozygous Sanger chromatogram"></div>
+              <p class="interpretation">
+                A clean double peak at the expected position can support confirmation of a
+                germline SNV or simple indel when the region amplifies well.
+              </p>
+            </article>
+
+            <article class="ngs-file-panel" id="sanger-hom" role="tabpanel" hidden>
+              <h3>Homozygous or hemizygous sequence variant</h3>
+              <div class="ngs-chromatogram" data-pattern="homozygous" aria-label="Schematic homozygous Sanger chromatogram"></div>
+              <p class="interpretation">
+                A single clean alternate peak can confirm a simple variant, but zygosity
+                still depends on sample identity, locus context, and assay design.
+              </p>
+            </article>
+
+            <article class="ngs-file-panel" id="sanger-noisy" role="tabpanel" hidden>
+              <h3>Noisy trace or low allele fraction</h3>
+              <div class="ngs-chromatogram" data-pattern="noisy" aria-label="Schematic noisy Sanger chromatogram"></div>
+              <p class="interpretation">
+                Sanger usually cannot confidently confirm low-VAF tumor variants. Use a
+                validated orthogonal method that matches the biological question.
+              </p>
+            </article>
           </div>
 
           <figure class="figure-card reveal">
             <div class="figure-heading">
-              <p class="figure-label">Figure 5</p>
-              <h3>Basic post-sequencing bioinformatics pipeline</h3>
+              <p class="figure-label">Confirmation policy</p>
+              <h3>When Sanger helps and when it does not</h3>
             </div>
-            <div class="pipeline-flow" role="img" aria-label="Bioinformatics pipeline after sequencing">
-              <div class="pipeline-node">FASTQ generation</div>
-              <div class="pipeline-node">QC</div>
-              <div class="pipeline-node">Trimming</div>
-              <div class="pipeline-node">Alignment or assembly</div>
-              <div class="pipeline-node">Counting or variant calling</div>
-              <div class="pipeline-node">Visualization</div>
-              <div class="pipeline-node">Interpretation</div>
+            <div class="ngs-sanger-grid">
+              <article>
+                <h4>Good use</h4>
+                <p>Confirm selected germline SNVs or small indels, test relatives, resolve simple local sequence questions.</p>
+              </article>
+              <article>
+                <h4>Weak use</h4>
+                <p>Low-VAF somatic calls, mosaicism, tumor heterogeneity, FFPE artifact review, or complex mixed samples.</p>
+              </article>
+              <article>
+                <h4>Not enough</h4>
+                <p>CNVs, fusions, repeat expansions, large rearrangements, deep intronic effects, and many structural variants.</p>
+              </article>
+              <article>
+                <h4>Better alternatives</h4>
+                <p>MLPA, qPCR, ddPCR, fragment analysis, FISH, RNA assay, long-read sequencing, or repeat NGS when validated.</p>
+              </article>
             </div>
-            <figcaption>
-              Bioinformatics is the bridge between sequencing output and scientific meaning.
-            </figcaption>
-            <p class="interpretation">
-              <strong>How to interpret this figure:</strong> data is gradually cleaned,
-              organized, measured, and then translated into biological insight.
-            </p>
           </figure>
+        </section>
 
-          <div class="card-grid two-column reveal">
-            <article class="info-card">
-              <h3>FASTQ generation and QC</h3>
-              <p>
-                The sequencing output is commonly delivered as FASTQ files, then checked for
-                base quality, adapters, duplication, and other warning signs.
-              </p>
-            </article>
-            <article class="info-card">
-              <h3>Trimming</h3>
-              <p>
-                Low-quality tails and adapter sequences may be removed before alignment or
-                assembly so later steps work more reliably.
-              </p>
-            </article>
-            <article class="info-card">
-              <h3>Alignment or assembly</h3>
-              <p>
-                If a good reference exists, reads are aligned to it. If not, sequences may be
-                assembled into longer contigs or transcripts.
-              </p>
-            </article>
-            <article class="info-card">
-              <h3>Counting, calling, visualization, interpretation</h3>
-              <p>
-                RNA-Seq often counts transcripts, while DNA sequencing often focuses on variants.
-                The last step is explaining what the results mean biologically.
-              </p>
-            </article>
+        <section class="section" id="fastq-tool">
+          <div class="section-heading reveal">
+            <span class="section-chip">Practical FASTQ QC</span>
+            <h2>Analyze NGS FASTQ files directly in the browser</h2>
+            <p>
+              After sequencing, FASTQ files should be checked before alignment or downstream
+              interpretation. The FASTQ QC Analyzer reviews read counts, read lengths, GC
+              content, N content, Q20/Q30 bases, per-cycle quality, base composition,
+              adapter-like sequences, and overrepresented reads without uploading files.
+            </p>
           </div>
-
-          <article class="callout-box reveal">
-            <h3>What changes and what stays the same with MGI data</h3>
-            <p>
-              MGI <strong>DNBSEQ</strong> instruments use platform-specific chemistry before
-              the sequence is called, but once the run is finished, students usually work with
-              familiar downstream concepts such as <strong>FASTQ</strong>,
-              <strong>BAM</strong>, count matrices, and <strong>VCF</strong> files.
-            </p>
-            <p>
-              <strong>Why this matters:</strong> the wet-lab technology may differ, but the
-              logic of QC, trimming, alignment, quantification, and interpretation still
-              remains recognizable to beginners.
-            </p>
-          </article>
-
           <div class="insight-grid reveal">
             <article class="insight-card">
-              <h3>What this means</h3>
-              <p>Sequencing and analysis are connected but not identical tasks.</p>
+              <h3>Upload FASTQ</h3>
+              <p>Use standard <code>.fastq</code>, <code>.fq</code>, or gzip-compressed files.</p>
             </article>
             <article class="insight-card">
-              <h3>Why this matters</h3>
-              <p>Similar read files may need very different pipelines depending on the experiment.</p>
+              <h3>Review QC flags</h3>
+              <p>Check common warnings before trimming, alignment, assembly, or quantification.</p>
             </article>
             <article class="insight-card">
-              <h3>Student takeaway</h3>
-              <p>Bioinformatics is not extra. It is part of the experiment itself.</p>
+              <h3>Export outputs</h3>
+              <p>Download CSV, JSON, or text summaries for records and teaching reports.</p>
             </article>
           </div>
-        </section>
-
-        <section class="section section-alt" id="misconceptions">
-          <div class="section-heading reveal">
-            <span class="section-chip">10. Common pitfalls</span>
-            <h2>Common mistakes and misconceptions in learning NGS</h2>
-            <p>
-              Beginners often focus on read numbers or the machine alone. A stronger way to
-              think is to connect experiment design, data quality, and the biological question.
-            </p>
-          </div>
-
-          <div class="misconception-grid reveal">
-            <article class="misconception-card">
-              <h3>High read count does not always mean good data</h3>
-              <p><strong>Reality:</strong> many reads can still be low quality, duplicated, contaminated, or poorly matched to the question.</p>
-            </article>
-            <article class="misconception-card">
-              <h3>More coverage is not always useful</h3>
-              <p><strong>Reality:</strong> useful coverage depends on the goal. Very high depth may add cost more than insight.</p>
-            </article>
-            <article class="misconception-card">
-              <h3>QC is not optional</h3>
-              <p><strong>Reality:</strong> skipping QC can turn technical artifacts into false biological conclusions.</p>
-            </article>
-            <article class="misconception-card">
-              <h3>Different experiments require different pipelines</h3>
-              <p><strong>Reality:</strong> RNA-Seq, WGS, 16S, and metagenomics are not analyzed in the same way.</p>
-            </article>
-            <article class="misconception-card">
-              <h3>Sequencing and interpretation are not the same thing</h3>
-              <p><strong>Reality:</strong> a sequence file is data, not a conclusion. Biological context is still needed.</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="section" id="choose">
-          <div class="section-heading reveal">
-            <span class="section-chip">11. Practical decision-making</span>
-            <h2>How to choose the right NGS approach</h2>
-            <p>
-              One of the most useful beginner skills is matching the experiment to the
-              question. The question should come first, followed by the assay and then the
-              analysis plan.
-            </p>
-          </div>
-
-          <figure class="figure-card reveal">
-            <div class="figure-heading">
-              <p class="figure-label">Figure 6</p>
-              <h3>Decision guide for selecting an NGS approach</h3>
-            </div>
-            <div class="decision-flow" role="img" aria-label="Decision flowchart for choosing an NGS method">
-              <div class="decision-start">What do you want to study?</div>
-              <div class="decision-row">
-                <div class="decision-node">
-                  <h4>Mutations across the whole genome</h4>
-                  <p>Use <strong>WGS</strong></p>
-                </div>
-                <div class="decision-node">
-                  <h4>Coding-region variants</h4>
-                  <p>Use <strong>WES</strong></p>
-                </div>
-                <div class="decision-node">
-                  <h4>Gene expression</h4>
-                  <p>Use <strong>RNA-Seq</strong></p>
-                </div>
-              </div>
-              <div class="decision-row">
-                <div class="decision-node">
-                  <h4>Bacterial community composition</h4>
-                  <p>Use <strong>16S rRNA sequencing</strong></p>
-                </div>
-                <div class="decision-node">
-                  <h4>All microbial DNA in a sample</h4>
-                  <p>Use <strong>Metagenomics</strong></p>
-                </div>
-                <div class="decision-node">
-                  <h4>Specific known genes</h4>
-                  <p>Use <strong>Targeted sequencing</strong></p>
-                </div>
-              </div>
-            </div>
-            <figcaption>
-              The research question is the most important starting point when selecting an NGS strategy.
-            </figcaption>
-            <p class="interpretation">
-              <strong>How to use this figure:</strong> begin with the biological question,
-              then choose the method that produces the most relevant data.
-            </p>
-          </figure>
-
-          <figure class="figure-card reveal">
-            <div class="figure-heading">
-              <p class="figure-label">Table 6</p>
-              <h3>Decision table for beginners</h3>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>If the student wants to study...</th>
-                    <th>Recommended approach</th>
-                    <th>Main reason</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Mutations across the genome</td>
-                    <td>WGS</td>
-                    <td>Broadest view of genomic variation</td>
-                  </tr>
-                  <tr>
-                    <td>Coding-region variants</td>
-                    <td>WES</td>
-                    <td>Focuses on exons where many disease variants occur</td>
-                  </tr>
-                  <tr>
-                    <td>Gene expression</td>
-                    <td>RNA-Seq</td>
-                    <td>Measures transcript abundance</td>
-                  </tr>
-                  <tr>
-                    <td>Bacterial community composition</td>
-                    <td>16S rRNA sequencing</td>
-                    <td>Efficient marker-based taxonomic survey</td>
-                  </tr>
-                  <tr>
-                    <td>All microbial DNA in a sample</td>
-                    <td>Metagenomics</td>
-                    <td>Captures mixed-community DNA beyond one marker gene</td>
-                  </tr>
-                  <tr>
-                    <td>Specific known genes</td>
-                    <td>Targeted sequencing</td>
-                    <td>Provides focused high-depth analysis</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <figcaption>
-              Good experiment design is a matching problem: question, sample, sequencing
-              strategy, and analysis plan must fit together.
-            </figcaption>
-            <p class="interpretation">
-              <strong>Student takeaway:</strong> more data is not always better. The most
-              useful dataset is the one that best answers the question.
-            </p>
-          </figure>
+          <p class="reveal">
+            <a class="hub-link hub-link-primary" href="../fastq-analyzer/">Open FASTQ QC Analyzer</a>
+          </p>
         </section>
 
         <section class="section summary-section" id="summary">
           <div class="section-heading reveal">
-            <span class="section-chip">12. Final memory map</span>
-            <h2>What students should remember about NGS</h2>
+            <span class="section-chip">Workshop memory map</span>
+            <h2>What students should remember after this lecture</h2>
             <p>
-              If you remember the ideas below, you already have a strong beginner-level
-              foundation for future study in genomics, molecular diagnostics, microbiology,
-              and bioinformatics.
+              If these points feel clear, the rest of NGS becomes much easier to learn in a
+              rigorous way.
             </p>
           </div>
 
-          <div class="summary-grid reveal">
-            <article class="summary-card">
-              <h3>NGS reads many fragments in parallel</h3>
-              <p>That parallelism is what makes large-scale sequencing practical.</p>
+          <div class="ngs-summary-grid reveal">
+            <article class="ngs-summary-tile">
+              <span class="ngs-micro-label">1</span>
+              <h3>NGS begins before sequencing</h3>
+              <p>Specimen quality and extraction QC already shape the final result.</p>
+              <strong>Pre-analytic truth matters</strong>
             </article>
-            <article class="summary-card">
-              <h3>The experiment starts before the machine</h3>
-              <p>Sample quality and library preparation strongly shape the data.</p>
+            <article class="ngs-summary-tile">
+              <span class="ngs-micro-label">2</span>
+              <h3>Library design changes what can be called</h3>
+              <p>Target capture, indexes, and chemistry control scope and bias.</p>
+              <strong>Wet-lab choices affect later claims</strong>
             </article>
-            <article class="summary-card">
-              <h3>QC protects interpretation</h3>
-              <p>Never trust a dataset fully until you understand its quality profile.</p>
+            <article class="ngs-summary-tile">
+              <span class="ngs-micro-label">3</span>
+              <h3>FASTQ QC is not optional</h3>
+              <p>Raw reads can be technically weak even when yield looks large.</p>
+              <strong>Do not skip the first QC gate</strong>
             </article>
-            <article class="summary-card">
-              <h3>Different questions need different NGS methods</h3>
-              <p>WGS, WES, RNA-Seq, 16S, and metagenomics are not interchangeable.</p>
+            <article class="ngs-summary-tile">
+              <span class="ngs-micro-label">4</span>
+              <h3>Mean depth is not enough</h3>
+              <p>Coverage breadth and local callability matter more than one average number.</p>
+              <strong>Ask which loci actually reached threshold</strong>
             </article>
-            <article class="summary-card">
-              <h3>Bioinformatics is part of the experiment</h3>
-              <p>Sequencing files become useful only after careful analysis and interpretation.</p>
+            <article class="ngs-summary-tile">
+              <span class="ngs-micro-label">5</span>
+              <h3>Filtering is not classification</h3>
+              <p>VCF candidates still need phenotype and evidence review.</p>
+              <strong>A VUS is not a diagnosis</strong>
+            </article>
+            <article class="ngs-summary-tile">
+              <span class="ngs-micro-label">6</span>
+              <h3>A report must state limits</h3>
+              <p>Coverage gaps, LoD, scope, and versioning should never be hidden.</p>
+              <strong>Reporting truth completes the chain</strong>
+            </article>
+            <article class="ngs-summary-tile">
+              <span class="ngs-micro-label">7</span>
+              <h3>Ion Torrent has platform-specific QC</h3>
+              <p>Chip loading, templating, polyclonal reads, and homopolymer context matter.</p>
+              <strong>Know the machine you are teaching</strong>
+            </article>
+            <article class="ngs-summary-tile">
+              <span class="ngs-micro-label">8</span>
+              <h3>Sanger confirms only the right questions</h3>
+              <p>It can confirm simple sequence variants, but not every NGS result class.</p>
+              <strong>Choose the orthogonal method deliberately</strong>
             </article>
           </div>
-
-          <article class="closing-note reveal">
-            <h3>Student takeaway</h3>
-            <p>
-              NGS is best learned as a connected story: sample, library, machine, reads, QC,
-              analysis, and biological meaning. Once that story feels clear, the terminology
-              and technical details become much easier to understand.
-            </p>
-          </article>
         </section>
 
         <section class="section section-alt" id="comments">
           <div class="section-heading reveal">
-            <span class="section-chip">13. Professional feedback</span>
+            <span class="section-chip">Professional feedback</span>
             <h2>Comments from doctors, professors, and readers</h2>
             <p>
               This section is for professional reflections, teaching feedback, and scientific
@@ -1426,9 +2836,7 @@
           <div class="comments-feed reveal">
             <div class="comments-feed-header">
               <h3>Recent comments</h3>
-              <p>
-                New comments appear here after they are saved successfully.
-              </p>
+              <p>New comments appear here after they are saved successfully.</p>
             </div>
             <div class="comments-list" id="comments-list" aria-live="polite">
               <article class="comment-card comment-card-empty">
@@ -1465,5 +2873,6 @@
 
     <script src="../config.js"></script>
     <script src="../script.js"></script>
+    <script src="./ngs-lecture.js"></script>
   </body>
 </html>
