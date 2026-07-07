@@ -53,4 +53,39 @@ const csv = core.buildSummaryCsv(result);
 assert.ok(csv.includes("unit.fastq"));
 assert.ok(csv.includes("q30_percent"));
 
+const samplingState = core.createFastqSamplingState({ maxRecords: 2 });
+core.appendFastqSamplingChunk(
+  samplingState,
+  [
+    "@read_1",
+    "ACGT",
+    "+",
+    "IIII",
+    "@read_2",
+    "TGCA",
+    "+",
+    "HHHH",
+    "@read_3",
+    "NNNN",
+    "+",
+    "####",
+  ].join("\n")
+);
+const sampled = core.finalizeFastqSamplingState(samplingState);
+assert.equal(sampled.truncated, true);
+assert.equal(sampled.recordCount, 2);
+assert.ok(sampled.text.includes("@read_1"));
+assert.ok(sampled.text.includes("@read_2"));
+assert.ok(!sampled.text.includes("@read_3"));
+
+const chunkedSamplingState = core.createFastqSamplingState({ maxRecords: 1 });
+core.appendFastqSamplingChunk(chunkedSamplingState, "@read_a\r\nAC");
+core.appendFastqSamplingChunk(chunkedSamplingState, "GT\r\n+\r\nII");
+core.appendFastqSamplingChunk(chunkedSamplingState, "II\r\n@read_b\r\n");
+const chunkedSample = core.finalizeFastqSamplingState(chunkedSamplingState);
+assert.equal(chunkedSample.truncated, true);
+assert.equal(chunkedSample.recordCount, 1);
+assert.ok(chunkedSample.text.includes("@read_a"));
+assert.ok(!chunkedSample.text.includes("@read_b"));
+
 console.log("FASTQ core tests passed.");

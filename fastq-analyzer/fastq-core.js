@@ -113,6 +113,99 @@
     };
   }
 
+  function createFastqSamplingState(options = {}) {
+    return {
+      maxRecords: Math.max(0, Number(options.maxRecords || 0)),
+      carry: "",
+      mode: "header",
+      currentRecordLines: [],
+      sequenceLength: 0,
+      qualityLength: 0,
+      sampledRecords: [],
+      recordCount: 0,
+      truncated: false,
+    };
+  }
+
+  function processSamplerLine(state, rawLine) {
+    const line = String(rawLine || "").replace(/\r$/, "");
+    if (state.truncated) {
+      return true;
+    }
+
+    if (state.mode === "header") {
+      if (line.trim() === "") {
+        return false;
+      }
+      state.currentRecordLines = [line];
+      state.sequenceLength = 0;
+      state.qualityLength = 0;
+      state.mode = "sequence";
+      return false;
+    }
+
+    state.currentRecordLines.push(line);
+
+    if (state.mode === "sequence") {
+      if (line.startsWith("+")) {
+        state.mode = "quality";
+      } else if (line.trim() !== "") {
+        state.sequenceLength += line.trim().length;
+      }
+      return false;
+    }
+
+    state.qualityLength += line.length;
+    if (state.qualityLength >= state.sequenceLength) {
+      state.recordCount += 1;
+      state.sampledRecords.push(state.currentRecordLines.join("\n"));
+      state.currentRecordLines = [];
+      state.sequenceLength = 0;
+      state.qualityLength = 0;
+      state.mode = "header";
+      if (state.maxRecords && state.recordCount >= state.maxRecords) {
+        state.truncated = true;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function appendFastqSamplingChunk(state, chunk) {
+    const normalizedChunk = `${state.carry}${String(chunk || "").replace(/\r\n/g, "\n")}`;
+    const lines = normalizedChunk.split("\n");
+    state.carry = lines.pop() || "";
+
+    for (let index = 0; index < lines.length; index += 1) {
+      if (processSamplerLine(state, lines[index])) {
+        state.carry = "";
+        return true;
+      }
+    }
+
+    return state.truncated;
+  }
+
+  function finalizeFastqSamplingState(state) {
+    if (state.carry && !state.truncated) {
+      processSamplerLine(state, state.carry);
+      state.carry = "";
+    }
+
+    if (state.currentRecordLines.length && !state.truncated) {
+      state.sampledRecords.push(state.currentRecordLines.join("\n"));
+      state.currentRecordLines = [];
+      state.mode = "header";
+    }
+
+    return {
+      text: state.sampledRecords.join("\n"),
+      recordCount: state.recordCount,
+      truncated: state.truncated,
+    };
+  }
+
   function incrementMap(map, key, amount = 1, start = 0) {
     const existing = map.get(key) || { label: key, start, count: 0 };
     existing.count += amount;
@@ -569,7 +662,9 @@
       });
 
       if (maxRecords && records.length >= maxRecords) {
-        warnings.push(`${fileName}: analysis stopped after ${maxRecords.toLocaleString()} records by user limit.`);
+        warnings.push(
+          `${fileName}: analysis stopped after ${maxRecords.toLocaleString()} records by the configured read limit.`
+        );
         break;
       }
     }
@@ -745,6 +840,9 @@
   return {
     ADAPTERS,
     parseFastq,
+    createFastqSamplingState,
+    appendFastqSamplingChunk,
+    finalizeFastqSamplingState,
     analyzeFastqText,
     analyzeFastqTexts,
     buildSummaryCsv,

@@ -61,6 +61,10 @@
                 FASTQ files stay inside this browser session. The page does not upload read
                 files to the website backend.
               </p>
+              <p>
+                For browser stability, the analyzer uses a read-limited sample per file by
+                default. Increase the limit only if your computer can handle larger runs.
+              </p>
             </div>
           </div>
 
@@ -96,7 +100,14 @@
               </label>
               <label class="field">
                 <span>Read limit per file</span>
-                <input id="max-records" type="number" min="0" step="1000" placeholder="All reads" />
+                <input
+                  id="max-records"
+                  type="number"
+                  min="1000"
+                  step="1000"
+                  value="50000"
+                  placeholder="50,000 recommended"
+                />
               </label>
             </div>
 

@@ -4,6 +4,9 @@
     return;
   }
 
+  const DEFAULT_SAFE_RECORD_LIMIT = 50000;
+  const HARD_RECORD_LIMIT = 250000;
+
   const elements = {
     fileInput: document.querySelector("#fastq-files"),
     dropzone: document.querySelector("#fastq-dropzone"),
@@ -30,6 +33,10 @@
   };
 
   let currentResult = null;
+
+  if (elements.maxRecords && !elements.maxRecords.value) {
+    elements.maxRecords.value = String(DEFAULT_SAFE_RECORD_LIMIT);
+  }
 
   function formatInteger(value) {
     return Number(value || 0).toLocaleString();
@@ -83,30 +90,58 @@
     )} bytes total:<br>${files.map((file) => escapeHtml(file.name)).join("<br>")}`;
   }
 
-  function isGzipBuffer(file, buffer) {
-    const bytes = new Uint8Array(buffer.slice(0, 2));
+  async function isGzipFile(file) {
+    const bytes = new Uint8Array(await file.slice(0, 2).arrayBuffer());
     return /\.gz$/i.test(file.name) || (bytes[0] === 0x1f && bytes[1] === 0x8b);
   }
 
-  async function readFileAsText(file) {
-    const buffer = await file.arrayBuffer();
-    if (isGzipBuffer(file, buffer)) {
-      if (typeof DecompressionStream !== "function") {
-        throw new Error(
-          `${file.name} appears to be gzip-compressed, but this browser does not support built-in gzip decompression.`
-        );
-      }
-      const stream = new Blob([buffer]).stream().pipeThrough(new DecompressionStream("gzip"));
-      return new Response(stream).text();
+  async function readFileSampleAsText(file, maxRecords) {
+    const gzip = await isGzipFile(file);
+    if (gzip && typeof DecompressionStream !== "function") {
+      throw new Error(
+        `${file.name} appears to be gzip-compressed, but this browser does not support built-in gzip decompression.`
+      );
     }
-    return new TextDecoder().decode(buffer);
+
+    const stream = gzip ? file.stream().pipeThrough(new DecompressionStream("gzip")) : file.stream();
+    const reader = stream.getReader();
+    const decoder = new TextDecoder();
+    const sampleState = core.createFastqSamplingState({ maxRecords });
+
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+          break;
+        }
+
+        const chunkText = decoder.decode(value, { stream: true });
+        if (chunkText && core.appendFastqSamplingChunk(sampleState, chunkText)) {
+          await reader.cancel();
+          break;
+        }
+      }
+
+      const flush = decoder.decode();
+      if (flush) {
+        core.appendFastqSamplingChunk(sampleState, flush);
+      }
+
+      return core.finalizeFastqSamplingState(sampleState);
+    } finally {
+      reader.releaseLock();
+    }
   }
 
   function getAnalysisOptions() {
     const maxRecordsValue = Number(elements.maxRecords.value || 0);
+    const normalizedMaxRecords =
+      Number.isFinite(maxRecordsValue) && maxRecordsValue > 0
+        ? Math.min(Math.floor(maxRecordsValue), HARD_RECORD_LIMIT)
+        : DEFAULT_SAFE_RECORD_LIMIT;
     return {
       qualityOffset: elements.qualityOffset.value,
-      maxRecords: Number.isFinite(maxRecordsValue) && maxRecordsValue > 0 ? maxRecordsValue : 0,
+      maxRecords: normalizedMaxRecords,
       maxTrackedSequences: 20000,
     };
   }
@@ -122,20 +157,41 @@
     setStatus(`Reading ${files.length} FASTQ file${files.length === 1 ? "" : "s"}...`);
 
     try {
+      const options = getAnalysisOptions();
       const inputs = [];
+      const truncatedFiles = [];
       for (let index = 0; index < files.length; index += 1) {
         const file = files[index];
         setStatus(`Reading ${file.name} (${index + 1}/${files.length})...`);
+        const sample = await readFileSampleAsText(file, options.maxRecords);
+        if (sample.truncated) {
+          truncatedFiles.push(file.name);
+        }
         inputs.push({
           fileName: file.name,
-          text: await readFileAsText(file),
+          text: sample.text,
         });
       }
 
       setStatus("Calculating FASTQ QC metrics...");
-      currentResult = core.analyzeFastqTexts(inputs, getAnalysisOptions());
+      currentResult = core.analyzeFastqTexts(inputs, options);
       renderResults(currentResult);
-      setStatus("FASTQ analysis complete.", currentResult.overall.status === "fail" ? "error" : currentResult.overall.status === "warn" ? "warning" : "success");
+      const tone =
+        currentResult.overall.status === "fail"
+          ? "error"
+          : currentResult.overall.status === "warn"
+            ? "warning"
+            : "success";
+      if (truncatedFiles.length) {
+        setStatus(
+          `FASTQ analysis complete using the first ${formatInteger(
+            options.maxRecords
+          )} reads per file for browser-safe QC.`,
+          tone
+        );
+      } else {
+        setStatus("FASTQ analysis complete.", tone);
+      }
     } catch (error) {
       console.error(error);
       setStatus(error.message || "FASTQ analysis failed.", "error");
