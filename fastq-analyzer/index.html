@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FASTQ QC Analyzer | Wahj Al-DNA</title>
+    <meta
+      name="description"
+      content="Browser-side FASTQ quality-control analyzer for NGS read files, including read counts, GC content, Q20/Q30 metrics, per-cycle quality, base composition, adapter warnings, and exportable reports."
+    />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./fastq-analyzer.css" />
+  </head>
+  <body class="fastq-analyzer-page">
+    <div class="site-shell">
+      <header class="site-header site-header-compact" id="top">
+        <div class="brand-lockup">
+          <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Educational Hub</p>
+            <p class="brand-title">Wahj Al-DNA</p>
+          </div>
+        </div>
+        <div class="reader-badge" aria-live="polite">
+          <p class="reader-label">Visits</p>
+          <p class="reader-count"><span id="reader-count">Loading...</span></p>
+          <p class="reader-note" id="reader-note">
+            Anonymous visit count updates automatically. No personal information is collected.
+          </p>
+        </div>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+          Menu
+        </button>
+        <nav class="primary-nav" id="primary-nav" aria-label="Primary">
+          <a href="../">Hub</a>
+          <a href="../ngs/">NGS guide</a>
+          <a href="#workbench">FASTQ upload</a>
+          <a href="#qc-summary">QC summary</a>
+          <a href="#charts">Charts</a>
+          <a href="#export">Export</a>
+          <a href="../sequence-analysis/">Sanger BLAST</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="section fastq-workbench-section" id="workbench">
+          <div class="fastq-workbench-copy reveal">
+            <span class="section-chip">NGS FASTQ quality control</span>
+            <h1>FASTQ QC Analyzer</h1>
+            <p class="hero-lead">
+              Analyze NGS FASTQ reads in the browser and review read counts, GC content,
+              Q20/Q30 percentages, per-cycle quality, base composition, adapter warnings,
+              duplicated reads, and exportable QC summaries.
+            </p>
+            <div class="fastq-privacy-note">
+              <p class="eyebrow">Local analysis</p>
+              <p>
+                FASTQ files stay inside this browser session. The page does not upload read
+                files to the website backend.
+              </p>
+              <p>
+                For browser stability, the analyzer uses a read-limited sample per file by
+                default. Increase the limit only if your computer can handle larger runs.
+              </p>
+            </div>
+          </div>
+
+          <section class="fastq-panel fastq-upload-panel reveal" aria-labelledby="upload-title">
+            <div class="fastq-panel-heading">
+              <span class="section-chip">Input</span>
+              <h2 id="upload-title">Load FASTQ files</h2>
+            </div>
+
+            <label class="fastq-dropzone" for="fastq-files" id="fastq-dropzone">
+              <input
+                id="fastq-files"
+                type="file"
+                accept=".fastq,.fq,.fastq.gz,.fq.gz,.gz"
+                multiple
+              />
+              <strong>Drop FASTQ files here or click to browse</strong>
+              <span>.fastq, .fq, .fastq.gz, and .fq.gz are supported.</span>
+            </label>
+
+            <div class="fastq-file-list" id="fastq-file-list">
+              No FASTQ files selected.
+            </div>
+
+            <div class="fastq-control-grid">
+              <label class="field">
+                <span>Quality encoding</span>
+                <select id="quality-offset">
+                  <option value="auto">Auto detect</option>
+                  <option value="33">Phred+33</option>
+                  <option value="64">Phred+64</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Read limit per file</span>
+                <input
+                  id="max-records"
+                  type="number"
+                  min="1000"
+                  step="1000"
+                  value="50000"
+                  placeholder="50,000 recommended"
+                />
+              </label>
+            </div>
+
+            <div class="fastq-action-row">
+              <button class="primary-action" type="button" id="analyze-fastq-button">
+                Analyze FASTQ
+              </button>
+              <button class="button-secondary" type="button" id="load-demo-button">
+                Load demo data
+              </button>
+              <button class="button-secondary" type="button" id="reset-fastq-button">
+                Reset
+              </button>
+            </div>
+
+            <div class="fastq-status" id="fastq-status" role="status" aria-live="polite">
+              Waiting for FASTQ files.
+            </div>
+          </section>
+        </section>
+
+        <section class="section fastq-results-section" id="qc-summary">
+          <div class="section-heading">
+            <span class="section-chip">QC summary</span>
+            <h2>Run-level metrics</h2>
+            <p>
+              The summary follows common first-pass FASTQ QC checks before alignment,
+              trimming, variant calling, assembly, or transcript quantification.
+            </p>
+          </div>
+
+          <div class="fastq-metric-grid" id="fastq-metric-grid">
+            <article class="fastq-metric-card">
+              <span>Reads</span>
+              <strong>—</strong>
+            </article>
+            <article class="fastq-metric-card">
+              <span>Bases</span>
+              <strong>—</strong>
+            </article>
+            <article class="fastq-metric-card">
+              <span>Mean Q</span>
+              <strong>—</strong>
+            </article>
+            <article class="fastq-metric-card">
+              <span>Q30 bases</span>
+              <strong>—</strong>
+            </article>
+          </div>
+
+          <div class="fastq-summary-layout">
+            <section class="fastq-panel" aria-labelledby="warnings-title">
+              <div class="fastq-panel-heading">
+                <span class="section-chip">Flags</span>
+                <h3 id="warnings-title">QC warnings</h3>
+              </div>
+              <ul class="fastq-warning-list" id="fastq-warning-list">
+                <li>No analysis has been run yet.</li>
+              </ul>
+            </section>
+
+            <section class="fastq-panel" aria-labelledby="files-title">
+              <div class="fastq-panel-heading">
+                <span class="section-chip">Files</span>
+                <h3 id="files-title">Per-file summary</h3>
+              </div>
+              <div class="fastq-table-shell">
+                <table class="fastq-data-table">
+                  <thead>
+                    <tr>
+                      <th>File</th>
+                      <th>Status</th>
+                      <th>Reads</th>
+                      <th>Mean length</th>
+                      <th>GC%</th>
+                      <th>Mean Q</th>
+                      <th>Q30%</th>
+                    </tr>
+                  </thead>
+                  <tbody id="fastq-file-summary-body">
+                    <tr>
+                      <td colspan="7">Run an analysis to populate the table.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="section fastq-chart-section" id="charts">
+          <div class="section-heading">
+            <span class="section-chip">Read diagnostics</span>
+            <h2>Quality, composition, and distributions</h2>
+            <p>
+              Use these plots to identify low-quality cycles, biased base composition,
+              length variation, GC shifts, and repeated sequence content.
+            </p>
+          </div>
+
+          <div class="fastq-chart-grid">
+            <figure class="fastq-chart-card">
+              <figcaption>Per-cycle mean quality</figcaption>
+              <canvas id="quality-cycle-chart" width="640" height="320"></canvas>
+            </figure>
+            <figure class="fastq-chart-card">
+              <figcaption>Per-cycle base composition</figcaption>
+              <canvas id="base-composition-chart" width="640" height="320"></canvas>
+            </figure>
+            <figure class="fastq-chart-card">
+              <figcaption>Read length distribution</figcaption>
+              <canvas id="length-distribution-chart" width="640" height="320"></canvas>
+            </figure>
+            <figure class="fastq-chart-card">
+              <figcaption>Per-read GC distribution</figcaption>
+              <canvas id="gc-distribution-chart" width="640" height="320"></canvas>
+            </figure>
+          </div>
+
+          <div class="fastq-summary-layout fastq-detail-layout">
+            <section class="fastq-panel" aria-labelledby="overrepresented-title">
+              <div class="fastq-panel-heading">
+                <span class="section-chip">Repeated reads</span>
+                <h3 id="overrepresented-title">Overrepresented sequences</h3>
+              </div>
+              <div class="fastq-table-shell">
+                <table class="fastq-data-table">
+                  <thead>
+                    <tr>
+                      <th>Sequence</th>
+                      <th>Length</th>
+                      <th>Count</th>
+                      <th>% reads</th>
+                    </tr>
+                  </thead>
+                  <tbody id="overrepresented-body">
+                    <tr>
+                      <td colspan="4">No analysis has been run yet.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="fastq-panel" aria-labelledby="adapter-title">
+              <div class="fastq-panel-heading">
+                <span class="section-chip">Adapters</span>
+                <h3 id="adapter-title">Adapter-like hits</h3>
+              </div>
+              <div class="fastq-table-shell">
+                <table class="fastq-data-table">
+                  <thead>
+                    <tr>
+                      <th>Signal</th>
+                      <th>Reads</th>
+                      <th>% reads</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adapter-body">
+                    <tr>
+                      <td colspan="3">No analysis has been run yet.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="section fastq-export-section" id="export">
+          <div class="section-heading">
+            <span class="section-chip">Export</span>
+            <h2>Download the QC output</h2>
+            <p>
+              Export the analysis as a file-level CSV table, a complete JSON object, or a
+              plain-text QC report for lab records.
+            </p>
+          </div>
+
+          <div class="fastq-export-grid">
+            <div class="fastq-action-row">
+              <button class="button-secondary" type="button" id="download-csv-button" disabled>
+                Download CSV
+              </button>
+              <button class="button-secondary" type="button" id="download-json-button" disabled>
+                Download JSON
+              </button>
+              <button class="button-secondary" type="button" id="download-report-button" disabled>
+                Download report
+              </button>
+            </div>
+            <pre class="fastq-report-preview" id="fastq-report-preview">Run an analysis to generate a report.</pre>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <div>
+          <p><strong>Author:</strong> Mahmood Al-Mualm</p>
+          <p><strong>Organization:</strong> Wahj Al-DNA</p>
+        </div>
+        <div>
+          <p>
+            FASTQ QC is a screening step. Confirm biological interpretation with the full
+            project pipeline, metadata, reference selection, and downstream validation.
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="../script.js"></script>
+    <script src="./fastq-core.js"></script>
+    <script src="./fastq-analyzer.js"></script>
+  </body>
+</html>
