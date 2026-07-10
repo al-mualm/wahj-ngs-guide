@@ -44,7 +44,8 @@ const accountCopy = {
       "Account created. We sent a verification email. Your reading history will sync while you are signed in.",
     loginBusy: "Signing in...",
     loginSuccess: "Signed in. Your local history is being synced.",
-    resetSent: "Password reset email sent.",
+    resetSent:
+      "Password reset email sent. Check your Inbox first, then Spam or Promotions. Use the newest reset email only.",
     authRequired: "Sign in to manage your account.",
     profileSaved: "Profile saved.",
     verificationSent: "Verification email sent.",
@@ -84,7 +85,8 @@ const accountCopy = {
       "تم إنشاء الحساب. أرسلنا رسالة تحقق إلى البريد. سيُزامن سجل القراءة عند تسجيل الدخول.",
     loginBusy: "يتم تسجيل الدخول...",
     loginSuccess: "تم تسجيل الدخول. تتم الآن مزامنة السجل المحلي.",
-    resetSent: "تم إرسال رسالة إعادة تعيين كلمة المرور.",
+    resetSent:
+      "تم إرسال رسالة إعادة تعيين كلمة المرور. تحقق من صندوق الوارد أولاً، ثم مجلد الرسائل غير المرغوب فيها أو العروض الترويجية. استخدم أحدث رسالة فقط.",
     authRequired: "سجّل الدخول لإدارة الحساب.",
     profileSaved: "تم حفظ الملف الشخصي.",
     verificationSent: "تم إرسال رسالة التحقق.",

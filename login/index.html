@@ -11,7 +11,7 @@
     <script>
       document.documentElement.classList.add("js");
     </script>
-    <link rel="stylesheet" href="../styles.css?v=20260710-account-design" />
+    <link rel="stylesheet" href="../styles.css?v=20260710-account-trust" />
   </head>
   <body class="account-page">
     <div class="site-shell">
@@ -34,6 +34,16 @@
             <p class="hero-lead">
               Use your account to continue from the lecture or tool page you opened before.
             </p>
+            <div class="account-assurance">
+              <p class="account-assurance-title">Your information stays limited to account features.</p>
+              <p>
+                Your name, email, profile details, and learning history are protected by Firebase
+                security rules and Google Cloud encryption in transit and at rest. They are used
+                only to run your account, restore your reading and tool history, and send
+                educational updates when you choose to receive them. The site does not sell your
+                data or use it for advertising.
+              </p>
+            </div>
             <p class="account-status" data-firebase-setup-warning></p>
           </div>
 
@@ -53,6 +63,11 @@
 
             <form class="account-form account-form-secondary" id="account-reset-form">
               <h2>Reset password</h2>
+              <p class="form-help-text">
+                Password reset emails may arrive in Spam or Promotions. If the email is not in
+                your Inbox within a few minutes, check those folders, mark it as not spam, and use
+                the newest reset link only.
+              </p>
               <label class="field field-wide">
                 <span>Email</span>
                 <input name="reset_email" type="email" autocomplete="email" required />
@@ -64,7 +79,7 @@
       </main>
     </div>
 
-    <script src="../config.js?v=20260710-account-design"></script>
-    <script src="../script.js?v=20260710-account-design"></script>
+    <script src="../config.js?v=20260710-account-trust"></script>
+    <script src="../script.js?v=20260710-account-trust"></script>
   </body>
 </html>

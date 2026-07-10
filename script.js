@@ -381,7 +381,12 @@ function initializeAccountModule() {
 
   const script = document.createElement("script");
   script.type = "module";
-  script.src = new URL("account.js", sharedScriptUrl).href;
+  const accountModuleUrl = new URL("account.js", sharedScriptUrl);
+  const sharedVersion = new URL(sharedScriptUrl).searchParams.get("v");
+  if (sharedVersion) {
+    accountModuleUrl.searchParams.set("v", sharedVersion);
+  }
+  script.src = accountModuleUrl.href;
   script.dataset.wahjAccountModule = "true";
   document.head.appendChild(script);
 }

@@ -11,7 +11,7 @@
     <script>
       document.documentElement.classList.add("js");
     </script>
-    <link rel="stylesheet" href="../styles.css?v=20260710-account-design" />
+    <link rel="stylesheet" href="../styles.css?v=20260710-account-trust" />
   </head>
   <body class="account-page">
     <div class="site-shell">
@@ -36,6 +36,15 @@
               keeps reading history across devices and lets you choose whether to receive future
               educational updates.
             </p>
+            <div class="account-assurance">
+              <p class="account-assurance-title">Privacy-first learning account</p>
+              <p>
+                Your account information is protected by Firebase security rules and Google Cloud
+                encryption in transit and at rest. We use it only to provide account access,
+                saved reading and tool history, and optional educational updates. It is not sold or
+                used for advertising.
+              </p>
+            </div>
             <p class="account-status" data-firebase-setup-warning></p>
           </div>
 
@@ -73,13 +82,16 @@
             </label>
             <label class="check-field field-wide">
               <input type="checkbox" name="email_opt_in" />
-              <span>I agree to receive occasional Wahj Al-DNA educational updates by email.</span>
+              <span>
+                I agree to receive occasional Wahj Al-DNA educational updates, new-content notices,
+                and site-improvement announcements by email.
+              </span>
             </label>
             <label class="check-field field-wide">
               <input type="checkbox" name="privacy_agree" required />
               <span>
                 I understand that my profile and learning history are stored to provide account
-                features. I can clear local history or delete my account later.
+                features, not advertising. I can clear local history or delete my account later.
               </span>
             </label>
             <button class="primary-action field-wide" type="submit">Create account</button>
@@ -89,7 +101,7 @@
       </main>
     </div>
 
-    <script src="../config.js?v=20260710-account-design"></script>
-    <script src="../script.js?v=20260710-account-design"></script>
+    <script src="../config.js?v=20260710-account-trust"></script>
+    <script src="../script.js?v=20260710-account-trust"></script>
   </body>
 </html>

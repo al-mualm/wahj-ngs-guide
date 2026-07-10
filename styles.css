@@ -1384,6 +1384,34 @@ html[dir="rtl"] .comment-actions {
   font-size: 1.15rem;
 }
 
+.account-assurance {
+  max-width: 46rem;
+  margin-top: 1.1rem;
+  padding-left: 1rem;
+  border-left: 4px solid rgba(47, 149, 184, 0.72);
+  color: var(--ink-soft);
+}
+
+.account-assurance p {
+  margin: 0;
+}
+
+.account-assurance p + p {
+  margin-top: 0.45rem;
+}
+
+.account-assurance-title {
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.form-help-text {
+  margin: -0.15rem 0 0.15rem;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
 .field input[readonly] {
   background: rgba(235, 241, 245, 0.78);
   color: var(--ink-soft);
