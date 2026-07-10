@@ -12,8 +12,9 @@
       document.documentElement.classList.add("js");
     </script>
     <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./real-time-pcr-lecture.css" />
   </head>
-  <body>
+  <body class="pcr-lecture-page">
     <div class="site-shell">
       <header class="site-header" id="top">
         <div class="brand-lockup">
@@ -86,163 +87,7 @@
             </p>
           </div>
 
-          <div class="hero-visual reveal pcr-hero-visual-stack">
-            <article
-              class="pcr-interactive-card"
-              id="qpcr-interactive-scene"
-              data-active-step="curve"
-              data-motion-state="running"
-              aria-label="Interactive qPCR amplification graphic"
-            >
-              <div class="figure-heading">
-                <p class="figure-label">Interactive graphic</p>
-                <h3>Watch fluorescence become a Ct value</h3>
-              </div>
-              <p class="pcr-scene-intro">
-                Select each stage to connect the plate wells, fluorescence rise, threshold
-                crossing, and final comparative-Ct output.
-              </p>
-
-              <div class="pcr-scene-toolbar">
-                <div class="pcr-scene-tabs" aria-label="qPCR graphic stages">
-                  <button
-                    type="button"
-                    class="pcr-scene-tab"
-                    data-pcr-scene-step="wells"
-                    aria-pressed="false"
-                  >
-                    Wells
-                  </button>
-                  <button
-                    type="button"
-                    class="pcr-scene-tab is-active"
-                    data-pcr-scene-step="curve"
-                    aria-pressed="true"
-                  >
-                    Curve
-                  </button>
-                  <button
-                    type="button"
-                    class="pcr-scene-tab"
-                    data-pcr-scene-step="threshold"
-                    aria-pressed="false"
-                  >
-                    Ct threshold
-                  </button>
-                  <button
-                    type="button"
-                    class="pcr-scene-tab"
-                    data-pcr-scene-step="ddct"
-                    aria-pressed="false"
-                  >
-                    2^-DeltaDeltaCt
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  class="motion-toggle pcr-motion-toggle"
-                  id="pcr-scene-motion-toggle"
-                  aria-pressed="false"
-                >
-                  Pause motion
-                </button>
-              </div>
-
-              <div class="pcr-scene-stage">
-                <svg
-                  class="pcr-scene-svg"
-                  viewBox="0 0 640 360"
-                  role="img"
-                  aria-labelledby="pcr-scene-title pcr-scene-desc"
-                >
-                  <title id="pcr-scene-title">Interactive qPCR amplification scene</title>
-                  <desc id="pcr-scene-desc">
-                    A 96-well plate feeds fluorescence traces into a qPCR amplification
-                    graph where the threshold crossing defines Ct and supports relative
-                    expression calculation.
-                  </desc>
-                  <defs>
-                    <linearGradient id="pcrScenePanel" x1="0" x2="1" y1="0" y2="1">
-                      <stop offset="0%" stop-color="#ffffff" />
-                      <stop offset="100%" stop-color="#eef6fb" />
-                    </linearGradient>
-                    <filter id="pcrSceneGlow" x="-20%" y="-20%" width="140%" height="140%">
-                      <feGaussianBlur stdDeviation="3" result="blur" />
-                      <feMerge>
-                        <feMergeNode in="blur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                  </defs>
-
-                  <rect class="pcr-scene-panel-bg" x="14" y="14" width="612" height="332" rx="32" />
-
-                  <g class="pcr-scene-plate" aria-hidden="true">
-                    <rect class="pcr-scene-plate-body" x="50" y="70" width="178" height="168" rx="26" />
-                    <text class="pcr-scene-label" x="68" y="51">qPCR plate</text>
-                    <g class="pcr-scene-well-grid">
-                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--1" cx="86" cy="106" r="13" />
-                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--2" cx="128" cy="106" r="13" />
-                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--3" cx="170" cy="106" r="13" />
-                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--4" cx="86" cy="150" r="13" />
-                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--5" cx="128" cy="150" r="13" />
-                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--6" cx="170" cy="150" r="13" />
-                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--7" cx="86" cy="194" r="13" />
-                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--8" cx="128" cy="194" r="13" />
-                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--9" cx="170" cy="194" r="13" />
-                    </g>
-                    <path class="pcr-scene-transfer pcr-scene-transfer--1" d="M210 122 C250 122, 266 108, 300 108" />
-                    <path class="pcr-scene-transfer pcr-scene-transfer--2" d="M210 166 C250 166, 270 196, 304 196" />
-                  </g>
-
-                  <g class="pcr-scene-chart" aria-hidden="true">
-                    <rect class="pcr-scene-chart-bg" x="292" y="62" width="290" height="218" rx="24" />
-                    <text class="pcr-scene-label" x="318" y="50">Amplification plot</text>
-                    <line class="pcr-scene-gridline" x1="330" y1="240" x2="550" y2="240" />
-                    <line class="pcr-scene-gridline" x1="330" y1="190" x2="550" y2="190" />
-                    <line class="pcr-scene-gridline" x1="330" y1="140" x2="550" y2="140" />
-                    <line class="pcr-scene-axis" x1="330" y1="252" x2="552" y2="252" />
-                    <line class="pcr-scene-axis" x1="330" y1="82" x2="330" y2="252" />
-                    <text class="pcr-scene-axis-label" x="544" y="276">Cycle</text>
-                    <text class="pcr-scene-axis-label" x="300" y="96" transform="rotate(-90 300 96)">Rn</text>
-                    <rect class="pcr-scene-baseline" x="340" y="222" width="96" height="20" rx="10" />
-                    <text class="pcr-scene-small-label" x="348" y="218">baseline</text>
-                    <line class="pcr-scene-threshold-line" x1="330" y1="156" x2="552" y2="156" />
-                    <text class="pcr-scene-small-label pcr-scene-threshold-label" x="460" y="146">threshold</text>
-                    <path class="pcr-scene-curve pcr-scene-control-curve" pathLength="1" d="M340 236 C380 236, 410 234, 430 226 S462 192, 480 154 S508 100, 544 84" />
-                    <path class="pcr-scene-curve pcr-scene-treated-curve" pathLength="1" d="M340 238 C390 238, 432 236, 456 230 S496 206, 512 174 S536 116, 552 92" />
-                    <line class="pcr-scene-ct-line" x1="480" y1="156" x2="480" y2="252" />
-                    <circle class="pcr-scene-ct-dot" cx="480" cy="156" r="7" />
-                    <text class="pcr-scene-ct-label" x="468" y="274">Ct</text>
-                  </g>
-
-                  <g class="pcr-scene-output" aria-hidden="true">
-                    <rect class="pcr-scene-output-card" x="110" y="276" width="420" height="44" rx="18" />
-                    <text class="pcr-scene-formula" x="130" y="305">DeltaCt -> DeltaDeltaCt -> relative expression = 2^-DeltaDeltaCt</text>
-                  </g>
-                </svg>
-
-                <div class="pcr-scene-readouts" aria-live="polite">
-                  <p data-pcr-scene-readout="wells">
-                    Plate assignment links each well to a biological role: control/reference,
-                    control/target, treated/reference, or treated/target.
-                  </p>
-                  <p data-pcr-scene-readout="curve">
-                    Fluorescence stays near baseline first, then rises as amplified product
-                    accumulates.
-                  </p>
-                  <p data-pcr-scene-readout="threshold">
-                    Ct is read where the amplification curve crosses the threshold inside the
-                    exponential phase.
-                  </p>
-                  <p data-pcr-scene-readout="ddct">
-                    DeltaCt normalizes target to reference; DeltaDeltaCt compares that value
-                    against the calibrator.
-                  </p>
-                </div>
-              </div>
-            </article>
-
+          <div class="hero-visual reveal">
             <figure class="figure-card diagram-hero">
               <div class="figure-heading">
                 <p class="figure-label">Figure 1</p>
@@ -386,28 +231,233 @@
             </p>
           </div>
 
-          <figure class="figure-card reveal">
+          <figure class="figure-card reveal interactive-figure-card">
             <div class="figure-heading">
-              <p class="figure-label">Figure 2</p>
-              <h3>How Ct is read from amplification data</h3>
+              <p class="figure-label">Figure 2A</p>
+              <h3>Interactive Ct threshold and amplification-curve explorer</h3>
             </div>
-            <div class="diagram-scroll">
-              <img
-                src="../assets/real-time-pcr/ct_analysis.svg"
-                alt="Original teaching diagram showing baseline, threshold, Ct, and amplification phases in real-time PCR"
-                class="diagram-image diagram-image-wide"
-              />
+            <div class="interactive-figure-meta">
+              <p>
+                Move the threshold line and shift the amplification curve to see how Ct
+                changes. You can use the slider or drag inside either plot to move the
+                threshold line directly.
+              </p>
+              <p class="interactive-figure-note">Educational schematic, not to scale.</p>
+            </div>
+            <div class="interactive-stage-strip" aria-hidden="true">
+              <span>Baseline noise</span>
+              <span>Threshold in the log-linear rise</span>
+              <span>Plateau is too late for Ct</span>
+            </div>
+            <div class="interactive-control-grid">
+              <label class="interactive-control">
+                <span>Threshold line (ΔRn)</span>
+                <div class="interactive-control-row">
+                  <input
+                    id="ct-threshold-slider"
+                    type="range"
+                    min="0.18"
+                    max="0.74"
+                    step="0.01"
+                    value="0.42"
+                  />
+                  <output id="ct-threshold-output" for="ct-threshold-slider">0.42 ΔRn</output>
+                </div>
+              </label>
+              <label class="interactive-control">
+                <span>Starting target / curve shift</span>
+                <div class="interactive-control-row">
+                  <input
+                    id="ct-shift-slider"
+                    type="range"
+                    min="-6"
+                    max="6"
+                    step="1"
+                    value="0"
+                  />
+                  <output id="ct-shift-output" for="ct-shift-slider">Reference amount</output>
+                </div>
+              </label>
+              <button class="outline-button" type="button" id="ct-reset-button">Reset figure</button>
+            </div>
+            <div class="interactive-metric-strip" aria-live="polite">
+              <article class="interactive-metric-card">
+                <span class="interactive-metric-label">Threshold cycle (Ct)</span>
+                <strong id="ct-assigned-readout">35.3 cycles</strong>
+              </article>
+              <article class="interactive-metric-card">
+                <span class="interactive-metric-label">Threshold effect</span>
+                <strong id="ct-threshold-effect"
+                  >Threshold sits in the log-linear rise, where Ct is usually assigned.</strong
+                >
+              </article>
+              <article class="interactive-metric-card">
+                <span class="interactive-metric-label">Starting quantity effect</span>
+                <strong id="ct-shift-effect"
+                  >Use this slider to see how starting quantity changes Ct.</strong
+                >
+              </article>
+            </div>
+            <div class="ct-plot-grid">
+              <article class="ct-plot-card">
+                <h4>Linear fluorescence display</h4>
+                <div class="interactive-plot-wrap">
+                  <svg
+                    id="ct-linear-svg"
+                    class="interactive-plot"
+                    viewBox="0 0 520 320"
+                    role="img"
+                    aria-labelledby="ct-linear-title ct-linear-desc"
+                  >
+                    <title id="ct-linear-title">
+                      Linear view of an amplification curve with threshold and Ct
+                    </title>
+                    <desc id="ct-linear-desc">
+                      Interactive educational plot showing baseline, threshold, Ct, and the
+                      rising amplification signal in a linear display.
+                    </desc>
+                  </svg>
+                </div>
+              </article>
+              <article class="ct-plot-card">
+                <h4>Semi-log teaching display</h4>
+                <div class="interactive-plot-wrap">
+                  <svg
+                    id="ct-log-svg"
+                    class="interactive-plot"
+                    viewBox="0 0 520 320"
+                    role="img"
+                    aria-labelledby="ct-log-title ct-log-desc"
+                  >
+                    <title id="ct-log-title">
+                      Log-style view of the same amplification curve with threshold and Ct
+                    </title>
+                    <desc id="ct-log-desc">
+                      Interactive educational plot showing the same amplification logic in a
+                      compressed display that makes the early growth phase easier to inspect.
+                    </desc>
+                  </svg>
+                </div>
+              </article>
             </div>
             <figcaption>
-              The fluorescence trace remains near baseline in the early cycles, rises during
-              the exponential phase, and eventually enters later phases as reagents become
-              limiting. Ct is assigned where the curve crosses the chosen threshold.
+              The fluorescence trace stays close to baseline in early cycles, then rises
+              through the informative amplification phase before plateauing. Ct is assigned
+              where the chosen threshold intersects the curve.
             </figcaption>
             <p class="interpretation">
-              <strong>How to interpret this figure:</strong> the threshold should be placed
-              above baseline noise and within the informative amplification region. A Ct
-              value is only meaningful when thresholding and assay behavior are consistent
-              across the compared samples.
+              <strong>How to use this interactive:</strong> move the threshold upward to see
+              Ct become later, or shift the curve left to simulate more starting target and
+              see Ct become earlier. Both effects matter when students interpret Ct values.
+            </p>
+          </figure>
+
+          <figure class="figure-card reveal interactive-figure-card">
+            <div class="figure-heading">
+              <p class="figure-label">Figure 2B</p>
+              <h3>Interactive cycle-by-cycle qPCR amplification simulator</h3>
+            </div>
+            <div class="interactive-figure-meta">
+              <p>
+                Drag the cycle slider from 0 to 40 to watch DNA copies accumulate in the
+                tube while the fluorescence curve remains near baseline, then rises, then
+                reaches plateau.
+              </p>
+              <p class="interactive-figure-note">Educational schematic, not to scale.</p>
+            </div>
+            <div class="interactive-stage-strip" aria-hidden="true">
+              <span>0-22 cycles: below detection</span>
+              <span>23-34 cycles: steep rise</span>
+              <span>35-40 cycles: plateau</span>
+            </div>
+            <div class="interactive-control-grid cycle-control-grid">
+              <label class="interactive-control">
+                <span>Cycle number</span>
+                <div class="interactive-control-row">
+                  <input
+                    id="qpcr-cycle-slider"
+                    type="range"
+                    min="0"
+                    max="40"
+                    step="1"
+                    value="0"
+                  />
+                  <output id="qpcr-cycle-output" for="qpcr-cycle-slider">0 cycles</output>
+                </div>
+                <div class="interactive-scale-labels" aria-hidden="true">
+                  <span>0 cycles</span>
+                  <span>40 cycles</span>
+                </div>
+              </label>
+              <button class="outline-button" type="button" id="qpcr-cycle-reset-button">
+                Reset simulator
+              </button>
+            </div>
+            <div class="interactive-metric-strip" aria-live="polite">
+              <article class="interactive-metric-card">
+                <span class="interactive-metric-label">Reaction phase</span>
+                <strong id="qpcr-phase-readout">Reaction set-up</strong>
+              </article>
+              <article class="interactive-metric-card">
+                <span class="interactive-metric-label">Ideal amplicon estimate</span>
+                <strong id="qpcr-copy-readout">3 starting fragments</strong>
+              </article>
+              <article class="interactive-metric-card">
+                <span class="interactive-metric-label">Signal status</span>
+                <strong id="qpcr-signal-readout">Fluorescence still near baseline.</strong>
+              </article>
+            </div>
+            <div class="qpcr-cycle-grid">
+              <article class="qpcr-cycle-card">
+                <p class="qpcr-reaction-alert" id="qpcr-reaction-alert">
+                  Baseline phase: DNA is doubling, but fluorescence is still close to
+                  background.
+                </p>
+                <div class="qpcr-tube-stage">
+                  <div class="qpcr-tube-shell" aria-hidden="true">
+                    <div class="qpcr-tube-liquid" id="qpcr-tube-liquid">
+                      <div class="qpcr-dna-cluster" id="qpcr-dna-cluster"></div>
+                    </div>
+                  </div>
+                  <div class="qpcr-stage-caption">
+                    <span class="qpcr-stage-chip">Tube view (schematic)</span>
+                    <p>
+                      DNA fragments double first; visible fluorescence lags behind. The
+                      fragment count is visually capped for teaching clarity.
+                    </p>
+                  </div>
+                </div>
+              </article>
+              <article class="qpcr-cycle-card">
+                <div class="interactive-plot-wrap">
+                  <svg
+                    id="qpcr-cycle-svg"
+                    class="interactive-plot"
+                    viewBox="0 0 520 320"
+                    role="img"
+                    aria-labelledby="qpcr-cycle-title qpcr-cycle-desc"
+                  >
+                    <title id="qpcr-cycle-title">
+                      Cycle-by-cycle qPCR amplification curve with plateau
+                    </title>
+                    <desc id="qpcr-cycle-desc">
+                      Interactive educational plot showing a near-baseline fluorescence
+                      signal until about cycle 23, followed by a rise and a plateau near
+                      cycle 35.
+                    </desc>
+                  </svg>
+                </div>
+              </article>
+            </div>
+            <figcaption>
+              The molecule count can rise long before the signal becomes confidently
+              detectable. Later, the curve flattens because reaction components become
+              limiting and amplification efficiency is no longer ideal.
+            </figcaption>
+            <p class="interpretation">
+              <strong>Teaching point:</strong> early cycles are molecularly active even when
+              the instrument still reads near-baseline fluorescence. Plateau is not “more
+              biology”; it is the stage where the reaction chemistry is being exhausted.
             </p>
           </figure>
 
@@ -1144,8 +1194,8 @@
 
     <script src="../config.js"></script>
     <script src="../script.js"></script>
-    <script src="./pcr-interactive.js"></script>
     <script src="../pcr-calculator-core.js"></script>
     <script src="../pcr-calculator.js"></script>
+    <script src="./real-time-pcr-lecture.js"></script>
   </body>
 </html>
