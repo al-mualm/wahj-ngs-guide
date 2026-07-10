@@ -12,7 +12,7 @@
       document.documentElement.classList.add("js");
     </script>
     <link rel="stylesheet" href="../styles.css" />
-    <link rel="stylesheet" href="./fastq-analyzer.css" />
+    <link rel="stylesheet" href="./fastq-analyzer.css?v=20260710-fastq-full-stream" />
   </head>
   <body class="fastq-analyzer-page">
     <div class="site-shell">
@@ -62,8 +62,9 @@
                 files to the website backend.
               </p>
               <p>
-                For browser stability, the analyzer uses a read-limited sample per file by
-                default. Increase the limit only if your computer can handle larger runs.
+                The analyzer streams each file locally and includes all parsed reads in the
+                QC metrics. Large compressed FASTQ files can take time, so keep this tab open
+                until the run finishes.
               </p>
             </div>
           </div>
@@ -98,17 +99,11 @@
                   <option value="64">Phred+64</option>
                 </select>
               </label>
-              <label class="field">
-                <span>Read limit per file</span>
-                <input
-                  id="max-records"
-                  type="number"
-                  min="1000"
-                  step="1000"
-                  value="50000"
-                  placeholder="50,000 recommended"
-                />
-              </label>
+              <div class="fastq-analysis-scope" aria-label="Analysis scope">
+                <span>Analysis scope</span>
+                <strong>All reads in each file</strong>
+                <small>Metrics are calculated from the full local stream, not from a read-limited sample.</small>
+              </div>
             </div>
 
             <div class="fastq-action-row">
@@ -125,6 +120,28 @@
 
             <div class="fastq-status" id="fastq-status" role="status" aria-live="polite">
               Waiting for FASTQ files.
+            </div>
+
+            <div class="fastq-progress-panel" id="fastq-progress-panel" hidden>
+              <div class="fastq-progress-copy">
+                <strong id="fastq-progress-title">Preparing analysis</strong>
+                <span id="fastq-progress-meta">Waiting to start.</span>
+              </div>
+              <div
+                class="fastq-progress-track"
+                id="fastq-progress-track"
+                role="progressbar"
+                aria-label="FASTQ analysis progress"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+              >
+                <div class="fastq-progress-fill" id="fastq-progress-fill"></div>
+              </div>
+              <div class="fastq-progress-foot">
+                <span id="fastq-progress-percent">0%</span>
+                <span id="fastq-progress-reads">0 reads parsed</span>
+              </div>
             </div>
           </section>
         </section>
@@ -320,7 +337,7 @@
 
     <script src="../config.js"></script>
     <script src="../script.js"></script>
-    <script src="./fastq-core.js"></script>
-    <script src="./fastq-analyzer.js"></script>
+    <script src="./fastq-core.js?v=20260710-fastq-full-stream"></script>
+    <script src="./fastq-analyzer.js?v=20260710-fastq-full-stream"></script>
   </body>
 </html>

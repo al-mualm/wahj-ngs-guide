@@ -88,4 +88,30 @@ assert.equal(chunkedSample.recordCount, 1);
 assert.ok(chunkedSample.text.includes("@read_a"));
 assert.ok(!chunkedSample.text.includes("@read_b"));
 
+const streamingAggregate = core.createAggregate("streamed.fastq");
+const streamingParser = core.createFastqRecordParser({
+  fileName: "streamed.fastq",
+  onRecord(record) {
+    core.scanRecordQualityAscii(record, streamingAggregate);
+    core.updateAggregateWithRecord(streamingAggregate, record, 33, {
+      lengthBinWidth: 25,
+      gcBinWidth: 5,
+      qualityBinWidth: 5,
+      maxTrackedSequences: 20000,
+    });
+  },
+});
+core.appendFastqRecordChunk(streamingParser, fastq.slice(0, 31));
+core.appendFastqRecordChunk(streamingParser, fastq.slice(31, 67));
+core.appendFastqRecordChunk(streamingParser, fastq.slice(67));
+const streamedParsed = core.finalizeFastqRecordParser(streamingParser);
+streamingAggregate.parseErrors.push(...streamedParsed.errors);
+streamingAggregate.parseWarnings.push(...streamedParsed.warnings);
+streamingAggregate.encoding = core.estimateQualityOffsetFromAggregate(streamingAggregate, 33);
+const streamingSummary = core.summarizeAggregate(streamingAggregate);
+assert.equal(streamedParsed.recordCount, 3);
+assert.equal(streamingSummary.metrics.reads, result.overall.metrics.reads);
+assert.equal(streamingSummary.metrics.bases, result.overall.metrics.bases);
+assert.equal(streamingSummary.metrics.q30Pct, result.overall.metrics.q30Pct);
+
 console.log("FASTQ core tests passed.");

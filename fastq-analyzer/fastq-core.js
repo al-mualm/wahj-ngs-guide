@@ -127,6 +127,182 @@
     };
   }
 
+  function createFastqRecordParser(options = {}) {
+    return {
+      fileName: options.fileName || "input.fastq",
+      onRecord: typeof options.onRecord === "function" ? options.onRecord : null,
+      maxRecords: Math.max(0, Number(options.maxRecords || 0)),
+      carry: "",
+      mode: "header",
+      header: "",
+      headerLineNumber: 0,
+      sequenceParts: [],
+      sequenceLength: 0,
+      qualityParts: [],
+      qualityLength: 0,
+      lineNumber: 0,
+      recordCount: 0,
+      errors: [],
+      warnings: [],
+      stopped: false,
+    };
+  }
+
+  function stopRecordParser(state, message) {
+    state.errors.push(message);
+    state.stopped = true;
+    return true;
+  }
+
+  function resetRecordParserRecord(state) {
+    state.mode = "header";
+    state.header = "";
+    state.headerLineNumber = 0;
+    state.sequenceParts = [];
+    state.sequenceLength = 0;
+    state.qualityParts = [];
+    state.qualityLength = 0;
+  }
+
+  function finishRecordParserRecord(state) {
+    const sequence = state.sequenceParts.join("").replace(/\s+/g, "").toUpperCase();
+    const quality = state.qualityParts.join("");
+    const headerLineNumber = state.headerLineNumber;
+
+    if (!sequence.length) {
+      state.errors.push(`${state.fileName}: empty sequence in record starting at line ${headerLineNumber}.`);
+      resetRecordParserRecord(state);
+      return false;
+    }
+
+    if (quality.length !== sequence.length) {
+      state.errors.push(
+        `${state.fileName}: sequence and quality lengths differ in record starting at line ${headerLineNumber} (${sequence.length} bases vs ${quality.length} qualities).`
+      );
+      resetRecordParserRecord(state);
+      return false;
+    }
+
+    state.recordCount += 1;
+    if (state.onRecord) {
+      state.onRecord({
+        header: state.header.slice(1).trim() || `record_${state.recordCount}`,
+        sequence,
+        quality,
+        lineNumber: headerLineNumber,
+      });
+    }
+    resetRecordParserRecord(state);
+
+    if (state.maxRecords && state.recordCount >= state.maxRecords) {
+      state.warnings.push(
+        `${state.fileName}: analysis stopped after ${state.maxRecords.toLocaleString()} records by the configured read limit.`
+      );
+      state.stopped = true;
+      return true;
+    }
+
+    return false;
+  }
+
+  function processRecordParserLine(state, rawLine) {
+    if (state.stopped) {
+      return true;
+    }
+
+    const line = String(rawLine || "").replace(/\r$/, "");
+    state.lineNumber += 1;
+
+    if (state.mode === "header") {
+      if (line.trim() === "") {
+        return false;
+      }
+      if (!line.startsWith("@")) {
+        return stopRecordParser(
+          state,
+          `${state.fileName}: expected FASTQ header starting with @ at line ${state.lineNumber}.`
+        );
+      }
+      state.header = line;
+      state.headerLineNumber = state.lineNumber;
+      state.sequenceParts = [];
+      state.sequenceLength = 0;
+      state.qualityParts = [];
+      state.qualityLength = 0;
+      state.mode = "sequence";
+      return false;
+    }
+
+    if (state.mode === "sequence") {
+      if (line.startsWith("+")) {
+        state.mode = "quality";
+        if (state.sequenceLength === 0) {
+          return finishRecordParserRecord(state);
+        }
+        return false;
+      }
+
+      const sequenceLine = line.trim();
+      if (sequenceLine) {
+        state.sequenceParts.push(sequenceLine);
+        state.sequenceLength += sequenceLine.length;
+      }
+      return false;
+    }
+
+    state.qualityParts.push(line);
+    state.qualityLength += line.length;
+    if (state.qualityLength >= state.sequenceLength) {
+      return finishRecordParserRecord(state);
+    }
+
+    return false;
+  }
+
+  function appendFastqRecordChunk(state, chunk) {
+    const normalizedChunk = `${state.carry}${String(chunk || "").replace(/\r\n/g, "\n")}`;
+    const lines = normalizedChunk.split("\n");
+    state.carry = lines.pop() || "";
+
+    for (let index = 0; index < lines.length; index += 1) {
+      if (processRecordParserLine(state, lines[index])) {
+        state.carry = "";
+        return true;
+      }
+    }
+
+    return state.stopped;
+  }
+
+  function finalizeFastqRecordParser(state) {
+    if (state.carry && !state.stopped) {
+      processRecordParserLine(state, state.carry);
+      state.carry = "";
+    }
+
+    if (!state.stopped && state.mode === "sequence" && state.headerLineNumber) {
+      state.errors.push(`${state.fileName}: missing + separator after record starting at line ${state.headerLineNumber}.`);
+      resetRecordParserRecord(state);
+    }
+
+    if (!state.stopped && state.mode === "quality" && state.headerLineNumber) {
+      const sequence = state.sequenceParts.join("").replace(/\s+/g, "").toUpperCase();
+      const quality = state.qualityParts.join("");
+      state.errors.push(
+        `${state.fileName}: sequence and quality lengths differ in record starting at line ${state.headerLineNumber} (${sequence.length} bases vs ${quality.length} qualities).`
+      );
+      resetRecordParserRecord(state);
+    }
+
+    return {
+      fileName: state.fileName,
+      recordCount: state.recordCount,
+      errors: state.errors,
+      warnings: state.warnings,
+      stopped: state.stopped,
+    };
+  }
+
   function processSamplerLine(state, rawLine) {
     const line = String(rawLine || "").replace(/\r$/, "");
     if (state.truncated) {
@@ -291,14 +467,18 @@
     };
   }
 
+  function scanRecordQualityAscii(record, aggregate) {
+    for (let index = 0; index < record.quality.length; index += 1) {
+      const code = record.quality.charCodeAt(index);
+      aggregate.minAscii = Math.min(aggregate.minAscii, code);
+      aggregate.maxAscii = Math.max(aggregate.maxAscii, code);
+      aggregate.qualityCharCount += 1;
+    }
+  }
+
   function scanQualityAscii(records, aggregate) {
     records.forEach((record) => {
-      for (let index = 0; index < record.quality.length; index += 1) {
-        const code = record.quality.charCodeAt(index);
-        aggregate.minAscii = Math.min(aggregate.minAscii, code);
-        aggregate.maxAscii = Math.max(aggregate.maxAscii, code);
-        aggregate.qualityCharCount += 1;
-      }
+      scanRecordQualityAscii(record, aggregate);
     });
   }
 
@@ -518,7 +698,10 @@
     }
 
     if (aggregate.sequenceTrackingLimitReached) {
-      add("warn", "The overrepresented-sequence table was capped to limit browser memory use.");
+      add(
+        "warn",
+        "The overrepresented-sequence table was capped to limit browser memory use; read counts, GC, and quality metrics still used all parsed reads."
+      );
     }
 
     return warnings;
@@ -840,9 +1023,18 @@
   return {
     ADAPTERS,
     parseFastq,
+    createAggregate,
     createFastqSamplingState,
     appendFastqSamplingChunk,
     finalizeFastqSamplingState,
+    createFastqRecordParser,
+    appendFastqRecordChunk,
+    finalizeFastqRecordParser,
+    scanRecordQualityAscii,
+    updateAggregateWithRecord,
+    summarizeAggregate,
+    estimateQualityOffsetFromAggregate,
+    normalizeQualityOffset,
     analyzeFastqText,
     analyzeFastqTexts,
     buildSummaryCsv,

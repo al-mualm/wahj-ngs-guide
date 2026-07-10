@@ -4,19 +4,26 @@
     return;
   }
 
-  const DEFAULT_SAFE_RECORD_LIMIT = 50000;
-  const HARD_RECORD_LIMIT = 250000;
+  const MAX_TRACKED_SEQUENCES = 20000;
+  const PROGRESS_CHUNK_INTERVAL = 24;
+  const AUTO_DETECT_RECORD_TARGET = 5000;
 
   const elements = {
     fileInput: document.querySelector("#fastq-files"),
     dropzone: document.querySelector("#fastq-dropzone"),
     fileList: document.querySelector("#fastq-file-list"),
     qualityOffset: document.querySelector("#quality-offset"),
-    maxRecords: document.querySelector("#max-records"),
     analyzeButton: document.querySelector("#analyze-fastq-button"),
     demoButton: document.querySelector("#load-demo-button"),
     resetButton: document.querySelector("#reset-fastq-button"),
     status: document.querySelector("#fastq-status"),
+    progressPanel: document.querySelector("#fastq-progress-panel"),
+    progressTitle: document.querySelector("#fastq-progress-title"),
+    progressMeta: document.querySelector("#fastq-progress-meta"),
+    progressTrack: document.querySelector("#fastq-progress-track"),
+    progressFill: document.querySelector("#fastq-progress-fill"),
+    progressPercent: document.querySelector("#fastq-progress-percent"),
+    progressReads: document.querySelector("#fastq-progress-reads"),
     metricGrid: document.querySelector("#fastq-metric-grid"),
     warningList: document.querySelector("#fastq-warning-list"),
     fileSummaryBody: document.querySelector("#fastq-file-summary-body"),
@@ -34,10 +41,6 @@
 
   let currentResult = null;
 
-  if (elements.maxRecords && !elements.maxRecords.value) {
-    elements.maxRecords.value = String(DEFAULT_SAFE_RECORD_LIMIT);
-  }
-
   function formatInteger(value) {
     return Number(value || 0).toLocaleString();
   }
@@ -46,6 +49,20 @@
     return Number(value || 0).toLocaleString(undefined, {
       maximumFractionDigits: digits,
     });
+  }
+
+  function formatBytes(value) {
+    const bytes = Number(value || 0);
+    if (bytes >= 1024 ** 3) {
+      return `${formatDecimal(bytes / 1024 ** 3, 2)} GB`;
+    }
+    if (bytes >= 1024 ** 2) {
+      return `${formatDecimal(bytes / 1024 ** 2, 2)} MB`;
+    }
+    if (bytes >= 1024) {
+      return `${formatDecimal(bytes / 1024, 1)} KB`;
+    }
+    return `${formatInteger(bytes)} B`;
   }
 
   function escapeHtml(value) {
@@ -62,6 +79,56 @@
     if (tone) {
       elements.status.classList.add(`is-${tone}`);
     }
+  }
+
+  function resetProgressPanel() {
+    elements.progressPanel.hidden = true;
+    elements.progressPanel.classList.remove("is-error", "is-complete");
+    elements.progressTitle.textContent = "Preparing analysis";
+    elements.progressMeta.textContent = "Waiting to start.";
+    elements.progressFill.style.width = "0%";
+    elements.progressTrack.setAttribute("aria-valuenow", "0");
+    elements.progressPercent.textContent = "0%";
+    elements.progressReads.textContent = "0 reads parsed";
+  }
+
+  function updateProgressPanel(progress) {
+    const bytesTotal = Number(progress.bytesTotal || 0);
+    const bytesRead = Math.max(0, Math.min(Number(progress.bytesRead || 0), bytesTotal || Number(progress.bytesRead || 0)));
+    const percent = bytesTotal ? Math.max(0, Math.min(100, (bytesRead / bytesTotal) * 100)) : 0;
+    const roundedPercent = Math.floor(percent);
+    const compressionNote = progress.gzip ? "compressed stream" : "file stream";
+
+    elements.progressPanel.hidden = false;
+    elements.progressPanel.classList.remove("is-error", "is-complete");
+    elements.progressTitle.textContent = progress.title || "Analyzing FASTQ";
+    elements.progressMeta.textContent = `${progress.fileName} (${progress.fileIndex}/${progress.totalFiles}) - ${formatBytes(
+      bytesRead
+    )} of ${formatBytes(bytesTotal)} ${compressionNote}`;
+    elements.progressFill.style.width = `${percent}%`;
+    elements.progressTrack.setAttribute("aria-valuenow", String(roundedPercent));
+    elements.progressPercent.textContent = `${roundedPercent}%`;
+    elements.progressReads.textContent = `${formatInteger(progress.reads)} reads parsed`;
+  }
+
+  function completeProgressPanel(reads) {
+    elements.progressPanel.hidden = false;
+    elements.progressPanel.classList.remove("is-error");
+    elements.progressPanel.classList.add("is-complete");
+    elements.progressTitle.textContent = "Analysis complete";
+    elements.progressMeta.textContent = "All selected FASTQ files finished.";
+    elements.progressFill.style.width = "100%";
+    elements.progressTrack.setAttribute("aria-valuenow", "100");
+    elements.progressPercent.textContent = "100%";
+    elements.progressReads.textContent = `${formatInteger(reads)} reads parsed`;
+  }
+
+  function markProgressError(message) {
+    elements.progressPanel.hidden = false;
+    elements.progressPanel.classList.remove("is-complete");
+    elements.progressPanel.classList.add("is-error");
+    elements.progressTitle.textContent = "Analysis stopped";
+    elements.progressMeta.textContent = message || "FASTQ analysis failed.";
   }
 
   function setBusy(isBusy) {
@@ -95,7 +162,7 @@
     return /\.gz$/i.test(file.name) || (bytes[0] === 0x1f && bytes[1] === 0x8b);
   }
 
-  async function readFileSampleAsText(file, maxRecords) {
+  async function streamFileThroughParser(file, parser, progressContext) {
     const gzip = await isGzipFile(file);
     if (gzip && typeof DecompressionStream !== "function") {
       throw new Error(
@@ -103,10 +170,52 @@
       );
     }
 
-    const stream = gzip ? file.stream().pipeThrough(new DecompressionStream("gzip")) : file.stream();
+    const byteProgress = {
+      bytesRead: 0,
+      bytesTotal: file.size || 0,
+    };
+    let sourceStream = file.stream();
+    const canCountSourceBytes = typeof TransformStream === "function";
+
+    if (canCountSourceBytes) {
+      sourceStream = sourceStream.pipeThrough(
+        new TransformStream({
+          transform(chunk, controller) {
+            byteProgress.bytesRead += chunk.byteLength || 0;
+            controller.enqueue(chunk);
+          },
+        })
+      );
+    }
+
+    const stream = gzip ? sourceStream.pipeThrough(new DecompressionStream("gzip")) : sourceStream;
     const reader = stream.getReader();
     const decoder = new TextDecoder();
-    const sampleState = core.createFastqSamplingState({ maxRecords });
+    let chunkCount = 0;
+
+    function reportProgress(force = false) {
+      if (!force && chunkCount % PROGRESS_CHUNK_INTERVAL !== 0) {
+        return;
+      }
+      updateProgressPanel({
+        title: progressContext.title,
+        fileName: file.name,
+        fileIndex: progressContext.fileIndex,
+        totalFiles: progressContext.totalFiles,
+        bytesRead: byteProgress.bytesRead,
+        bytesTotal: byteProgress.bytesTotal,
+        reads: parser.recordCount,
+        gzip,
+      });
+      const percent = byteProgress.bytesTotal
+        ? Math.floor(Math.min(100, (byteProgress.bytesRead / byteProgress.bytesTotal) * 100))
+        : 0;
+      setStatus(
+        `${progressContext.title}: ${formatInteger(parser.recordCount)} reads parsed (${percent}%).`
+      );
+    }
+
+    reportProgress(true);
 
     try {
       while (true) {
@@ -115,35 +224,126 @@
           break;
         }
 
+        if (!canCountSourceBytes) {
+          byteProgress.bytesRead += value.byteLength || 0;
+        }
+
         const chunkText = decoder.decode(value, { stream: true });
-        if (chunkText && core.appendFastqSamplingChunk(sampleState, chunkText)) {
-          await reader.cancel();
-          break;
+        if (chunkText) {
+          core.appendFastqRecordChunk(parser, chunkText);
+          chunkCount += 1;
+          if (chunkCount % PROGRESS_CHUNK_INTERVAL === 0) {
+            reportProgress();
+            await new Promise((resolve) => window.setTimeout(resolve, 0));
+          }
+          if (parser.stopped) {
+            await reader.cancel();
+            break;
+          }
         }
       }
 
       const flush = decoder.decode();
       if (flush) {
-        core.appendFastqSamplingChunk(sampleState, flush);
+        core.appendFastqRecordChunk(parser, flush);
       }
+      byteProgress.bytesRead = byteProgress.bytesTotal || byteProgress.bytesRead;
+      reportProgress(true);
 
-      return core.finalizeFastqSamplingState(sampleState);
+      return core.finalizeFastqRecordParser(parser);
     } finally {
       reader.releaseLock();
     }
   }
 
   function getAnalysisOptions() {
-    const maxRecordsValue = Number(elements.maxRecords.value || 0);
-    const normalizedMaxRecords =
-      Number.isFinite(maxRecordsValue) && maxRecordsValue > 0
-        ? Math.min(Math.floor(maxRecordsValue), HARD_RECORD_LIMIT)
-        : DEFAULT_SAFE_RECORD_LIMIT;
     return {
       qualityOffset: elements.qualityOffset.value,
-      maxRecords: normalizedMaxRecords,
-      maxTrackedSequences: 20000,
+      maxTrackedSequences: MAX_TRACKED_SEQUENCES,
     };
+  }
+
+  async function analyzeFileStream(file, options, overallAggregate, index, total) {
+    const fileAggregate = core.createAggregate(file.name);
+    const requestedQualityOffset = core.normalizeQualityOffset(options.qualityOffset);
+    const analysisOptions = {
+      lengthBinWidth: Number(options.lengthBinWidth || 25),
+      gcBinWidth: Number(options.gcBinWidth || 5),
+      qualityBinWidth: Number(options.qualityBinWidth || 5),
+      maxTrackedSequences: Number(options.maxTrackedSequences || MAX_TRACKED_SEQUENCES),
+    };
+    const encodingScanAggregate = core.createAggregate(file.name);
+    const pendingRecords = [];
+    let activeEncoding =
+      requestedQualityOffset === "auto"
+        ? null
+        : {
+            offset: requestedQualityOffset,
+            label: `Phred+${requestedQualityOffset}`,
+            confidence: "manual",
+            minAscii: 0,
+            maxAscii: 0,
+          };
+
+    function processRecord(record) {
+      core.scanRecordQualityAscii(record, fileAggregate);
+      core.scanRecordQualityAscii(record, overallAggregate);
+      core.updateAggregateWithRecord(fileAggregate, record, activeEncoding.offset, analysisOptions);
+      core.updateAggregateWithRecord(overallAggregate, record, activeEncoding.offset, analysisOptions);
+    }
+
+    function activateAutoEncoding() {
+      if (activeEncoding) {
+        return;
+      }
+      activeEncoding = core.estimateQualityOffsetFromAggregate(encodingScanAggregate, options.qualityOffset);
+      while (pendingRecords.length) {
+        processRecord(pendingRecords.shift());
+      }
+    }
+
+    const parser = core.createFastqRecordParser({
+      fileName: file.name,
+      onRecord(record) {
+        if (!activeEncoding) {
+          core.scanRecordQualityAscii(record, encodingScanAggregate);
+          pendingRecords.push(record);
+          if (pendingRecords.length >= AUTO_DETECT_RECORD_TARGET) {
+            activateAutoEncoding();
+          }
+          return;
+        }
+        processRecord(record);
+      },
+    });
+    const parsed = await streamFileThroughParser(
+      file,
+      parser,
+      {
+        title: "Analyzing all reads",
+        fileIndex: index,
+        totalFiles: total,
+      }
+    );
+    activateAutoEncoding();
+
+    fileAggregate.parseErrors.push(...parsed.errors);
+    fileAggregate.parseWarnings.push(...parsed.warnings);
+    const finalEncoding = core.estimateQualityOffsetFromAggregate(fileAggregate, options.qualityOffset);
+    if (
+      requestedQualityOffset === "auto" &&
+      activeEncoding &&
+      finalEncoding.offset !== activeEncoding.offset
+    ) {
+      const message = `${file.name}: automatic quality encoding was ambiguous during streaming. Rerun with an explicit Phred offset if this file uses older non-standard encoding.`;
+      fileAggregate.parseWarnings.push(message);
+      overallAggregate.parseWarnings.push(message);
+    }
+    fileAggregate.encoding = finalEncoding;
+    overallAggregate.parseErrors.push(...parsed.errors);
+    overallAggregate.parseWarnings.push(...parsed.warnings);
+
+    return core.summarizeAggregate(fileAggregate);
   }
 
   async function analyzeSelectedFiles() {
@@ -154,27 +354,43 @@
     }
 
     setBusy(true);
+    resetProgressPanel();
     setStatus(`Reading ${files.length} FASTQ file${files.length === 1 ? "" : "s"}...`);
 
     try {
       const options = getAnalysisOptions();
-      const inputs = [];
-      const truncatedFiles = [];
+      const overallAggregate = core.createAggregate("All FASTQ files");
+      const fileSummaries = [];
+
       for (let index = 0; index < files.length; index += 1) {
         const file = files[index];
-        setStatus(`Reading ${file.name} (${index + 1}/${files.length})...`);
-        const sample = await readFileSampleAsText(file, options.maxRecords);
-        if (sample.truncated) {
-          truncatedFiles.push(file.name);
-        }
-        inputs.push({
-          fileName: file.name,
-          text: sample.text,
-        });
+        const fileNumber = index + 1;
+        setStatus(`Analyzing all reads in ${file.name} (${fileNumber}/${files.length})...`);
+        fileSummaries.push(
+          await analyzeFileStream(
+            file,
+            options,
+            overallAggregate,
+            fileNumber,
+            files.length
+          )
+        );
       }
 
-      setStatus("Calculating FASTQ QC metrics...");
-      currentResult = core.analyzeFastqTexts(inputs, options);
+      overallAggregate.encoding = core.estimateQualityOffsetFromAggregate(
+        overallAggregate,
+        options.qualityOffset
+      );
+      currentResult = {
+        generatedAt: new Date().toISOString(),
+        options: {
+          qualityOffset: core.normalizeQualityOffset(options.qualityOffset),
+          maxRecords: 0,
+          analysisScope: "all_reads_streamed_locally",
+        },
+        overall: core.summarizeAggregate(overallAggregate),
+        files: fileSummaries,
+      };
       renderResults(currentResult);
       const tone =
         currentResult.overall.status === "fail"
@@ -182,19 +398,17 @@
           : currentResult.overall.status === "warn"
             ? "warning"
             : "success";
-      if (truncatedFiles.length) {
-        setStatus(
-          `FASTQ analysis complete using the first ${formatInteger(
-            options.maxRecords
-          )} reads per file for browser-safe QC.`,
-          tone
-        );
-      } else {
-        setStatus("FASTQ analysis complete.", tone);
-      }
+      setStatus(
+        `FASTQ analysis complete. All ${formatInteger(
+          currentResult.overall.metrics.reads
+        )} parsed reads were included in the QC metrics.`,
+        tone
+      );
+      completeProgressPanel(currentResult.overall.metrics.reads);
     } catch (error) {
       console.error(error);
       setStatus(error.message || "FASTQ analysis failed.", "error");
+      markProgressError(error.message || "FASTQ analysis failed.");
     } finally {
       setBusy(false);
     }
@@ -227,6 +441,7 @@
   }
 
   function loadDemoData() {
+    resetProgressPanel();
     currentResult = core.analyzeFastqTexts(
       [
         {
@@ -246,6 +461,7 @@
     );
     renderResults(currentResult);
     setStatus("Demo FASTQ analysis loaded.", "success");
+    completeProgressPanel(currentResult.overall.metrics.reads);
   }
 
   function renderMetricCards(result) {
@@ -574,6 +790,7 @@
   function resetResults() {
     currentResult = null;
     elements.fileInput.value = "";
+    resetProgressPanel();
     updateFileList();
     elements.metricGrid.innerHTML = `
       <article class="fastq-metric-card"><span>Reads</span><strong>—</strong></article>

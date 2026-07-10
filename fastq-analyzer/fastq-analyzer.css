@@ -118,6 +118,31 @@
   width: 100%;
 }
 
+.fastq-analysis-scope {
+  display: grid;
+  gap: 0.25rem;
+  min-height: 56px;
+  border: 1px solid rgba(24, 79, 103, 0.14);
+  border-radius: 8px;
+  padding: 0.75rem 0.85rem;
+  background: rgba(242, 247, 250, 0.92);
+  color: #365168;
+}
+
+.fastq-analysis-scope span {
+  color: #18364a;
+  font-weight: 800;
+  font-size: 0.92rem;
+}
+
+.fastq-analysis-scope strong {
+  color: #184f67;
+}
+
+.fastq-analysis-scope small {
+  line-height: 1.35;
+}
+
 .fastq-action-row {
   display: flex;
   flex-wrap: wrap;
@@ -165,6 +190,61 @@
   background: rgba(253, 235, 235, 0.96);
   border-left-color: #c96a58;
   color: #842b25;
+}
+
+.fastq-progress-panel {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  border: 1px solid rgba(24, 79, 103, 0.13);
+  border-radius: 8px;
+  padding: 0.9rem 0.95rem;
+  background: rgba(247, 251, 252, 0.96);
+}
+
+.fastq-progress-panel[hidden] {
+  display: none;
+}
+
+.fastq-progress-copy,
+.fastq-progress-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.fastq-progress-copy strong {
+  color: #18364a;
+}
+
+.fastq-progress-copy span,
+.fastq-progress-foot {
+  color: #587086;
+  font-size: 0.9rem;
+}
+
+.fastq-progress-track {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dfeaf0;
+}
+
+.fastq-progress-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #184f67, #2f95b8);
+  transition: width 180ms ease;
+}
+
+.fastq-progress-panel.is-error .fastq-progress-fill {
+  background: #c96a58;
+}
+
+.fastq-progress-panel.is-complete .fastq-progress-fill {
+  background: #3f8968;
 }
 
 .fastq-metric-grid {
