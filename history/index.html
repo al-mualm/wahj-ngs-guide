@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reading History | Wahj Al-DNA</title>
+    <meta
+      name="description"
+      content="Continue Wahj Al-DNA lectures and tools from your previous reading history."
+    />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="../styles.css?v=20260710-account-design" />
+  </head>
+  <body class="account-page">
+    <div class="site-shell">
+      <header class="site-header site-header-compact" id="top">
+        <div class="brand-lockup">
+          <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Learning account</p>
+            <p class="brand-title">Wahj Al-DNA</p>
+          </div>
+        </div>
+        <a class="hub-link" href="../">All topics</a>
+      </header>
+
+      <main>
+        <section class="section account-history-section">
+          <div class="section-heading">
+            <span class="section-chip">Continue learning</span>
+            <h1>Reading history</h1>
+            <p>
+              Anonymous readers keep history on this device. Signed-in readers also sync their
+              history through Firebase.
+            </p>
+            <p class="account-status" data-account-status></p>
+          </div>
+
+          <div class="history-grid">
+            <section class="history-panel" aria-labelledby="local-history-title">
+              <h2 id="local-history-title">This device</h2>
+              <div class="history-list" id="local-history-list"></div>
+            </section>
+            <section class="history-panel" aria-labelledby="cloud-history-title">
+              <h2 id="cloud-history-title">Cloud history</h2>
+              <div class="history-list" id="cloud-history-list"></div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="../config.js?v=20260710-account-design"></script>
+    <script src="../script.js?v=20260710-account-design"></script>
+  </body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account | Wahj Al-DNA</title>
+    <meta
+      name="description"
+      content="Manage your Wahj Al-DNA learning account, email preferences, and saved history."
+    />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="../styles.css?v=20260710-account-design" />
+  </head>
+  <body class="account-page">
+    <div class="site-shell">
+      <header class="site-header site-header-compact" id="top">
+        <div class="brand-lockup">
+          <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Learning account</p>
+            <p class="brand-title">Wahj Al-DNA</p>
+          </div>
+        </div>
+        <a class="hub-link" href="../">All topics</a>
+      </header>
+
+      <main>
+        <section class="section account-hero">
+          <div class="account-copy">
+            <span class="section-chip">Profile</span>
+            <h1>Your account</h1>
+            <p class="hero-lead">
+              Manage your profile, email preference, and reading-history controls.
+            </p>
+            <p id="account-user-summary" class="account-summary"></p>
+            <p class="account-status" data-firebase-setup-warning></p>
+          </div>
+
+          <form class="account-form" id="account-profile-form">
+            <label class="field">
+              <span>Full name</span>
+              <input name="full_name" autocomplete="name" />
+            </label>
+            <label class="field">
+              <span>Email</span>
+              <input name="email" type="email" autocomplete="email" readonly />
+            </label>
+            <label class="field">
+              <span>Country</span>
+              <input name="country" autocomplete="country-name" />
+            </label>
+            <label class="field">
+              <span>Institution or organization</span>
+              <input name="institution" autocomplete="organization" />
+            </label>
+            <label class="field">
+              <span>Role</span>
+              <select name="role">
+                <option value="">Select role</option>
+                <option value="student">Student</option>
+                <option value="researcher">Researcher</option>
+                <option value="clinician">Clinician</option>
+                <option value="educator">Educator</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <label class="check-field">
+              <input type="checkbox" name="email_opt_in" />
+              <span>Send me occasional Wahj Al-DNA educational updates.</span>
+            </label>
+            <button class="primary-action field-wide" type="submit">Save profile</button>
+            <div class="account-actions field-wide">
+              <button class="secondary-action" id="account-verify-email" type="button">
+                Send verification email
+              </button>
+              <button class="secondary-action" id="account-clear-local" type="button">
+                Clear local history
+              </button>
+              <button class="secondary-action" id="account-sign-out" type="button">Sign out</button>
+              <button class="danger-action" id="account-delete" type="button">Delete account</button>
+            </div>
+            <p class="account-status field-wide" data-account-status></p>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <script src="../config.js?v=20260710-account-design"></script>
+    <script src="../script.js?v=20260710-account-design"></script>
+  </body>
+</html>

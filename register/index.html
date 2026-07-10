@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Account | Wahj Al-DNA</title>
+    <meta
+      name="description"
+      content="Create the Wahj Al-DNA learning account required to access lectures, tools, saved history, and optional educational updates."
+    />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="../styles.css?v=20260710-account-design" />
+  </head>
+  <body class="account-page">
+    <div class="site-shell">
+      <header class="site-header site-header-compact" id="top">
+        <div class="brand-lockup">
+          <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Learning account</p>
+            <p class="brand-title">Wahj Al-DNA</p>
+          </div>
+        </div>
+        <a class="hub-link" href="../">All topics</a>
+      </header>
+
+      <main>
+        <section class="section account-hero">
+          <div class="account-copy">
+            <span class="section-chip">Required account</span>
+            <h1>Create your learning account</h1>
+            <p class="hero-lead">
+              Registration is required to access Wahj Al-DNA lectures and tools. Your account also
+              keeps reading history across devices and lets you choose whether to receive future
+              educational updates.
+            </p>
+            <p class="account-status" data-firebase-setup-warning></p>
+          </div>
+
+          <form class="account-form" id="account-register-form">
+            <label class="field">
+              <span>Full name</span>
+              <input name="full_name" autocomplete="name" required />
+            </label>
+            <label class="field">
+              <span>Email</span>
+              <input name="email" type="email" autocomplete="email" required />
+            </label>
+            <label class="field">
+              <span>Password</span>
+              <input name="password" type="password" autocomplete="new-password" minlength="8" required />
+            </label>
+            <label class="field">
+              <span>Country</span>
+              <input name="country" autocomplete="country-name" />
+            </label>
+            <label class="field">
+              <span>Institution or organization</span>
+              <input name="institution" autocomplete="organization" />
+            </label>
+            <label class="field">
+              <span>Role</span>
+              <select name="role">
+                <option value="">Select role</option>
+                <option value="student">Student</option>
+                <option value="researcher">Researcher</option>
+                <option value="clinician">Clinician</option>
+                <option value="educator">Educator</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <label class="check-field field-wide">
+              <input type="checkbox" name="email_opt_in" />
+              <span>I agree to receive occasional Wahj Al-DNA educational updates by email.</span>
+            </label>
+            <label class="check-field field-wide">
+              <input type="checkbox" name="privacy_agree" required />
+              <span>
+                I understand that my profile and learning history are stored to provide account
+                features. I can clear local history or delete my account later.
+              </span>
+            </label>
+            <button class="primary-action field-wide" type="submit">Create account</button>
+            <p class="account-status field-wide" data-account-status></p>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <script src="../config.js?v=20260710-account-design"></script>
+    <script src="../script.js?v=20260710-account-design"></script>
+  </body>
+</html>

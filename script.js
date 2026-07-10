@@ -1,4 +1,5 @@
 const appConfig = window.WAHJ_NGS_CONFIG || {};
+const sharedScriptUrl = document.currentScript?.src || "";
 const backendApiUrl = (appConfig.readerApiUrl || appConfig.registrationApiUrl || "").trim();
 const siteLabel = (appConfig.siteLabel || "Wahj NGS Guide").trim();
 const commentsLimit = Number(appConfig.commentsLimit || 6);
@@ -373,6 +374,18 @@ async function submitComment(formData) {
   });
 }
 
+function initializeAccountModule() {
+  if (!sharedScriptUrl || document.querySelector("script[data-wahj-account-module]")) {
+    return;
+  }
+
+  const script = document.createElement("script");
+  script.type = "module";
+  script.src = new URL("account.js", sharedScriptUrl).href;
+  script.dataset.wahjAccountModule = "true";
+  document.head.appendChild(script);
+}
+
 if (navToggle && primaryNav) {
   navToggle.addEventListener("click", () => {
     const isOpen = primaryNav.classList.toggle("open");
@@ -502,3 +515,4 @@ if (commentForm) {
 
 initializeReaderCounter();
 loadComments();
+initializeAccountModule();
