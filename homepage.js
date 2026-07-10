@@ -76,6 +76,22 @@ const homepageCopy = {
             href: "ngs/#workflow",
             chips: ["Workflow", "QC", "Decision guide"],
           },
+          {
+            badge: "Tool",
+            title: "FASTQ QC analyzer",
+            description:
+              "Upload NGS FASTQ files in the browser, review read counts, GC content, Q20/Q30 metrics, per-cycle quality, adapter flags, and export QC summaries.",
+            href: "fastq-analyzer/",
+            chips: ["FASTQ upload", "Q30", "Adapter flags"],
+          },
+          {
+            badge: "Local server",
+            title: "Local NGS workflow",
+            description:
+              "Use this Mac as the analysis machine: submit local FASTQ paths to the backend for fastp, BWA alignment, samtools statistics, genome structure, and annotation summaries.",
+            href: "local-ngs-workbench/",
+            chips: ["Mac backend", "Alignment", "Reports"],
+          },
         ],
       },
       sanger: {
@@ -269,6 +285,22 @@ const homepageCopy = {
               "انتقل مباشرة إلى أقسام سير العمل وضبط الجودة والمنصات ودليل اختيار التقنية داخل صفحة NGS.",
             href: "ar/#workflow",
             chips: ["Workflow", "QC", "Decision guide"],
+          },
+          {
+            badge: "أداة",
+            title: "محلل FASTQ لضبط الجودة",
+            description:
+              "ارفع ملفات FASTQ داخل المتصفح وراجع عدد القراءات وGC وQ20/Q30 وجودة الدورات وإشارات المحولات ثم صدّر ملخصات QC.",
+            href: "fastq-analyzer/",
+            chips: ["FASTQ upload", "Q30", "Adapter flags"],
+          },
+          {
+            badge: "خادم محلي",
+            title: "سير عمل NGS على هذا الماك",
+            description:
+              "استخدم جهاز Mac كمحرك تحليل: أرسل مسارات FASTQ المحلية إلى الخلفية لتشغيل fastp والمحاذاة وsamtools وملخصات البنية الجينومية والتعليقات.",
+            href: "local-ngs-workbench/",
+            chips: ["Mac backend", "Alignment", "Reports"],
           },
         ],
       },
