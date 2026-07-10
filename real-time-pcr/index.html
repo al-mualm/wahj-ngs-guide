@@ -86,7 +86,163 @@
             </p>
           </div>
 
-          <div class="hero-visual reveal">
+          <div class="hero-visual reveal pcr-hero-visual-stack">
+            <article
+              class="pcr-interactive-card"
+              id="qpcr-interactive-scene"
+              data-active-step="curve"
+              data-motion-state="running"
+              aria-label="Interactive qPCR amplification graphic"
+            >
+              <div class="figure-heading">
+                <p class="figure-label">Interactive graphic</p>
+                <h3>Watch fluorescence become a Ct value</h3>
+              </div>
+              <p class="pcr-scene-intro">
+                Select each stage to connect the plate wells, fluorescence rise, threshold
+                crossing, and final comparative-Ct output.
+              </p>
+
+              <div class="pcr-scene-toolbar">
+                <div class="pcr-scene-tabs" aria-label="qPCR graphic stages">
+                  <button
+                    type="button"
+                    class="pcr-scene-tab"
+                    data-pcr-scene-step="wells"
+                    aria-pressed="false"
+                  >
+                    Wells
+                  </button>
+                  <button
+                    type="button"
+                    class="pcr-scene-tab is-active"
+                    data-pcr-scene-step="curve"
+                    aria-pressed="true"
+                  >
+                    Curve
+                  </button>
+                  <button
+                    type="button"
+                    class="pcr-scene-tab"
+                    data-pcr-scene-step="threshold"
+                    aria-pressed="false"
+                  >
+                    Ct threshold
+                  </button>
+                  <button
+                    type="button"
+                    class="pcr-scene-tab"
+                    data-pcr-scene-step="ddct"
+                    aria-pressed="false"
+                  >
+                    2^-DeltaDeltaCt
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  class="motion-toggle pcr-motion-toggle"
+                  id="pcr-scene-motion-toggle"
+                  aria-pressed="false"
+                >
+                  Pause motion
+                </button>
+              </div>
+
+              <div class="pcr-scene-stage">
+                <svg
+                  class="pcr-scene-svg"
+                  viewBox="0 0 640 360"
+                  role="img"
+                  aria-labelledby="pcr-scene-title pcr-scene-desc"
+                >
+                  <title id="pcr-scene-title">Interactive qPCR amplification scene</title>
+                  <desc id="pcr-scene-desc">
+                    A 96-well plate feeds fluorescence traces into a qPCR amplification
+                    graph where the threshold crossing defines Ct and supports relative
+                    expression calculation.
+                  </desc>
+                  <defs>
+                    <linearGradient id="pcrScenePanel" x1="0" x2="1" y1="0" y2="1">
+                      <stop offset="0%" stop-color="#ffffff" />
+                      <stop offset="100%" stop-color="#eef6fb" />
+                    </linearGradient>
+                    <filter id="pcrSceneGlow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feGaussianBlur stdDeviation="3" result="blur" />
+                      <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                      </feMerge>
+                    </filter>
+                  </defs>
+
+                  <rect class="pcr-scene-panel-bg" x="14" y="14" width="612" height="332" rx="32" />
+
+                  <g class="pcr-scene-plate" aria-hidden="true">
+                    <rect class="pcr-scene-plate-body" x="50" y="70" width="178" height="168" rx="26" />
+                    <text class="pcr-scene-label" x="68" y="51">qPCR plate</text>
+                    <g class="pcr-scene-well-grid">
+                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--1" cx="86" cy="106" r="13" />
+                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--2" cx="128" cy="106" r="13" />
+                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--3" cx="170" cy="106" r="13" />
+                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--4" cx="86" cy="150" r="13" />
+                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--5" cx="128" cy="150" r="13" />
+                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--6" cx="170" cy="150" r="13" />
+                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--7" cx="86" cy="194" r="13" />
+                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--8" cx="128" cy="194" r="13" />
+                      <circle class="pcr-scene-well-fill pcr-scene-well-fill--9" cx="170" cy="194" r="13" />
+                    </g>
+                    <path class="pcr-scene-transfer pcr-scene-transfer--1" d="M210 122 C250 122, 266 108, 300 108" />
+                    <path class="pcr-scene-transfer pcr-scene-transfer--2" d="M210 166 C250 166, 270 196, 304 196" />
+                  </g>
+
+                  <g class="pcr-scene-chart" aria-hidden="true">
+                    <rect class="pcr-scene-chart-bg" x="292" y="62" width="290" height="218" rx="24" />
+                    <text class="pcr-scene-label" x="318" y="50">Amplification plot</text>
+                    <line class="pcr-scene-gridline" x1="330" y1="240" x2="550" y2="240" />
+                    <line class="pcr-scene-gridline" x1="330" y1="190" x2="550" y2="190" />
+                    <line class="pcr-scene-gridline" x1="330" y1="140" x2="550" y2="140" />
+                    <line class="pcr-scene-axis" x1="330" y1="252" x2="552" y2="252" />
+                    <line class="pcr-scene-axis" x1="330" y1="82" x2="330" y2="252" />
+                    <text class="pcr-scene-axis-label" x="544" y="276">Cycle</text>
+                    <text class="pcr-scene-axis-label" x="300" y="96" transform="rotate(-90 300 96)">Rn</text>
+                    <rect class="pcr-scene-baseline" x="340" y="222" width="96" height="20" rx="10" />
+                    <text class="pcr-scene-small-label" x="348" y="218">baseline</text>
+                    <line class="pcr-scene-threshold-line" x1="330" y1="156" x2="552" y2="156" />
+                    <text class="pcr-scene-small-label pcr-scene-threshold-label" x="460" y="146">threshold</text>
+                    <path class="pcr-scene-curve pcr-scene-control-curve" pathLength="1" d="M340 236 C380 236, 410 234, 430 226 S462 192, 480 154 S508 100, 544 84" />
+                    <path class="pcr-scene-curve pcr-scene-treated-curve" pathLength="1" d="M340 238 C390 238, 432 236, 456 230 S496 206, 512 174 S536 116, 552 92" />
+                    <line class="pcr-scene-ct-line" x1="480" y1="156" x2="480" y2="252" />
+                    <circle class="pcr-scene-ct-dot" cx="480" cy="156" r="7" />
+                    <text class="pcr-scene-ct-label" x="468" y="274">Ct</text>
+                  </g>
+
+                  <g class="pcr-scene-output" aria-hidden="true">
+                    <rect class="pcr-scene-output-card" x="110" y="276" width="420" height="44" rx="18" />
+                    <text class="pcr-scene-formula" x="130" y="305">DeltaCt -> DeltaDeltaCt -> relative expression = 2^-DeltaDeltaCt</text>
+                  </g>
+                </svg>
+
+                <div class="pcr-scene-readouts" aria-live="polite">
+                  <p data-pcr-scene-readout="wells">
+                    Plate assignment links each well to a biological role: control/reference,
+                    control/target, treated/reference, or treated/target.
+                  </p>
+                  <p data-pcr-scene-readout="curve">
+                    Fluorescence stays near baseline first, then rises as amplified product
+                    accumulates.
+                  </p>
+                  <p data-pcr-scene-readout="threshold">
+                    Ct is read where the amplification curve crosses the threshold inside the
+                    exponential phase.
+                  </p>
+                  <p data-pcr-scene-readout="ddct">
+                    DeltaCt normalizes target to reference; DeltaDeltaCt compares that value
+                    against the calibrator.
+                  </p>
+                </div>
+              </div>
+            </article>
+
             <figure class="figure-card diagram-hero">
               <div class="figure-heading">
                 <p class="figure-label">Figure 1</p>
@@ -988,6 +1144,7 @@
 
     <script src="../config.js"></script>
     <script src="../script.js"></script>
+    <script src="./pcr-interactive.js"></script>
     <script src="../pcr-calculator-core.js"></script>
     <script src="../pcr-calculator.js"></script>
   </body>

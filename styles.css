@@ -1802,6 +1802,298 @@ body.account-access-locked .site-shell {
   align-self: start;
 }
 
+.pcr-hero-visual-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.pcr-interactive-card {
+  --pcr-scene-play-state: running;
+  position: relative;
+  display: grid;
+  gap: 0.95rem;
+  padding: clamp(1rem, 2vw, 1.25rem);
+  border-radius: 28px;
+  border: 1px solid rgba(23, 39, 57, 0.1);
+  background:
+    radial-gradient(circle at 88% 18%, rgba(214, 64, 51, 0.09), transparent 28%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(236, 244, 249, 0.94));
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+}
+
+.pcr-interactive-card[data-motion-state="paused"],
+.pcr-interactive-card[data-motion-state="reduced"] {
+  --pcr-scene-play-state: paused;
+}
+
+.pcr-interactive-card::before {
+  content: "";
+  position: absolute;
+  inset: auto -3rem -4rem auto;
+  width: 12rem;
+  height: 12rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(47, 149, 184, 0.14), transparent 68%);
+  pointer-events: none;
+}
+
+.pcr-scene-intro {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.pcr-scene-toolbar {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.pcr-scene-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pcr-scene-tab {
+  border: 1px solid rgba(23, 39, 57, 0.1);
+  border-radius: 999px;
+  padding: 0.55rem 0.8rem;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.pcr-scene-tab:hover,
+.pcr-scene-tab:focus-visible,
+.pcr-scene-tab.is-active {
+  transform: translateY(-1px);
+  border-color: rgba(47, 149, 184, 0.28);
+  background: rgba(47, 149, 184, 0.13);
+  color: var(--blue-deep);
+}
+
+.pcr-scene-tab:focus-visible,
+.pcr-motion-toggle:focus-visible {
+  outline: 3px solid rgba(47, 149, 184, 0.2);
+  outline-offset: 3px;
+}
+
+.pcr-motion-toggle {
+  width: fit-content;
+  padding: 0.6rem 0.9rem;
+}
+
+.pcr-scene-stage {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.pcr-scene-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.pcr-scene-panel-bg,
+.pcr-scene-chart-bg,
+.pcr-scene-output-card {
+  fill: url(#pcrScenePanel);
+  stroke: rgba(23, 39, 57, 0.1);
+  stroke-width: 2;
+}
+
+.pcr-scene-plate-body {
+  fill: rgba(255, 255, 255, 0.72);
+  stroke: rgba(23, 39, 57, 0.12);
+  stroke-width: 2;
+}
+
+.pcr-scene-label,
+.pcr-scene-axis-label,
+.pcr-scene-small-label,
+.pcr-scene-ct-label,
+.pcr-scene-formula {
+  font-family: "Avenir Next", "Aptos", "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+.pcr-scene-label {
+  fill: var(--blue-deep);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pcr-scene-axis-label,
+.pcr-scene-small-label {
+  fill: #5b7085;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pcr-scene-ct-label {
+  fill: #c96a58;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.pcr-scene-formula {
+  fill: #19344f;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.pcr-scene-well-fill {
+  fill: rgba(47, 149, 184, 0.24);
+  stroke: rgba(24, 79, 103, 0.18);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pcr-well-pulse 4.8s ease-in-out infinite;
+  animation-play-state: var(--pcr-scene-play-state);
+}
+
+.pcr-scene-well-fill--2,
+.pcr-scene-well-fill--5,
+.pcr-scene-well-fill--8 {
+  fill: rgba(214, 64, 51, 0.24);
+  animation-delay: -1.4s;
+}
+
+.pcr-scene-well-fill--3,
+.pcr-scene-well-fill--6,
+.pcr-scene-well-fill--9 {
+  fill: rgba(63, 137, 104, 0.22);
+  animation-delay: -2.8s;
+}
+
+.pcr-scene-transfer {
+  fill: none;
+  stroke: rgba(47, 149, 184, 0.48);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 12 12;
+  animation: pcr-transfer-flow 3.4s linear infinite;
+  animation-play-state: var(--pcr-scene-play-state);
+}
+
+.pcr-scene-transfer--2 {
+  stroke: rgba(214, 64, 51, 0.42);
+  animation-delay: -1.2s;
+}
+
+.pcr-scene-gridline {
+  stroke: rgba(23, 39, 57, 0.08);
+  stroke-width: 1.5;
+}
+
+.pcr-scene-axis {
+  stroke: rgba(23, 39, 57, 0.28);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.pcr-scene-baseline {
+  fill: rgba(47, 149, 184, 0.08);
+  stroke: rgba(47, 149, 184, 0.22);
+  stroke-width: 1.5;
+}
+
+.pcr-scene-threshold-line {
+  stroke: rgba(214, 64, 51, 0.56);
+  stroke-width: 3;
+  stroke-dasharray: 10 8;
+}
+
+.pcr-scene-curve {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  animation: pcr-curve-draw 6.4s ease-in-out infinite;
+  animation-play-state: var(--pcr-scene-play-state);
+}
+
+.pcr-scene-control-curve {
+  stroke: rgba(47, 149, 184, 0.96);
+}
+
+.pcr-scene-treated-curve {
+  stroke: rgba(214, 64, 51, 0.72);
+  animation-delay: -1.6s;
+}
+
+.pcr-scene-ct-line {
+  stroke: rgba(214, 64, 51, 0.7);
+  stroke-width: 2.6;
+  stroke-dasharray: 7 7;
+}
+
+.pcr-scene-ct-dot {
+  fill: rgba(214, 64, 51, 0.95);
+  filter: url(#pcrSceneGlow);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pcr-ct-pulse 2.8s ease-in-out infinite;
+  animation-play-state: var(--pcr-scene-play-state);
+}
+
+.pcr-scene-readouts {
+  min-height: 4.3rem;
+  padding: 0.85rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(23, 39, 57, 0.08);
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.pcr-scene-readouts p {
+  display: none;
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.pcr-interactive-card[data-active-step="wells"] [data-pcr-scene-readout="wells"],
+.pcr-interactive-card[data-active-step="curve"] [data-pcr-scene-readout="curve"],
+.pcr-interactive-card[data-active-step="threshold"] [data-pcr-scene-readout="threshold"],
+.pcr-interactive-card[data-active-step="ddct"] [data-pcr-scene-readout="ddct"] {
+  display: block;
+}
+
+.pcr-interactive-card[data-active-step="wells"] .pcr-scene-plate,
+.pcr-interactive-card[data-active-step="curve"] .pcr-scene-curve,
+.pcr-interactive-card[data-active-step="threshold"] .pcr-scene-threshold-line,
+.pcr-interactive-card[data-active-step="threshold"] .pcr-scene-ct-line,
+.pcr-interactive-card[data-active-step="threshold"] .pcr-scene-ct-dot,
+.pcr-interactive-card[data-active-step="ddct"] .pcr-scene-output {
+  filter: url(#pcrSceneGlow);
+}
+
+.pcr-interactive-card[data-active-step="wells"] .pcr-scene-chart,
+.pcr-interactive-card[data-active-step="wells"] .pcr-scene-output,
+.pcr-interactive-card[data-active-step="ddct"] .pcr-scene-plate {
+  opacity: 0.58;
+}
+
+.pcr-interactive-card[data-active-step="ddct"] .pcr-scene-output-card {
+  fill: rgba(239, 248, 252, 0.96);
+  stroke: rgba(47, 149, 184, 0.24);
+}
+
 .diagram-hero {
   margin: 0;
 }
@@ -1850,6 +2142,53 @@ body.account-access-locked .site-shell {
 
 .pcr-step-card p {
   margin: 0;
+}
+
+@keyframes pcr-well-pulse {
+  0%,
+  100% {
+    opacity: 0.58;
+    transform: scale(1);
+  }
+
+  45% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes pcr-transfer-flow {
+  from {
+    stroke-dashoffset: 24;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pcr-curve-draw {
+  0% {
+    stroke-dashoffset: 1;
+  }
+
+  35%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pcr-ct-pulse {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
 }
 
 @media (max-width: 1080px) {
@@ -1912,6 +2251,16 @@ body.account-access-locked .site-shell {
 
   .diagram-image-wide {
     min-width: 860px;
+  }
+
+  .pcr-scene-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pcr-scene-tab,
+  .pcr-motion-toggle {
+    width: 100%;
   }
 }
 
