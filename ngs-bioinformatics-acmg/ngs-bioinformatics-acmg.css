@@ -34,14 +34,69 @@
 }
 
 .ngs-acmg-page .section {
-  padding: 4rem 0;
+  padding: clamp(3.2rem, 6vw, 5rem) 0;
+}
+
+.ngs-acmg-page .section.section-compact {
+  padding-top: 1.25rem;
+}
+
+.ngs-acmg-page .section-heading,
+.ngs-acmg-page .figure-card,
+.ngs-acmg-page .summary-card,
+.ngs-acmg-page .info-card,
+.ngs-acmg-page .acmg-four-up,
+.ngs-acmg-page .acmg-three-up,
+.ngs-acmg-page .acmg-two-up,
+.ngs-acmg-page .history-timeline,
+.ngs-acmg-page .quality-chip-grid,
+.ngs-acmg-page .acmg-tier-strip,
+.ngs-acmg-page .workflow-explorer,
+.ngs-acmg-page .standards-explorer,
+.ngs-acmg-page .workflow-stage-panel,
+.ngs-acmg-page .organization-panel,
+.ngs-acmg-page .command-concepts,
+.ngs-acmg-page .command-concept-panel,
+.ngs-acmg-page .criteria-controls,
+.ngs-acmg-page .criteria-results,
+.ngs-acmg-page .case-builder,
+.ngs-acmg-page .case-builder-result,
+.ngs-acmg-page .pvs1-lab,
+.ngs-acmg-page .pvs1-result-card,
+.ngs-acmg-page .pvs1-controls,
+.ngs-acmg-page .terminal-simulator,
+.ngs-acmg-page .terminal-sidebar .summary-card,
+.ngs-acmg-page .terminal-main,
+.ngs-acmg-page .table-wrap {
+  width: min(100%, 78rem);
+  margin-inline: auto;
+}
+
+.ngs-acmg-page .section-heading p,
+.ngs-acmg-page .hero-lead,
+.ngs-acmg-page .acmg-hero-note p,
+.ngs-acmg-page .summary-card p,
+.ngs-acmg-page .info-card p,
+.ngs-acmg-page .workflow-stage-panel > p,
+.ngs-acmg-page .organization-panel > p,
+.ngs-acmg-page .organization-panel-meta p,
+.ngs-acmg-page .criteria-definition,
+.ngs-acmg-page .terminal-disclaimer,
+.ngs-acmg-page .interpretation,
+.ngs-acmg-page .acmg-doctor-callout {
+  max-width: 68ch;
+  line-height: 1.75;
+}
+
+.ngs-acmg-page .section-heading {
+  margin-bottom: 1.45rem;
 }
 
 .acmg-hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
-  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 1.2rem;
   align-items: start;
 }
 
@@ -62,12 +117,13 @@
   margin: 0.55rem 0 0.9rem;
   font-family: var(--heading-font);
   font-size: clamp(2.3rem, 4vw, 4rem);
-  line-height: 1.06;
-  max-width: 14ch;
+  line-height: 1.1;
+  max-width: 11ch;
 }
 
 .acmg-hero .hero-lead {
-  max-width: 44rem;
+  max-width: 66ch;
+  font-size: 1.18rem;
 }
 
 .acmg-hero .author-panel {
@@ -91,6 +147,7 @@
 .acmg-hero-side {
   display: grid;
   gap: 1rem;
+  width: min(100%, 68rem);
 }
 
 .acmg-pipeline {
@@ -117,6 +174,39 @@
   gap: 0.55rem;
 }
 
+.lecture-roadmap {
+  padding: 1.5rem;
+}
+
+.lecture-roadmap-list {
+  margin: 0;
+  padding-left: 1.3rem;
+  display: grid;
+  gap: 0.95rem;
+}
+
+.lecture-roadmap-list li {
+  display: grid;
+  gap: 0.28rem;
+  padding: 0 0 0.95rem 0.4rem;
+  border-bottom: 1px solid rgba(23, 39, 57, 0.08);
+}
+
+.lecture-roadmap-list li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.lecture-roadmap-list strong {
+  font-size: 1rem;
+  color: var(--blue-deep);
+}
+
+.lecture-roadmap-list span {
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
 .acmg-four-up,
 .acmg-three-up,
 .acmg-two-up,
@@ -124,27 +214,27 @@
 .quality-chip-grid,
 .acmg-tier-strip {
   display: grid;
-  gap: 1rem;
+  gap: 1.15rem;
 }
 
 .acmg-four-up {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .acmg-three-up {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .acmg-two-up {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .history-timeline {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .quality-chip-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .quality-chip-grid span {
@@ -192,7 +282,7 @@
 }
 
 .workflow-explorer {
-  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+  grid-template-columns: 1fr;
   align-items: start;
 }
 
@@ -203,6 +293,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.7rem;
+  justify-content: flex-start;
 }
 
 .workflow-stage-list button,
@@ -238,7 +329,7 @@
 .command-concept-panel,
 .case-builder-result,
 .pvs1-result-card {
-  padding: 1.25rem;
+  padding: 1.45rem;
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(23, 39, 57, 0.08);
@@ -266,7 +357,7 @@
 }
 
 .workflow-stage-kpis {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   margin-top: 1rem;
 }
 
@@ -296,7 +387,7 @@
 }
 
 .workflow-stage-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   margin-top: 1rem;
 }
 
@@ -322,7 +413,7 @@
 
 .organization-panel-meta {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 1rem;
   margin-top: 1rem;
 }
@@ -351,6 +442,34 @@
 
 .command-example-card {
   margin-top: 1rem;
+}
+
+.history-timeline .summary-card,
+.acmg-four-up .info-card,
+.acmg-three-up .summary-card,
+.acmg-two-up .summary-card,
+.workflow-stage-grid article,
+.organization-panel-meta article,
+.criteria-card,
+.case-evidence-option {
+  border-left: 4px solid rgba(47, 149, 184, 0.22);
+}
+
+.history-timeline .summary-card {
+  position: relative;
+  padding-left: 1.2rem;
+}
+
+.history-timeline .summary-card::before {
+  content: "";
+  position: absolute;
+  left: -0.55rem;
+  top: 1.25rem;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 999px;
+  background: rgba(47, 149, 184, 0.22);
+  border: 2px solid rgba(47, 149, 184, 0.45);
 }
 
 .acmg-tier-strip {
@@ -387,7 +506,7 @@
 }
 
 .criteria-controls {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: end;
 }
 
@@ -425,7 +544,7 @@
 }
 
 .criteria-results {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .criteria-card {
@@ -523,7 +642,7 @@
 }
 
 .case-builder {
-  grid-template-columns: minmax(320px, 0.95fr) minmax(0, 1.05fr);
+  grid-template-columns: 1fr;
   align-items: start;
 }
 
@@ -625,14 +744,14 @@
 }
 
 .pvs1-lab {
-  grid-template-columns: minmax(300px, 0.78fr) minmax(0, 1.22fr);
+  grid-template-columns: 1fr;
   align-items: start;
 }
 
 .pvs1-controls {
   display: grid;
   gap: 0.85rem;
-  padding: 1.25rem;
+  padding: 1.45rem;
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(23, 39, 57, 0.08);
@@ -672,13 +791,24 @@
 }
 
 .terminal-layout {
-  grid-template-columns: minmax(270px, 0.82fr) minmax(0, 1.18fr);
+  grid-template-columns: 1fr;
   align-items: start;
+  gap: 1.15rem;
 }
 
 .terminal-sidebar {
   display: grid;
   gap: 1rem;
+}
+
+.terminal-main {
+  display: grid;
+  gap: 1rem;
+  order: 1;
+}
+
+.terminal-sidebar {
+  order: 2;
 }
 
 .terminal-screen {
@@ -777,45 +907,17 @@
 }
 
 @media (max-width: 1180px) {
-  .acmg-four-up {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .history-timeline {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
   .quality-chip-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .criteria-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  .criteria-results {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 980px) {
-  .acmg-hero,
-  .workflow-explorer,
-  .case-builder,
-  .pvs1-lab,
-  .terminal-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .acmg-three-up,
-  .acmg-two-up {
-    grid-template-columns: 1fr;
-  }
-
   .acmg-tier-strip,
-  .workflow-stage-kpis,
-  .workflow-stage-grid,
-  .organization-panel-meta,
   .case-evidence-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -851,20 +953,14 @@
     display: flex;
   }
 
-  .history-timeline,
   .quality-chip-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 640px) {
-  .acmg-four-up,
-  .history-timeline,
   .quality-chip-grid,
   .acmg-tier-strip,
-  .workflow-stage-kpis,
-  .workflow-stage-grid,
-  .organization-panel-meta,
   .criteria-controls,
   .case-evidence-grid {
     grid-template-columns: 1fr;
