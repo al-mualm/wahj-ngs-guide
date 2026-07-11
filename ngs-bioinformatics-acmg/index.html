@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Clinical NGS Lecture 2: Bioinformatics, ACMG and the Command Line</title>
+    <title>Clinical NGS Lecture 1: Bioinformatics, ACMG and the Command Line</title>
     <meta
       name="description"
-      content="A companion clinical NGS lecture on bioinformatics workflow, ACMG/AMP germline variant classification logic, and why command-line analysis improves reproducibility."
+      content="A doctor-facing clinical NGS lecture on bioinformatics workflow, germline ACMG/AMP interpretation, evidence codes, reproducibility, and an interactive terminal simulator."
     />
     <script>
       document.documentElement.classList.add("js");
@@ -46,9 +46,15 @@
         </button>
         <nav class="primary-nav" id="primary-nav" aria-label="Primary">
           <a href="#intro">Intro</a>
+          <a href="#doctor-view">Clinical view</a>
+          <a href="#foundation">Bioinformatics</a>
           <a href="#workflow">Workflow</a>
-          <a href="#acmg">ACMG/AMP</a>
+          <a href="#organizations">Standards</a>
+          <a href="#history">History</a>
+          <a href="#germline-somatic">Germline vs somatic</a>
+          <a href="#classes">Classes</a>
           <a href="#criteria">Criteria</a>
+          <a href="#pvs1">PVS1</a>
           <a href="#command-line">Command line</a>
           <a href="#references">References</a>
           <a href="../ngs/">Main NGS lecture</a>
@@ -58,13 +64,13 @@
       <main>
         <section class="section acmg-hero" id="intro">
           <div class="hero-copy reveal">
-            <span class="section-chip">Clinical NGS • Lecture 2</span>
+            <span class="section-chip">Clinical NGS • Lecture 1</span>
             <h1>Bioinformatics, ACMG and the command line</h1>
             <p class="hero-lead">
-              This companion lecture explains how sequencing data becomes interpretable evidence:
-              raw reads are processed into candidate variants, candidates are evaluated with
-              ACMG/AMP-style logic, and command-line work keeps the analysis traceable and
-              reproducible.
+              This lecture is designed for medical doctors who need to understand how raw
+              sequencing data become clinically interpretable evidence. The focus is not on
+              coding alone; it is on what must happen correctly before any result deserves to be
+              trusted in a report.
             </p>
             <div class="author-panel">
               <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="author-logo" />
@@ -81,9 +87,9 @@
             </div>
             <div class="acmg-hero-note">
               <p>
-                This page is built from the uploaded lecture material and structured as a web
-                lecture rather than a slide download. The emphasis is clinical genomics reasoning,
-                not only terminology.
+                Sequencers generate data, not diagnoses. Bioinformatics organizes the data.
+                Classification organizes the evidence. Clinical interpretation still requires the
+                right phenotype, inheritance model, test scope, and laboratory context.
               </p>
               <div class="reference-link-list" aria-label="Lecture references">
                 <a href="../ngs/">Open the main NGS lecture</a>
@@ -102,165 +108,396 @@
               <span class="meta-label">Opening question</span>
               <h2>The sequencer does not produce a diagnosis</h2>
               <p>
-                Clinical NGS begins with millions of reads, narrows to thousands of candidate
-                variants, then to a few reviewed findings. The lecture question is what transforms
-                the first box into the last one.
+                Clinical NGS starts with millions of reads, narrows to thousands of candidate
+                variants, then to a few reportable findings. This lecture explains what removes
+                false candidates and what converts the remaining findings into defensible
+                classifications.
               </p>
               <div class="pipeline-flow acmg-pipeline">
                 <div class="pipeline-node">
-                  <strong>Millions</strong>
-                  <span>DNA reads</span>
+                  <strong>35 million</strong>
+                  <span>paired reads</span>
                 </div>
                 <div class="pipeline-arrow" aria-hidden="true">›</div>
                 <div class="pipeline-node">
-                  <strong>Thousands</strong>
-                  <span>candidate variants</span>
+                  <strong>62,000</strong>
+                  <span>raw variant calls</span>
                 </div>
                 <div class="pipeline-arrow" aria-hidden="true">›</div>
                 <div class="pipeline-node">
-                  <strong>Dozens</strong>
-                  <span>reviewed variants</span>
+                  <strong>28</strong>
+                  <span>reviewed candidates</span>
                 </div>
                 <div class="pipeline-arrow" aria-hidden="true">›</div>
                 <div class="pipeline-node">
-                  <strong>Few</strong>
+                  <strong>1-3</strong>
                   <span>reportable findings</span>
                 </div>
               </div>
             </article>
             <article class="summary-card">
-              <span class="meta-label">Learning outcome</span>
+              <span class="meta-label">What the audience should leave with</span>
               <ul class="acmg-checklist">
-                <li>Process the data into reliable, searchable variant calls.</li>
-                <li>Evaluate the evidence with ACMG/AMP germline logic.</li>
-                <li>Document the work in a reproducible command-line record.</li>
+                <li>What bioinformatics is and why it is unavoidable in NGS.</li>
+                <li>Why FASTQ, BAM/CRAM, VCF, annotation, and reporting are different checkpoints.</li>
+                <li>How ACMG/AMP evidence codes differ from final five-tier classes.</li>
+                <li>How germline interpretation differs from somatic significance frameworks.</li>
+                <li>Why command-line work matters for traceability, audit trails, and validation.</li>
               </ul>
             </article>
           </aside>
         </section>
 
-        <section class="section" id="workflow">
+        <section class="section" id="doctor-view">
           <div class="section-heading reveal">
-            <span class="section-chip">Workflow checkpoints</span>
-            <h2>Bioinformatics answers a different question at every stage</h2>
+            <span class="section-chip">Clinical view</span>
+            <h2>What a medical doctor should ask before trusting an NGS result</h2>
             <p>
-              The key idea is that FASTQ, BAM/CRAM, VCF, annotation, and report are not
-              interchangeable files. Each one is a checkpoint with its own scientific question.
+              Most downstream interpretation errors begin upstream. If the sample, coverage,
+              alignment, or phenotype context is weak, no evidence code can rescue the result.
             </p>
           </div>
 
-          <div class="workflow-map reveal acmg-workflow-map">
-            <article class="workflow-step">
-              <span>1</span>
-              <h3>FASTQ</h3>
-              <p>Raw reads plus quality scores.</p>
-              <strong>Question: can I trust the letters?</strong>
+          <div class="acmg-four-up reveal">
+            <article class="info-card">
+              <h3>Was the specimen suitable?</h3>
+              <p>
+                Tissue type, DNA integrity, contamination risk, and labeling errors all change the
+                reliability of the final report.
+              </p>
             </article>
-            <article class="workflow-step">
-              <span>2</span>
-              <h3>BAM / CRAM</h3>
-              <p>Reads mapped to a reference with alignment metadata.</p>
-              <strong>Question: where did each read come from?</strong>
+            <article class="info-card">
+              <h3>Was the target region adequately covered?</h3>
+              <p>
+                A negative result is only meaningful if the clinically relevant exons or hotspots
+                were actually sequenced to sufficient depth and quality.
+              </p>
             </article>
-            <article class="workflow-step">
-              <span>3</span>
-              <h3>VCF</h3>
-              <p>Variant records with genotype and quality fields.</p>
-              <strong>Question: what differs from the reference?</strong>
+            <article class="info-card">
+              <h3>Is the detected variant technically real?</h3>
+              <p>
+                Depth, mapping quality, base quality, allele fraction, strand bias, and local
+                sequence context all influence whether a call is trustworthy.
+              </p>
             </article>
-            <article class="workflow-step">
-              <span>4</span>
-              <h3>Annotation</h3>
-              <p>Gene, transcript, population, and disease context.</p>
-              <strong>Question: what is already known?</strong>
+            <article class="info-card">
+              <h3>Does the interpretation framework match the case?</h3>
+              <p>
+                Germline pathogenicity, somatic clinical significance, and tumor oncogenicity are
+                different questions. They do not use interchangeable language.
+              </p>
             </article>
-            <article class="workflow-step">
-              <span>5</span>
-              <h3>Report</h3>
-              <p>Findings that can be responsibly communicated.</p>
-              <strong>Question: what is clinically defensible?</strong>
+          </div>
+
+          <div class="acmg-doctor-callout reveal">
+            <strong>Clinical rule:</strong> the report is the final checkpoint, not the first place
+            where quality problems should be noticed.
+          </div>
+        </section>
+
+        <section class="section section-alt" id="foundation">
+          <div class="section-heading reveal">
+            <span class="section-chip">What is bioinformatics?</span>
+            <h2>Bioinformatics turns biological signal into computable clinical evidence</h2>
+            <p>
+              In clinical genomics, bioinformatics is not only software use. It combines biology,
+              computing, statistics, data management, and laboratory context to produce auditable
+              evidence from sequencing data.
+            </p>
+          </div>
+
+          <div class="acmg-three-up reveal">
+            <article class="summary-card">
+              <h3>Primary analysis</h3>
+              <p>Signal processing and base calling convert the instrument output into sequence data.</p>
+              <ul class="acmg-checklist">
+                <li>BCL or raw machine signal</li>
+                <li>Demultiplexing</li>
+                <li>FASTQ generation</li>
+              </ul>
+            </article>
+            <article class="summary-card">
+              <h3>Secondary analysis</h3>
+              <p>Reads are cleaned, aligned, and converted into technical variant calls.</p>
+              <ul class="acmg-checklist">
+                <li>FASTQ QC and trimming</li>
+                <li>Alignment to reference genome</li>
+                <li>Variant calling, BAM/CRAM, VCF</li>
+              </ul>
+            </article>
+            <article class="summary-card">
+              <h3>Tertiary analysis</h3>
+              <p>Variants are annotated, filtered, prioritized, classified, and reported.</p>
+              <ul class="acmg-checklist">
+                <li>Population and transcript annotation</li>
+                <li>Phenotype-driven prioritization</li>
+                <li>ACMG/AMP evidence review and report drafting</li>
+              </ul>
             </article>
           </div>
 
           <figure class="figure-card reveal">
             <div class="figure-heading">
-              <p class="figure-label">Detection, prioritization and classification</p>
-              <h3>These are different jobs and should not be mixed</h3>
+              <p class="figure-label">Why humans cannot do this manually</p>
+              <h3>Clinical NGS creates a scale that manual review cannot manage safely</h3>
             </div>
-            <div class="acmg-three-up">
-              <article class="info-card">
-                <h4>Detection</h4>
-                <p>Is the variant call technically real?</p>
-                <ul>
-                  <li>Read depth</li>
-                  <li>Base quality</li>
-                  <li>Mapping quality</li>
+            <div class="acmg-two-up">
+              <div class="info-card">
+                <h4>What the data volume does</h4>
+                <ul class="acmg-checklist">
+                  <li>Millions of reads must be aligned reproducibly.</li>
+                  <li>Thousands of raw candidate variants must be filtered consistently.</li>
+                  <li>Every step must be documented with software versions and parameters.</li>
                 </ul>
-              </article>
-              <article class="info-card">
-                <h4>Prioritization</h4>
-                <p>Does the candidate deserve expert review?</p>
-                <ul>
-                  <li>Frequency</li>
-                  <li>Consequence</li>
-                  <li>Inheritance and phenotype fit</li>
+              </div>
+              <div class="info-card">
+                <h4>What the laboratory must still control</h4>
+                <ul class="acmg-checklist">
+                  <li>Sample identity and chain of custody</li>
+                  <li>Pipeline validation and version control</li>
+                  <li>Reference build and transcript selection</li>
+                  <li>Data security, audit trail, and report authorization</li>
                 </ul>
-              </article>
-              <article class="info-card">
-                <h4>Classification</h4>
-                <p>What does the total evidence support?</p>
-                <ul>
-                  <li>Pathogenic direction</li>
-                  <li>Benign direction</li>
-                  <li>Conflict handling</li>
-                </ul>
-              </article>
+              </div>
             </div>
-            <figcaption>
-              A common error in teaching is to jump directly from rarity or a single predictor to a
-              final class. The workflow does not allow that shortcut.
-            </figcaption>
+          </figure>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Quality language doctors should understand</p>
+              <h3>These terms define whether a negative or positive call can be trusted</h3>
+            </div>
+            <div class="quality-chip-grid">
+              <span>Coverage breadth</span>
+              <span>Read depth</span>
+              <span>Base quality</span>
+              <span>Mapping quality</span>
+              <span>Allele fraction</span>
+              <span>Strand bias</span>
+              <span>Contamination</span>
+              <span>Reference build</span>
+              <span>Transcript choice</span>
+              <span>CNV support</span>
+              <span>Repeat expansion visibility</span>
+              <span>mtDNA heteroplasmy</span>
+            </div>
+          </figure>
+
+          <div class="acmg-three-up reveal">
+            <article class="summary-card">
+              <h3>Reference build and transcript choice</h3>
+              <p>
+                A genomic coordinate is meaningful only if the reference build and transcript are
+                explicit. The same variant may receive different cDNA or protein consequences
+                depending on transcript selection.
+              </p>
+              <ul class="acmg-checklist">
+                <li>GRCh37 and GRCh38 coordinates are not interchangeable.</li>
+                <li>Transcript choice changes exon numbering, HGVS, and sometimes consequence class.</li>
+                <li>Every report should document the build and transcript used.</li>
+              </ul>
+            </article>
+            <article class="summary-card">
+              <h3>Variant types the pipeline may or may not detect well</h3>
+              <p>
+                Clinical NGS is not one method for one variant type. Detection performance differs
+                between SNVs, indels, CNVs, structural variants, repeat expansions, and mtDNA
+                heteroplasmy.
+              </p>
+              <ul class="acmg-checklist">
+                <li>SNVs and small indels are the classic strengths of short-read pipelines.</li>
+                <li>CNV and exon-dropout logic need separate evidence and coverage review.</li>
+                <li>Negative results must be interpreted in the context of assay scope.</li>
+              </ul>
+            </article>
+            <article class="summary-card">
+              <h3>Validation, provenance, and security</h3>
+              <p>
+                A clinically defensible result requires pipeline validation, software version
+                control, sample identity checks, audit trails, and secure handling of genomic data.
+              </p>
+              <ul class="acmg-checklist">
+                <li>Sample swaps and contamination can invalidate interpretation before ACMG review starts.</li>
+                <li>Software version drift can change the VCF even when the patient is the same.</li>
+                <li>Audit trails are a laboratory requirement, not optional informatics decoration.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="workflow">
+          <div class="section-heading reveal">
+            <span class="section-chip">Interactive workflow journey</span>
+            <h2>From FASTQ to report: each step removes a different kind of uncertainty</h2>
+            <p>
+              Click a stage to see the input, process, output, key quality checks, typical tools,
+              failure modes, and why a doctor should care about that checkpoint.
+            </p>
+          </div>
+
+          <div class="workflow-explorer reveal" data-workflow-explorer>
+            <div class="workflow-stage-list" role="tablist" aria-label="NGS workflow stages"></div>
+            <div class="workflow-stage-panel" data-workflow-panel></div>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="organizations">
+          <div class="section-heading reveal">
+            <span class="section-chip">Professional roles</span>
+            <h2>Who writes guidance, who accredits, who curates, and who regulates</h2>
+            <p>
+              No single organization controls genetic testing worldwide. Guidance, accreditation,
+              evidence curation, public archives, and government regulation are different layers of
+              responsibility.
+            </p>
+          </div>
+
+          <div class="standards-explorer reveal" data-organization-explorer>
+            <div class="organization-button-row" role="tablist" aria-label="Organizations"></div>
+            <div class="organization-panel" data-organization-panel></div>
+          </div>
+
+          <div class="acmg-doctor-callout reveal">
+            <strong>Critical distinction:</strong> ClinVar is a public archive of submissions.
+            ClinGen provides expert curation and criteria guidance. CAP focuses on laboratory
+            quality systems and inspection, not just variant classification.
+          </div>
+        </section>
+
+        <section class="section" id="history">
+          <div class="section-heading reveal">
+            <span class="section-chip">Before and after standardization</span>
+            <h2>Why the 2015 ACMG/AMP paper changed how laboratories talk about variants</h2>
+            <p>
+              Before standardization, similar evidence could receive labels such as “mutation,”
+              “polymorphism,” “deleterious,” or “unclassified” in different laboratories. The
+              2015 consensus paper standardized the language and weighting framework for germline
+              Mendelian interpretation.
+            </p>
+          </div>
+
+          <div class="history-timeline reveal">
+            <article class="summary-card">
+              <span class="timeline-year">Before 2015</span>
+              <h3>Inconsistent terminology</h3>
+              <p>
+                Terms such as mutation, disease-causing, polymorphism, deleterious, and neutral
+                were used inconsistently and could imply stronger certainty than the evidence
+                actually supported.
+              </p>
+            </article>
+            <article class="summary-card">
+              <span class="timeline-year">2013</span>
+              <h3>Workgroup and surveys</h3>
+              <p>
+                A workgroup with ACMG, AMP, and CAP representation compared laboratory practice,
+                surveyed multiple labs, and tested criteria and terminology against real use.
+              </p>
+            </article>
+            <article class="summary-card">
+              <span class="timeline-year">March 2015</span>
+              <h3>Joint ACMG/AMP recommendation</h3>
+              <p>
+                The final paper established five germline classes, standardized evidence
+                strengths, and published the combination rules that many laboratories still teach
+                today.
+              </p>
+            </article>
+            <article class="summary-card">
+              <span class="timeline-year">2017 onward</span>
+              <h3>Somatic frameworks separate</h3>
+              <p>
+                Later frameworks for cancer variants addressed somatic clinical significance and
+                oncogenicity separately from germline pathogenicity.
+              </p>
+            </article>
+            <article class="summary-card">
+              <span class="timeline-year">ClinGen era</span>
+              <h3>Criteria refinement</h3>
+              <p>
+                ClinGen expert panels and current guidance refine how the original criteria are
+                applied, including PVS1 logic, PM2 strength, segregation, computation, and
+                splicing evidence.
+              </p>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Historical correction</p>
+              <h3>Use the correct citation range for the original paper</h3>
+            </div>
+            <p>
+              The Genetics in Medicine paper by Richards et al. is commonly cited as
+              <strong>2015;17:405-423</strong>. The page range should not be extended to 424.
+            </p>
           </figure>
         </section>
 
-        <section class="section section-alt" id="acmg">
+        <section class="section section-alt" id="germline-somatic">
           <div class="section-heading reveal">
-            <span class="section-chip">Standardization</span>
-            <h2>Why ACMG/AMP guidance was needed</h2>
+            <span class="section-chip">Framework separation</span>
+            <h2>Germline pathogenicity, somatic clinical significance, and oncogenicity are not the same question</h2>
             <p>
-              Before the 2015 consensus paper, laboratories often used different words for similar
-              evidence. The joint ACMG/AMP framework standardized terminology and evidence
-              weighting for germline Mendelian variant interpretation.
+              This distinction is essential for medical doctors. A result can be biologically
+              important in cancer yet not use ACMG/AMP germline wording, and a germline pathogenic
+              variant can have implications for relatives in a way that somatic findings do not.
             </p>
           </div>
 
-          <div class="acmg-org-grid reveal">
-            <article class="summary-card">
-              <h3>ACMG</h3>
-              <p>Medical genetics and genomics practice guidance.</p>
-            </article>
-            <article class="summary-card">
-              <h3>AMP</h3>
-              <p>Molecular pathology and diagnostic standards.</p>
-            </article>
-            <article class="summary-card">
-              <h3>CAP</h3>
-              <p>Laboratory quality, pathology standards, and accreditation influence.</p>
-            </article>
-            <article class="summary-card">
-              <h3>ASCO</h3>
-              <p>Somatic oncology guidance later, not the 2015 germline paper.</p>
-            </article>
-            <article class="summary-card">
-              <h3>ClinGen</h3>
-              <p>Ongoing refinement, expert panel specifications, and criteria updates.</p>
-            </article>
+          <div class="table-wrap reveal">
+            <table>
+              <thead>
+                <tr>
+                  <th>Question</th>
+                  <th>Typical setting</th>
+                  <th>Framework</th>
+                  <th>Typical output language</th>
+                  <th>Why this matters clinically</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Does this variant cause an inherited disorder?</td>
+                  <td>Germline Mendelian testing</td>
+                  <td>ACMG/AMP five-tier classes</td>
+                  <td>Benign to pathogenic</td>
+                  <td>Impacts diagnosis, counseling, recurrence risk, and relatives.</td>
+                </tr>
+                <tr>
+                  <td>Does this tumor alteration affect diagnosis, prognosis, or therapy?</td>
+                  <td>Somatic cancer testing</td>
+                  <td>AMP/ASCO/CAP clinical significance tiers</td>
+                  <td>Tier I to IV significance</td>
+                  <td>Addresses treatment actionability and cancer management, not inherited causation.</td>
+                </tr>
+                <tr>
+                  <td>Does this alteration contribute to cancer biology?</td>
+                  <td>Somatic oncogenicity review</td>
+                  <td>ClinGen/CGC/VICC-type oncogenicity logic</td>
+                  <td>Oncogenic, likely oncogenic, uncertain, etc.</td>
+                  <td>Biologic cancer role is not the same as immediate clinical actionability.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section" id="classes">
+          <div class="section-heading reveal">
+            <span class="section-chip">Five-tier system</span>
+            <h2>ACMG/AMP classes are final conclusions, not individual evidence codes</h2>
+            <p>
+              One of the most important teaching points is that codes such as PVS1, PM2, or BS3
+              are pieces of evidence. The final classification is a separate judgment after those
+              pieces are combined.
+            </p>
           </div>
 
           <figure class="figure-card reveal">
             <div class="figure-heading">
-              <p class="figure-label">Five-tier germline classes</p>
-              <h3>The final class is a conclusion, not a single code</h3>
+              <p class="figure-label">Final germline classes</p>
+              <h3>The class communicates confidence, not absolute certainty</h3>
             </div>
             <div class="acmg-tier-strip" role="img" aria-label="Five-tier ACMG germline classes">
               <div class="tier tier-benign">Benign</div>
@@ -270,151 +507,60 @@
               <div class="tier tier-pathogenic">Pathogenic</div>
             </div>
             <p class="interpretation">
-              “Likely” was intended as a greater-than-90% certainty threshold in the original
-              framework. A category communicates confidence, not absolute certainty.
+              In the original 2015 framework, “likely” was intended as a greater-than-90%
+              certainty threshold. A VUS is a statement about evidence, not a statement that the
+              variant is harmless or disease-causing.
             </p>
           </figure>
-        </section>
-
-        <section class="section" id="criteria">
-          <div class="section-heading reveal">
-            <span class="section-chip">Evidence logic</span>
-            <h2>How to read ACMG/AMP evidence codes</h2>
-            <p>
-              PVS, PS, PM, PP, BA, BS, and BP are evidence directions with defined strengths. The
-              number identifies the criterion; it does not rank criteria within the same strength.
-            </p>
-          </div>
 
           <figure class="figure-card reveal">
             <div class="figure-heading">
-              <p class="figure-label">Evidence strengths</p>
-              <h3>Pathogenic and benign evidence move in opposite directions</h3>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Code family</th>
-                    <th>Meaning</th>
-                    <th>Examples</th>
-                    <th>Teaching caution</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>PVS</td>
-                    <td>Pathogenic, very strong</td>
-                    <td>PVS1 null variant logic</td>
-                    <td>Requires correct mechanism, transcript, exon, and NMD context.</td>
-                  </tr>
-                  <tr>
-                    <td>PS</td>
-                    <td>Pathogenic, strong</td>
-                    <td>PS1, PS2, PS3, PS4</td>
-                    <td>Strong evidence still needs valid source assumptions.</td>
-                  </tr>
-                  <tr>
-                    <td>PM</td>
-                    <td>Pathogenic, moderate</td>
-                    <td>PM1 to PM6</td>
-                    <td>Modern guidance often downgrades PM2 to supporting strength.</td>
-                  </tr>
-                  <tr>
-                    <td>PP</td>
-                    <td>Pathogenic, supporting</td>
-                    <td>PP1 to PP5</td>
-                    <td>Supporting evidence rarely settles a case alone.</td>
-                  </tr>
-                  <tr>
-                    <td>BA / BS / BP</td>
-                    <td>Benign direction</td>
-                    <td>BA1, BS1 to BS4, BP1 to BP7</td>
-                    <td>Benign evidence can override weak pathogenic signals.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </figure>
-
-          <div class="acmg-dual-grid reveal">
-            <article class="figure-card">
-              <div class="figure-heading">
-                <p class="figure-label">Evidence families</p>
-                <h3>Independent directions of evidence</h3>
-              </div>
-              <ul class="acmg-checklist">
-                <li>Population frequency</li>
-                <li>Variant effect and molecular consequence</li>
-                <li>Functional data</li>
-                <li>Cases and controls</li>
-                <li>De novo status</li>
-                <li>Segregation</li>
-                <li>Allelic phase</li>
-                <li>Phenotype specificity</li>
-              </ul>
-            </article>
-
-            <article class="figure-card">
-              <div class="figure-heading">
-                <p class="figure-label">Common traps</p>
-                <h3>Most errors come from overclaiming evidence</h3>
-              </div>
-              <ul class="acmg-checklist">
-                <li>Rare does not automatically mean pathogenic.</li>
-                <li>Several in-silico tools usually count once, not as multiple criteria.</li>
-                <li>ClinVar entries must be checked for stars, date, and evidence quality.</li>
-                <li>Not every stop-gain justifies automatic PVS1.</li>
-                <li>A VUS is not a diagnosis and should not be forced into likely pathogenic.</li>
-              </ul>
-            </article>
-          </div>
-
-          <figure class="figure-card reveal">
-            <div class="figure-heading">
-              <p class="figure-label">Combination logic</p>
-              <h3>The 2015 framework standardizes words and weights</h3>
+              <p class="figure-label">Combination rules</p>
+              <h3>Teach the original 2015 rules completely, not as a partial example</h3>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
                     <th>Final class</th>
-                    <th>Meaning</th>
-                    <th>Typical logic example</th>
-                    <th>Important note</th>
+                    <th>Original 2015 combination rules</th>
+                    <th>Teaching note</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Benign</td>
-                    <td>Evidence strongly argues against disease causation.</td>
-                    <td>BA1 or at least two strong benign criteria.</td>
-                    <td>Use disease-specific frequency logic where available.</td>
-                  </tr>
-                  <tr>
-                    <td>Likely benign</td>
-                    <td>Benign direction is favored but not absolute.</td>
-                    <td>BS plus BP, or at least two supporting benign criteria.</td>
-                    <td>Keep documentation clear when evidence is partial.</td>
-                  </tr>
-                  <tr>
-                    <td>VUS</td>
-                    <td>Evidence is insufficient or conflicting.</td>
-                    <td>Required combination rules are not met.</td>
-                    <td>Do not use alone for treatment or diagnosis.</td>
+                    <td>Pathogenic</td>
+                    <td>
+                      1 Very Strong + 1 Strong, or 2 Moderate, or 1 Moderate + 1 Supporting, or
+                      at least 2 Supporting; or at least 2 Strong; or 1 Strong + 3 Moderate; or
+                      1 Strong + 2 Moderate + at least 2 Supporting; or 1 Strong + 1 Moderate +
+                      at least 4 Supporting.
+                    </td>
+                    <td>These are original ACMG/AMP rules, not the later Bayesian refinements.</td>
                   </tr>
                   <tr>
                     <td>Likely pathogenic</td>
-                    <td>Pathogenic direction is favored with substantial support.</td>
-                    <td>PVS1 with moderate/supporting evidence, or PS with PM.</td>
-                    <td>Current ClinGen specifications may alter original strengths.</td>
+                    <td>
+                      1 Very Strong + 1 Moderate; or 1 Strong + 1-2 Moderate; or 1 Strong + at
+                      least 2 Supporting; or at least 3 Moderate; or 2 Moderate + at least 2
+                      Supporting; or 1 Moderate + at least 4 Supporting.
+                    </td>
+                    <td>Modern ClinGen specifications may alter strength assignments such as PM2.</td>
                   </tr>
                   <tr>
-                    <td>Pathogenic</td>
-                    <td>Evidence strongly supports disease causation.</td>
-                    <td>PVS1 plus strong evidence, or multiple strong criteria.</td>
-                    <td>Still requires the correct disease mechanism and context.</td>
+                    <td>Benign</td>
+                    <td>1 Stand-alone benign criterion or at least 2 Strong benign criteria.</td>
+                    <td>Population thresholds should be disease-specific when validated.</td>
+                  </tr>
+                  <tr>
+                    <td>Likely benign</td>
+                    <td>1 Strong benign plus 1 Supporting benign, or at least 2 Supporting benign.</td>
+                    <td>Conflicting evidence usually pulls the case back into VUS territory.</td>
+                  </tr>
+                  <tr>
+                    <td>VUS</td>
+                    <td>Required pathogenic or benign rules are not met, or the evidence conflicts.</td>
+                    <td>Do not force VUS into pathogenic language because of clinical pressure.</td>
                   </tr>
                 </tbody>
               </table>
@@ -422,132 +568,306 @@
           </figure>
         </section>
 
+        <section class="section section-alt" id="criteria">
+          <div class="section-heading reveal">
+            <span class="section-chip">Evidence-code explorer</span>
+            <h2>Explore every original ACMG/AMP criterion with current cautions</h2>
+            <p>
+              Search by code or topic, filter by evidence direction and strength, and open the
+              details for required data, example use, common misuse, and current ClinGen-era
+              cautions.
+            </p>
+          </div>
+
+          <div class="criteria-controls reveal" data-criteria-controls>
+            <label class="criteria-control">
+              <span>Search</span>
+              <input type="search" id="criteria-search" placeholder="PVS1, de novo, segregation, splicing..." />
+            </label>
+            <label class="criteria-control">
+              <span>Direction</span>
+              <select id="criteria-direction">
+                <option value="all">All</option>
+                <option value="pathogenic">Pathogenic direction</option>
+                <option value="benign">Benign direction</option>
+              </select>
+            </label>
+            <label class="criteria-control">
+              <span>Strength</span>
+              <select id="criteria-strength">
+                <option value="all">All</option>
+                <option value="Very strong">Very strong</option>
+                <option value="Strong">Strong</option>
+                <option value="Moderate">Moderate</option>
+                <option value="Supporting">Supporting</option>
+                <option value="Stand-alone">Stand-alone</option>
+              </select>
+            </label>
+            <p class="criteria-status" id="criteria-status">Loading criteria...</p>
+          </div>
+
+          <div class="criteria-results reveal" id="criteria-results"></div>
+        </section>
+
+        <section class="section" id="case-builder">
+          <div class="section-heading reveal">
+            <span class="section-chip">Interactive case builder</span>
+            <h2>Combine evidence cards and see why a case lands in P, LP, VUS, LB, or B</h2>
+            <p>
+              This teaching tool uses the original 2015 ACMG/AMP combination logic, with an
+              educational example of modified supporting strength such as PM2_supporting. It is
+              not an automatic clinical classifier.
+            </p>
+          </div>
+
+          <div class="case-builder reveal" data-case-builder>
+            <div class="case-builder-controls">
+              <div class="case-builder-presets" aria-label="Case builder presets">
+                <button type="button" data-case-preset="lof">Classic loss-of-function case</button>
+                <button type="button" data-case-preset="vus">Rare but unresolved case</button>
+                <button type="button" data-case-preset="conflict">Conflicting evidence case</button>
+                <button type="button" data-case-preset="benign">Clearly benign case</button>
+              </div>
+              <div class="case-evidence-grid" id="case-evidence-grid"></div>
+            </div>
+            <div class="case-builder-result" id="case-builder-result"></div>
+          </div>
+        </section>
+
+        <section class="section" id="pvs1">
+          <div class="section-heading reveal">
+            <span class="section-chip">PVS1 teaching tree</span>
+            <h2>PVS1 is powerful, but only when the biology and transcript logic fit</h2>
+            <p>
+              This teaching tool is simplified, but it shows why null variants are not
+              automatically “very strong.” The gene mechanism, transcript, and predicted protein
+              consequence must support loss of function as the disease mechanism.
+            </p>
+          </div>
+
+          <div class="pvs1-lab reveal" data-pvs1-lab>
+            <div class="pvs1-controls">
+              <label>
+                <span>Is loss of function a known disease mechanism?</span>
+                <select id="pvs1-mechanism">
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </label>
+              <label>
+                <span>Is the affected transcript clinically relevant?</span>
+                <select id="pvs1-transcript">
+                  <option value="yes">Yes</option>
+                  <option value="no">No / uncertain</option>
+                </select>
+              </label>
+              <label>
+                <span>What is the predicted consequence?</span>
+                <select id="pvs1-consequence">
+                  <option value="nmd">Early truncation with likely NMD</option>
+                  <option value="critical">Escapes NMD but removes a critical region</option>
+                  <option value="uncertain">Partial effect or uncertain region</option>
+                  <option value="intact">Predicted exon skipping leaves the remainder largely intact</option>
+                </select>
+              </label>
+            </div>
+            <div class="pvs1-result-card" id="pvs1-result"></div>
+          </div>
+        </section>
+
         <section class="section section-alt" id="command-line">
           <div class="section-heading reveal">
-            <span class="section-chip">Reproducibility</span>
-            <h2>Why command-line work matters in clinical genomics teaching</h2>
+            <span class="section-chip">Interactive command line</span>
+            <h2>Why the command line belongs in a clinical NGS lecture</h2>
             <p>
-              Graphical interfaces remain useful, but command-line analysis becomes essential when
-              workflows must be repeatable, traceable, automatable, and suitable for servers or
-              high-performance computing.
+              Doctors do not need to become bioinformatics engineers, but they should understand
+              why command-line work remains central to validation, reproducibility, provenance, and
+              the exact recovery of a result during review or audit.
             </p>
           </div>
 
           <div class="acmg-three-up reveal">
             <article class="summary-card">
-              <h3>Repeatable</h3>
-              <p>Run the same operation across many samples with the same parameters.</p>
+              <h3>Terminal, shell, CLI</h3>
+              <p>
+                The terminal is the window. The shell interprets commands. The command-line
+                interface is the text-based way we tell programs what to do.
+              </p>
             </article>
             <article class="summary-card">
-              <h3>Traceable</h3>
-              <p>Save commands, versions, and filters so another person can reconstruct the work.</p>
+              <h3>Paths and files</h3>
+              <p>
+                Doctors should recognize working directory, absolute path, relative path,
+                compressed files, and why file names must match the sample and report.
+              </p>
             </article>
             <article class="summary-card">
-              <h3>Automatable</h3>
-              <p>Connect QC, alignment, variant calling, and filtering into one pipeline.</p>
+              <h3>Safety and audit</h3>
+              <p>
+                Good command-line practice means using <code>--help</code>, documenting versions,
+                logging commands, and avoiding destructive actions when reviewing patient data.
+              </p>
             </article>
           </div>
 
-          <figure class="figure-card reveal">
-            <div class="figure-heading">
-              <p class="figure-label">Read a command before running it</p>
-              <h3>Every command has a small grammar</h3>
-            </div>
-            <pre class="acmg-command-block"><code>bcftools view -i 'QUAL&gt;30 &amp;&amp; INFO/DP&gt;10' sample.vcf.gz
+          <div class="command-concepts reveal" data-command-concepts>
+            <div class="command-concept-buttons" role="tablist" aria-label="Command line concepts"></div>
+            <div class="command-concept-panel" data-command-concept-panel></div>
+          </div>
 
-PROGRAM    bcftools
-SUBCOMMAND view
-OPTION     -i
-EXPRESSION quality and depth rule
-INPUT      sample.vcf.gz</code></pre>
-            <p class="interpretation">
-              Do not copy a command until you can explain its input, output, and assumptions.
+          <div class="terminal-simulator reveal" data-terminal-simulator>
+            <div class="terminal-toolbar">
+              <div class="terminal-preset-row" aria-label="Guided command presets">
+                <button type="button" data-terminal-command="pwd">pwd</button>
+                <button type="button" data-terminal-command="ls -lh">ls -lh</button>
+                <button type="button" data-terminal-command="cd data">cd data</button>
+                <button type="button" data-terminal-command="zcat sample_R1.fastq.gz | head -n 8">Inspect FASTQ</button>
+                <button type="button" data-terminal-command="ls *.gz">Wildcards</button>
+                <button type="button" data-terminal-command="samtools --help | head -n 5">--help</button>
+                <button type="button" data-terminal-command="fastp --version">Version</button>
+                <button type="button" data-terminal-command="samtools flagstat sample.bam">BAM summary</button>
+                <button type="button" data-terminal-command="samtools depth -r chr7:117199640-117199660 sample.bam | head -n 5">Depth</button>
+                <button type="button" data-terminal-command="zgrep '^#' sample.vcf.gz | head -n 5">VCF header</button>
+                <button type="button" data-terminal-command="bcftools view -H -r chr7:117199640-117199710 sample.vcf.gz">One variant</button>
+                <button type="button" data-terminal-command="bcftools view -i 'QUAL>30 && FORMAT/DP>10' sample.vcf.gz | head -n 3">Quality filter</button>
+                <button
+                  type="button"
+                  data-terminal-command="bwa-mem2 mem -t 8 ../reference/GRCh38.primary_assembly.fa sample_R1.fastq.gz sample_R2.fastq.gz | samtools sort -o sample.new.bam"
+                >
+                  Align example
+                </button>
+                <button type="button" data-terminal-command="sha256sum sample_R1.fastq.gz">Checksum</button>
+                <button type="button" data-terminal-command="echo $?">Exit code</button>
+              </div>
+            </div>
+
+            <div class="terminal-layout">
+              <aside class="terminal-sidebar">
+                <article class="summary-card">
+                  <span class="meta-label">Virtual workshop files</span>
+                  <div id="terminal-filemap"></div>
+                </article>
+                <article class="summary-card">
+                  <span class="meta-label">Last command breakdown</span>
+                  <div id="terminal-breakdown" class="terminal-breakdown">
+                    Run a command to see what the program, subcommand, options, input, and output mean.
+                  </div>
+                </article>
+                <article class="summary-card">
+                  <span class="meta-label">Clinical message</span>
+                  <p id="terminal-note">
+                    A laboratory should be able to reconstruct the exact command path that produced
+                    a reportable finding.
+                  </p>
+                </article>
+              </aside>
+
+              <div class="terminal-main">
+                <div class="terminal-screen" id="terminal-output" aria-live="polite"></div>
+                <form class="terminal-input-row" id="terminal-form">
+                  <span class="terminal-prompt" id="terminal-prompt"></span>
+                  <input
+                    id="terminal-input"
+                    type="text"
+                    autocomplete="off"
+                    spellcheck="false"
+                    value="pwd"
+                    aria-label="Command input"
+                  />
+                  <button type="submit" class="primary-action">Run</button>
+                </form>
+                <div class="terminal-helper-row">
+                  <button type="button" class="secondary-action" id="terminal-reset">Reset terminal</button>
+                  <button type="button" class="secondary-action" id="terminal-walkthrough">Run guided walkthrough</button>
+                </div>
+                <p class="terminal-disclaimer">
+                  This is a safe teaching simulator. It accepts the guided commands defined for the
+                  lecture and does not execute anything on your computer.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section section-alt" id="reporting">
+          <div class="section-heading reveal">
+            <span class="section-chip">Reporting and reclassification</span>
+            <h2>What the final report should say clearly, and what it should not overclaim</h2>
+            <p>
+              The last interpretive job is communication. Reports should separate detected
+              findings, limitations, VUS language, phenotype correlation, and future
+              reclassification pathways.
             </p>
-          </figure>
+          </div>
 
-          <figure class="figure-card reveal">
-            <div class="figure-heading">
-              <p class="figure-label">Starter commands</p>
-              <h3>Six commands are enough to begin exploring NGS files</h3>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Command</th>
-                    <th>Question answered</th>
-                    <th>Use in class</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><code>pwd</code></td>
-                    <td>Where am I?</td>
-                    <td>Orient students to the working directory.</td>
-                  </tr>
-                  <tr>
-                    <td><code>ls -lh</code></td>
-                    <td>What files are here?</td>
-                    <td>Show file names, sizes, and workflow checkpoints.</td>
-                  </tr>
-                  <tr>
-                    <td><code>cd data</code></td>
-                    <td>How do I move into the folder I need?</td>
-                    <td>Keep the story continuous during demonstration.</td>
-                  </tr>
-                  <tr>
-                    <td><code>head sample.fastq</code></td>
-                    <td>What do the first reads look like?</td>
-                    <td>Connect raw reads to quality strings.</td>
-                  </tr>
-                  <tr>
-                    <td><code>wc -l sample.fastq</code></td>
-                    <td>How many lines or records are present?</td>
-                    <td>Remind students that FASTQ uses four lines per read.</td>
-                  </tr>
-                  <tr>
-                    <td><code>grep '^#' sample.vcf</code></td>
-                    <td>What is the VCF header telling me?</td>
-                    <td>Show metadata before discussing any single variant row.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </figure>
+          <div class="acmg-four-up reveal">
+            <article class="summary-card">
+              <h3>VUS communication</h3>
+              <p>
+                A VUS should remain uncertain in the report. It should not be described as
+                disease-causing only because it is rare or located in an interesting gene.
+              </p>
+            </article>
+            <article class="summary-card">
+              <h3>Limitations statement</h3>
+              <p>
+                The report should state uncovered regions, low-confidence regions, assay scope,
+                and what variant classes may not be well assessed by the method used.
+              </p>
+            </article>
+            <article class="summary-card">
+              <h3>ClinVar and reanalysis</h3>
+              <p>
+                ClinVar is a useful public archive, but not the only authority. Reanalysis may
+                change a VUS or even refine a previously reported pathogenic interpretation.
+              </p>
+            </article>
+            <article class="summary-card">
+              <h3>Family and phenotype context</h3>
+              <p>
+                Segregation studies, updated phenotype information, copy-number testing, and
+                orthogonal confirmation can all change how a variant is finally interpreted.
+              </p>
+            </article>
+          </div>
+
+          <div class="acmg-doctor-callout reveal">
+            <strong>Reporting rule:</strong> a clinically good report does not only say what was
+            found; it also says what was not confidently ruled out.
+          </div>
         </section>
 
         <section class="section" id="references">
           <div class="section-heading reveal">
-            <span class="section-chip">Synthesis</span>
-            <h2>What students should remember from this lecture</h2>
+            <span class="section-chip">References and take-home points</span>
+            <h2>Keep the clinical logic transparent</h2>
             <p>
-              A sequencer generates data, not a diagnosis. Bioinformatics organizes that data,
-              classification evaluates the evidence, and the command line makes the path explicit.
+              A good NGS lecture for doctors should end with a question: if the classification
+              changed tomorrow, what new evidence would have caused that change?
             </p>
           </div>
 
-          <div class="acmg-takeaways reveal">
+          <div class="acmg-two-up reveal">
             <article class="summary-card">
               <h3>Take-home messages</h3>
               <ul class="acmg-checklist">
-                <li>FASTQ, BAM/CRAM, and VCF answer different questions.</li>
-                <li>Filtering, prioritization, and classification are separate steps.</li>
-                <li>ACMG/AMP uses five final germline classes.</li>
-                <li>Evidence codes are weighted observations, not conclusions by themselves.</li>
-                <li>Current ClinGen and gene-specific refinements must be checked.</li>
-                <li>The command line supports reproducibility and auditability.</li>
+                <li>Sequencing data are not a diagnosis.</li>
+                <li>FASTQ, BAM/CRAM, and VCF are different checkpoints, not interchangeable files.</li>
+                <li>Detection, prioritization, classification, and reporting are separate jobs.</li>
+                <li>ACMG/AMP codes are evidence items; the five-tier class is the conclusion.</li>
+                <li>ClinGen guidance refines many original criteria and must be checked.</li>
+                <li>Command-line work makes the analysis reproducible, reviewable, and auditable.</li>
               </ul>
             </article>
-
             <article class="summary-card">
-              <h3>Core references</h3>
+              <h3>Primary sources</h3>
               <ol class="reference-list">
-                <li>Richards S, Aziz N, Bale S, et al. Genetics in Medicine. 2015;17:405-424.</li>
-                <li>ClinGen Variant Classification Guidance, updated July 2025.</li>
+                <li>Richards S, Aziz N, Bale S, et al. Genetics in Medicine. 2015;17:405-423.</li>
+                <li>ClinGen Variant Classification Guidance. Updated July 2025.</li>
                 <li>Li MM, Datto M, Duncavage EJ, et al. J Mol Diagn. 2017;19:4-23.</li>
                 <li>Horak P, Griffith M, Danos AM, et al. Genetics in Medicine. 2022;24:986-998.</li>
               </ol>
-              <div class="reference-link-list" aria-label="Reference downloads">
+              <div class="reference-link-list" aria-label="Reference links">
                 <a
                   href="../docs/reference-papers/acmg-guidelines-paper.pdf"
                   download="acmg-guidelines-paper.pdf"
@@ -569,5 +889,6 @@ INPUT      sample.vcf.gz</code></pre>
 
     <script src="../config.js"></script>
     <script src="../script.js"></script>
+    <script src="./ngs-bioinformatics-acmg.js"></script>
   </body>
 </html>
