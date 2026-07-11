@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clinical NGS Lecture 2: Bioinformatics, ACMG and the Command Line</title>
+    <meta
+      name="description"
+      content="A companion clinical NGS lecture on bioinformatics workflow, ACMG/AMP germline variant classification logic, and why command-line analysis improves reproducibility."
+    />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./ngs-bioinformatics-acmg.css" />
+  </head>
+  <body class="ngs-acmg-page">
+    <div class="site-shell">
+      <header class="site-header" id="top">
+        <div class="brand-lockup">
+          <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Educational Handbook</p>
+            <p class="brand-title">Wahj Al-DNA</p>
+          </div>
+        </div>
+        <div class="language-switch" aria-label="Language switch">
+          <a class="language-link is-active" href="./">English</a>
+          <a class="language-link" href="../hub-ar/#ngs">العربية</a>
+        </div>
+        <div class="reader-badge" aria-live="polite">
+          <p class="reader-label">Visits</p>
+          <p class="reader-count"><span id="reader-count">Loading...</span></p>
+          <p class="reader-note" id="reader-note">
+            Anonymous visit count updates automatically. No personal information is collected.
+          </p>
+        </div>
+        <a class="hub-link" href="../">All topics</a>
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="primary-nav"
+        >
+          Menu
+        </button>
+        <nav class="primary-nav" id="primary-nav" aria-label="Primary">
+          <a href="#intro">Intro</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#acmg">ACMG/AMP</a>
+          <a href="#criteria">Criteria</a>
+          <a href="#command-line">Command line</a>
+          <a href="#references">References</a>
+          <a href="../ngs/">Main NGS lecture</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="section acmg-hero" id="intro">
+          <div class="hero-copy reveal">
+            <span class="section-chip">Clinical NGS • Lecture 2</span>
+            <h1>Bioinformatics, ACMG and the command line</h1>
+            <p class="hero-lead">
+              This companion lecture explains how sequencing data becomes interpretable evidence:
+              raw reads are processed into candidate variants, candidates are evaluated with
+              ACMG/AMP-style logic, and command-line work keeps the analysis traceable and
+              reproducible.
+            </p>
+            <div class="author-panel">
+              <img src="../assets/wahj-logo.png" alt="Wahj Al-DNA logo" class="author-logo" />
+              <div>
+                <p class="meta-label">Prepared by</p>
+                <h2>Mahmood Al-Mualm</h2>
+                <p>CEO of Wahj Al-DNA</p>
+                <p class="author-link">
+                  <a href="https://wahj-dna.com.iq/en/home/" target="_blank" rel="noreferrer"
+                    >wahj-dna.com.iq/en/home</a
+                  >
+                </p>
+              </div>
+            </div>
+            <div class="acmg-hero-note">
+              <p>
+                This page is built from the uploaded lecture material and structured as a web
+                lecture rather than a slide download. The emphasis is clinical genomics reasoning,
+                not only terminology.
+              </p>
+              <div class="reference-link-list" aria-label="Lecture references">
+                <a href="../ngs/">Open the main NGS lecture</a>
+                <a
+                  href="../docs/reference-papers/acmg-guidelines-paper.pdf"
+                  download="acmg-guidelines-paper.pdf"
+                  type="application/pdf"
+                  >Download ACMG guideline paper (PDF)</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <aside class="acmg-hero-side reveal">
+            <article class="summary-card">
+              <span class="meta-label">Opening question</span>
+              <h2>The sequencer does not produce a diagnosis</h2>
+              <p>
+                Clinical NGS begins with millions of reads, narrows to thousands of candidate
+                variants, then to a few reviewed findings. The lecture question is what transforms
+                the first box into the last one.
+              </p>
+              <div class="pipeline-flow acmg-pipeline">
+                <div class="pipeline-node">
+                  <strong>Millions</strong>
+                  <span>DNA reads</span>
+                </div>
+                <div class="pipeline-arrow" aria-hidden="true">›</div>
+                <div class="pipeline-node">
+                  <strong>Thousands</strong>
+                  <span>candidate variants</span>
+                </div>
+                <div class="pipeline-arrow" aria-hidden="true">›</div>
+                <div class="pipeline-node">
+                  <strong>Dozens</strong>
+                  <span>reviewed variants</span>
+                </div>
+                <div class="pipeline-arrow" aria-hidden="true">›</div>
+                <div class="pipeline-node">
+                  <strong>Few</strong>
+                  <span>reportable findings</span>
+                </div>
+              </div>
+            </article>
+            <article class="summary-card">
+              <span class="meta-label">Learning outcome</span>
+              <ul class="acmg-checklist">
+                <li>Process the data into reliable, searchable variant calls.</li>
+                <li>Evaluate the evidence with ACMG/AMP germline logic.</li>
+                <li>Document the work in a reproducible command-line record.</li>
+              </ul>
+            </article>
+          </aside>
+        </section>
+
+        <section class="section" id="workflow">
+          <div class="section-heading reveal">
+            <span class="section-chip">Workflow checkpoints</span>
+            <h2>Bioinformatics answers a different question at every stage</h2>
+            <p>
+              The key idea is that FASTQ, BAM/CRAM, VCF, annotation, and report are not
+              interchangeable files. Each one is a checkpoint with its own scientific question.
+            </p>
+          </div>
+
+          <div class="workflow-map reveal acmg-workflow-map">
+            <article class="workflow-step">
+              <span>1</span>
+              <h3>FASTQ</h3>
+              <p>Raw reads plus quality scores.</p>
+              <strong>Question: can I trust the letters?</strong>
+            </article>
+            <article class="workflow-step">
+              <span>2</span>
+              <h3>BAM / CRAM</h3>
+              <p>Reads mapped to a reference with alignment metadata.</p>
+              <strong>Question: where did each read come from?</strong>
+            </article>
+            <article class="workflow-step">
+              <span>3</span>
+              <h3>VCF</h3>
+              <p>Variant records with genotype and quality fields.</p>
+              <strong>Question: what differs from the reference?</strong>
+            </article>
+            <article class="workflow-step">
+              <span>4</span>
+              <h3>Annotation</h3>
+              <p>Gene, transcript, population, and disease context.</p>
+              <strong>Question: what is already known?</strong>
+            </article>
+            <article class="workflow-step">
+              <span>5</span>
+              <h3>Report</h3>
+              <p>Findings that can be responsibly communicated.</p>
+              <strong>Question: what is clinically defensible?</strong>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Detection, prioritization and classification</p>
+              <h3>These are different jobs and should not be mixed</h3>
+            </div>
+            <div class="acmg-three-up">
+              <article class="info-card">
+                <h4>Detection</h4>
+                <p>Is the variant call technically real?</p>
+                <ul>
+                  <li>Read depth</li>
+                  <li>Base quality</li>
+                  <li>Mapping quality</li>
+                </ul>
+              </article>
+              <article class="info-card">
+                <h4>Prioritization</h4>
+                <p>Does the candidate deserve expert review?</p>
+                <ul>
+                  <li>Frequency</li>
+                  <li>Consequence</li>
+                  <li>Inheritance and phenotype fit</li>
+                </ul>
+              </article>
+              <article class="info-card">
+                <h4>Classification</h4>
+                <p>What does the total evidence support?</p>
+                <ul>
+                  <li>Pathogenic direction</li>
+                  <li>Benign direction</li>
+                  <li>Conflict handling</li>
+                </ul>
+              </article>
+            </div>
+            <figcaption>
+              A common error in teaching is to jump directly from rarity or a single predictor to a
+              final class. The workflow does not allow that shortcut.
+            </figcaption>
+          </figure>
+        </section>
+
+        <section class="section section-alt" id="acmg">
+          <div class="section-heading reveal">
+            <span class="section-chip">Standardization</span>
+            <h2>Why ACMG/AMP guidance was needed</h2>
+            <p>
+              Before the 2015 consensus paper, laboratories often used different words for similar
+              evidence. The joint ACMG/AMP framework standardized terminology and evidence
+              weighting for germline Mendelian variant interpretation.
+            </p>
+          </div>
+
+          <div class="acmg-org-grid reveal">
+            <article class="summary-card">
+              <h3>ACMG</h3>
+              <p>Medical genetics and genomics practice guidance.</p>
+            </article>
+            <article class="summary-card">
+              <h3>AMP</h3>
+              <p>Molecular pathology and diagnostic standards.</p>
+            </article>
+            <article class="summary-card">
+              <h3>CAP</h3>
+              <p>Laboratory quality, pathology standards, and accreditation influence.</p>
+            </article>
+            <article class="summary-card">
+              <h3>ASCO</h3>
+              <p>Somatic oncology guidance later, not the 2015 germline paper.</p>
+            </article>
+            <article class="summary-card">
+              <h3>ClinGen</h3>
+              <p>Ongoing refinement, expert panel specifications, and criteria updates.</p>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Five-tier germline classes</p>
+              <h3>The final class is a conclusion, not a single code</h3>
+            </div>
+            <div class="acmg-tier-strip" role="img" aria-label="Five-tier ACMG germline classes">
+              <div class="tier tier-benign">Benign</div>
+              <div class="tier tier-likely-benign">Likely benign</div>
+              <div class="tier tier-vus">VUS</div>
+              <div class="tier tier-likely-pathogenic">Likely pathogenic</div>
+              <div class="tier tier-pathogenic">Pathogenic</div>
+            </div>
+            <p class="interpretation">
+              “Likely” was intended as a greater-than-90% certainty threshold in the original
+              framework. A category communicates confidence, not absolute certainty.
+            </p>
+          </figure>
+        </section>
+
+        <section class="section" id="criteria">
+          <div class="section-heading reveal">
+            <span class="section-chip">Evidence logic</span>
+            <h2>How to read ACMG/AMP evidence codes</h2>
+            <p>
+              PVS, PS, PM, PP, BA, BS, and BP are evidence directions with defined strengths. The
+              number identifies the criterion; it does not rank criteria within the same strength.
+            </p>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Evidence strengths</p>
+              <h3>Pathogenic and benign evidence move in opposite directions</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Code family</th>
+                    <th>Meaning</th>
+                    <th>Examples</th>
+                    <th>Teaching caution</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>PVS</td>
+                    <td>Pathogenic, very strong</td>
+                    <td>PVS1 null variant logic</td>
+                    <td>Requires correct mechanism, transcript, exon, and NMD context.</td>
+                  </tr>
+                  <tr>
+                    <td>PS</td>
+                    <td>Pathogenic, strong</td>
+                    <td>PS1, PS2, PS3, PS4</td>
+                    <td>Strong evidence still needs valid source assumptions.</td>
+                  </tr>
+                  <tr>
+                    <td>PM</td>
+                    <td>Pathogenic, moderate</td>
+                    <td>PM1 to PM6</td>
+                    <td>Modern guidance often downgrades PM2 to supporting strength.</td>
+                  </tr>
+                  <tr>
+                    <td>PP</td>
+                    <td>Pathogenic, supporting</td>
+                    <td>PP1 to PP5</td>
+                    <td>Supporting evidence rarely settles a case alone.</td>
+                  </tr>
+                  <tr>
+                    <td>BA / BS / BP</td>
+                    <td>Benign direction</td>
+                    <td>BA1, BS1 to BS4, BP1 to BP7</td>
+                    <td>Benign evidence can override weak pathogenic signals.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </figure>
+
+          <div class="acmg-dual-grid reveal">
+            <article class="figure-card">
+              <div class="figure-heading">
+                <p class="figure-label">Evidence families</p>
+                <h3>Independent directions of evidence</h3>
+              </div>
+              <ul class="acmg-checklist">
+                <li>Population frequency</li>
+                <li>Variant effect and molecular consequence</li>
+                <li>Functional data</li>
+                <li>Cases and controls</li>
+                <li>De novo status</li>
+                <li>Segregation</li>
+                <li>Allelic phase</li>
+                <li>Phenotype specificity</li>
+              </ul>
+            </article>
+
+            <article class="figure-card">
+              <div class="figure-heading">
+                <p class="figure-label">Common traps</p>
+                <h3>Most errors come from overclaiming evidence</h3>
+              </div>
+              <ul class="acmg-checklist">
+                <li>Rare does not automatically mean pathogenic.</li>
+                <li>Several in-silico tools usually count once, not as multiple criteria.</li>
+                <li>ClinVar entries must be checked for stars, date, and evidence quality.</li>
+                <li>Not every stop-gain justifies automatic PVS1.</li>
+                <li>A VUS is not a diagnosis and should not be forced into likely pathogenic.</li>
+              </ul>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Combination logic</p>
+              <h3>The 2015 framework standardizes words and weights</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Final class</th>
+                    <th>Meaning</th>
+                    <th>Typical logic example</th>
+                    <th>Important note</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Benign</td>
+                    <td>Evidence strongly argues against disease causation.</td>
+                    <td>BA1 or at least two strong benign criteria.</td>
+                    <td>Use disease-specific frequency logic where available.</td>
+                  </tr>
+                  <tr>
+                    <td>Likely benign</td>
+                    <td>Benign direction is favored but not absolute.</td>
+                    <td>BS plus BP, or at least two supporting benign criteria.</td>
+                    <td>Keep documentation clear when evidence is partial.</td>
+                  </tr>
+                  <tr>
+                    <td>VUS</td>
+                    <td>Evidence is insufficient or conflicting.</td>
+                    <td>Required combination rules are not met.</td>
+                    <td>Do not use alone for treatment or diagnosis.</td>
+                  </tr>
+                  <tr>
+                    <td>Likely pathogenic</td>
+                    <td>Pathogenic direction is favored with substantial support.</td>
+                    <td>PVS1 with moderate/supporting evidence, or PS with PM.</td>
+                    <td>Current ClinGen specifications may alter original strengths.</td>
+                  </tr>
+                  <tr>
+                    <td>Pathogenic</td>
+                    <td>Evidence strongly supports disease causation.</td>
+                    <td>PVS1 plus strong evidence, or multiple strong criteria.</td>
+                    <td>Still requires the correct disease mechanism and context.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </figure>
+        </section>
+
+        <section class="section section-alt" id="command-line">
+          <div class="section-heading reveal">
+            <span class="section-chip">Reproducibility</span>
+            <h2>Why command-line work matters in clinical genomics teaching</h2>
+            <p>
+              Graphical interfaces remain useful, but command-line analysis becomes essential when
+              workflows must be repeatable, traceable, automatable, and suitable for servers or
+              high-performance computing.
+            </p>
+          </div>
+
+          <div class="acmg-three-up reveal">
+            <article class="summary-card">
+              <h3>Repeatable</h3>
+              <p>Run the same operation across many samples with the same parameters.</p>
+            </article>
+            <article class="summary-card">
+              <h3>Traceable</h3>
+              <p>Save commands, versions, and filters so another person can reconstruct the work.</p>
+            </article>
+            <article class="summary-card">
+              <h3>Automatable</h3>
+              <p>Connect QC, alignment, variant calling, and filtering into one pipeline.</p>
+            </article>
+          </div>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Read a command before running it</p>
+              <h3>Every command has a small grammar</h3>
+            </div>
+            <pre class="acmg-command-block"><code>bcftools view -i 'QUAL&gt;30 &amp;&amp; INFO/DP&gt;10' sample.vcf.gz
+
+PROGRAM    bcftools
+SUBCOMMAND view
+OPTION     -i
+EXPRESSION quality and depth rule
+INPUT      sample.vcf.gz</code></pre>
+            <p class="interpretation">
+              Do not copy a command until you can explain its input, output, and assumptions.
+            </p>
+          </figure>
+
+          <figure class="figure-card reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Starter commands</p>
+              <h3>Six commands are enough to begin exploring NGS files</h3>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Command</th>
+                    <th>Question answered</th>
+                    <th>Use in class</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>pwd</code></td>
+                    <td>Where am I?</td>
+                    <td>Orient students to the working directory.</td>
+                  </tr>
+                  <tr>
+                    <td><code>ls -lh</code></td>
+                    <td>What files are here?</td>
+                    <td>Show file names, sizes, and workflow checkpoints.</td>
+                  </tr>
+                  <tr>
+                    <td><code>cd data</code></td>
+                    <td>How do I move into the folder I need?</td>
+                    <td>Keep the story continuous during demonstration.</td>
+                  </tr>
+                  <tr>
+                    <td><code>head sample.fastq</code></td>
+                    <td>What do the first reads look like?</td>
+                    <td>Connect raw reads to quality strings.</td>
+                  </tr>
+                  <tr>
+                    <td><code>wc -l sample.fastq</code></td>
+                    <td>How many lines or records are present?</td>
+                    <td>Remind students that FASTQ uses four lines per read.</td>
+                  </tr>
+                  <tr>
+                    <td><code>grep '^#' sample.vcf</code></td>
+                    <td>What is the VCF header telling me?</td>
+                    <td>Show metadata before discussing any single variant row.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </figure>
+        </section>
+
+        <section class="section" id="references">
+          <div class="section-heading reveal">
+            <span class="section-chip">Synthesis</span>
+            <h2>What students should remember from this lecture</h2>
+            <p>
+              A sequencer generates data, not a diagnosis. Bioinformatics organizes that data,
+              classification evaluates the evidence, and the command line makes the path explicit.
+            </p>
+          </div>
+
+          <div class="acmg-takeaways reveal">
+            <article class="summary-card">
+              <h3>Take-home messages</h3>
+              <ul class="acmg-checklist">
+                <li>FASTQ, BAM/CRAM, and VCF answer different questions.</li>
+                <li>Filtering, prioritization, and classification are separate steps.</li>
+                <li>ACMG/AMP uses five final germline classes.</li>
+                <li>Evidence codes are weighted observations, not conclusions by themselves.</li>
+                <li>Current ClinGen and gene-specific refinements must be checked.</li>
+                <li>The command line supports reproducibility and auditability.</li>
+              </ul>
+            </article>
+
+            <article class="summary-card">
+              <h3>Core references</h3>
+              <ol class="reference-list">
+                <li>Richards S, Aziz N, Bale S, et al. Genetics in Medicine. 2015;17:405-424.</li>
+                <li>ClinGen Variant Classification Guidance, updated July 2025.</li>
+                <li>Li MM, Datto M, Duncavage EJ, et al. J Mol Diagn. 2017;19:4-23.</li>
+                <li>Horak P, Griffith M, Danos AM, et al. Genetics in Medicine. 2022;24:986-998.</li>
+              </ol>
+              <div class="reference-link-list" aria-label="Reference downloads">
+                <a
+                  href="../docs/reference-papers/acmg-guidelines-paper.pdf"
+                  download="acmg-guidelines-paper.pdf"
+                  type="application/pdf"
+                  >Download ACMG guideline paper (PDF)</a
+                >
+                <a
+                  href="https://www.genomatics.net/guides/acmg-variant-classification-guide"
+                  target="_blank"
+                  rel="noreferrer"
+                  >Open Genomatics ACMG guide</a
+                >
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="../script.js"></script>
+  </body>
+</html>

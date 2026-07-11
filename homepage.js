@@ -69,12 +69,12 @@ const homepageCopy = {
             chips: ["Workflow", "Applications", "Interpretation"],
           },
           {
-            badge: "Slides",
-            title: "Clinical NGS lecture slides",
+            badge: "Lecture",
+            title: "Bioinformatics, ACMG and command line",
             description:
-              "Download the PowerPoint lecture covering bioinformatics workflow, ACMG-style interpretation framing, and command-line teaching notes.",
-            href: "docs/lecture-slides/clinical-ngs-lecture-1-bioinformatics-acmg-command-line.pptx",
-            chips: ["PowerPoint", "ACMG", "Command line"],
+              "Open the companion lecture that explains how raw reads become candidate variants, how ACMG/AMP evidence codes are applied, and why command-line work improves reproducibility.",
+            href: "ngs-bioinformatics-acmg/",
+            chips: ["Bioinformatics", "ACMG/AMP", "Command line"],
           },
           {
             badge: "Practical guide",
@@ -287,12 +287,12 @@ const homepageCopy = {
             chips: ["سير العمل", "التطبيقات", "التفسير"],
           },
           {
-            badge: "شرائح",
-            title: "شرائح محاضرة Clinical NGS",
+            badge: "محاضرة",
+            title: "Bioinformatics وACMG وسطر الأوامر",
             description:
-              "حمّل ملف PowerPoint الخاص بالمحاضرة، ويشمل سير عمل التحليل الحيوي، وإطار ACMG التعليمي، وملاحظات الاستخدام التعليمي لسطر الأوامر.",
-            href: "docs/lecture-slides/clinical-ngs-lecture-1-bioinformatics-acmg-command-line.pptx",
-            chips: ["PowerPoint", "ACMG", "سطر الأوامر"],
+              "افتح المحاضرة المرافقة التي تشرح كيف تتحول القراءات الخام إلى متغيرات مرشحة، وكيف تُستخدم معايير ACMG/AMP، ولماذا يجعل سطر الأوامر التحليل أكثر قابلية للتكرار.",
+            href: "ngs-bioinformatics-acmg/",
+            chips: ["Bioinformatics", "ACMG/AMP", "سطر الأوامر"],
           },
           {
             badge: "إرشاد عملي",
