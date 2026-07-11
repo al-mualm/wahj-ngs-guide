@@ -10,7 +10,7 @@ window.WAHJ_NGS_CONFIG = {
   localNgsApiUrl: "http://127.0.0.1:8787",
   siteLabel: "Wahj NGS Guide",
   account: {
-    requireRegistration: true,
+    requireRegistration: false,
   },
   firebaseSdkVersion: "10.12.5",
   firebase: {
