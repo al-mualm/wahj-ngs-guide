@@ -69,6 +69,14 @@ const homepageCopy = {
             chips: ["Workflow", "Applications", "Interpretation"],
           },
           {
+            badge: "Slides",
+            title: "Clinical NGS lecture slides",
+            description:
+              "Download the PowerPoint lecture covering bioinformatics workflow, ACMG-style interpretation framing, and command-line teaching notes.",
+            href: "docs/lecture-slides/clinical-ngs-lecture-1-bioinformatics-acmg-command-line.pptx",
+            chips: ["PowerPoint", "ACMG", "Command line"],
+          },
+          {
             badge: "Practical guide",
             title: "NGS workflow and decision sections",
             description:
@@ -277,6 +285,14 @@ const homepageCopy = {
               "افتح صفحة NGS الكاملة التي تشرح سير العمل والتطبيقات والملفات والمنصات وتفسير النتائج.",
             href: "ar/",
             chips: ["سير العمل", "التطبيقات", "التفسير"],
+          },
+          {
+            badge: "شرائح",
+            title: "شرائح محاضرة Clinical NGS",
+            description:
+              "حمّل ملف PowerPoint الخاص بالمحاضرة، ويشمل سير عمل التحليل الحيوي، وإطار ACMG التعليمي، وملاحظات الاستخدام التعليمي لسطر الأوامر.",
+            href: "docs/lecture-slides/clinical-ngs-lecture-1-bioinformatics-acmg-command-line.pptx",
+            chips: ["PowerPoint", "ACMG", "سطر الأوامر"],
           },
           {
             badge: "إرشاد عملي",
