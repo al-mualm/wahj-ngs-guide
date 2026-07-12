@@ -157,6 +157,150 @@
     },
   ];
 
+  const fastqHeaderParts = [
+    {
+      id: "instrument",
+      value: "@A00519",
+      label: "Instrument ID",
+      meaning: "The sequencing instrument name. The leading @ marks the FASTQ identifier line.",
+    },
+    {
+      id: "run",
+      value: "145",
+      label: "Run number",
+      meaning: "The run number assigned on that instrument.",
+    },
+    {
+      id: "flowcell",
+      value: "H25FYDSX7",
+      label: "Flow-cell ID",
+      meaning: "The flow cell on which this cluster was sequenced.",
+    },
+    {
+      id: "lane",
+      value: "1",
+      label: "Lane",
+      meaning: "The flow-cell lane containing the cluster.",
+    },
+    {
+      id: "tile",
+      value: "1101",
+      label: "Tile",
+      meaning: "The imaged tile within the lane.",
+    },
+    {
+      id: "x",
+      value: "1240",
+      label: "X coordinate",
+      meaning: "The cluster's horizontal coordinate on the tile.",
+    },
+    {
+      id: "y",
+      value: "1000",
+      label: "Y coordinate",
+      meaning: "The cluster's vertical coordinate on the tile.",
+    },
+    {
+      id: "read",
+      value: "1",
+      label: "Read number",
+      meaning: "Read 1 or Read 2 in a paired-end run.",
+    },
+    {
+      id: "filter",
+      value: "N",
+      label: "Filter flag",
+      meaning: "N means the read did not fail the instrument filter; Y means it was filtered.",
+    },
+    {
+      id: "control",
+      value: "0",
+      label: "Control number",
+      meaning: "0 means the read is not identified as a control read.",
+    },
+    {
+      id: "index",
+      value: "ATCACG",
+      label: "Index sequence",
+      meaning: "The sample index or barcode reported for demultiplexing.",
+    },
+  ];
+
+  const qualityMetrics = [
+    {
+      id: "coverage",
+      title: "Coverage breadth",
+      definition: "The horizontal proportion of the intended target that reaches a stated minimum depth, such as the percentage of target bases at or above 20×.",
+      clinical: "A high mean depth cannot rescue a clinically important exon that has 0× coverage.",
+    },
+    {
+      id: "depth",
+      title: "Read depth",
+      definition: "The number of usable aligned reads overlapping one genomic position; it is reported per position or summarized across a target.",
+      clinical: "Depth is local. Two nearby bases can have very different evidence even within the same exon.",
+    },
+    {
+      id: "base-quality",
+      title: "Base quality",
+      definition: "A Phred-scaled estimate that one called base is wrong. Q30 corresponds to an estimated error probability of 0.001, or 0.1%.",
+      clinical: "A read can map correctly while one nucleotide within it remains low quality.",
+    },
+    {
+      id: "mapping-quality",
+      title: "Mapping quality",
+      definition: "A Phred-scaled estimate of uncertainty in where the read was aligned, not whether each base call is correct.",
+      clinical: "Pseudogenes and repetitive regions can give good-looking bases but uncertain genomic placement.",
+    },
+    {
+      id: "allele-fraction",
+      title: "Allele fraction",
+      definition: "The fraction of usable reads at a locus that support the alternate allele: alternate-supporting reads divided by total usable reads.",
+      clinical: "Allele fraction supports interpretation but is not a genotype or diagnosis by itself.",
+    },
+    {
+      id: "strand-bias",
+      title: "Strand bias",
+      definition: "An imbalance in alternate-allele support between forward- and reverse-oriented reads.",
+      clinical: "Support confined largely to one orientation can signal a technical artifact and needs contextual review.",
+    },
+    {
+      id: "contamination",
+      title: "Contamination",
+      definition: "A mixture of DNA from more than the intended sample, inferred from unexpected allele fractions, genotypes, or sample-fingerprint discordance.",
+      clinical: "Even low-level mixture can distort weak variants; contamination estimates and sample identity checks belong in QC.",
+    },
+    {
+      id: "reference-build",
+      title: "Reference build",
+      definition: "The exact genome assembly used to assign genomic coordinates, for example GRCh37 or GRCh38.",
+      clinical: "Coordinates from different builds are not interchangeable and can point to different bases if the build is omitted.",
+    },
+    {
+      id: "transcript-choice",
+      title: "Transcript choice",
+      definition: "The selected RNA transcript used to assign exon number, cDNA position, and predicted coding consequence.",
+      clinical: "One genomic variant can have different consequences across isoforms, so the accession and version must be reported.",
+    },
+    {
+      id: "cnv-support",
+      title: "CNV support",
+      definition: "Evidence for copy-number gain or loss derived from normalized depth and, where available, split-read, paired-end, and allele-balance signals.",
+      clinical: "A depth shift is candidate support, not automatic confirmation; validated calling and orthogonal confirmation may be needed.",
+    },
+    {
+      id: "repeat-expansion",
+      title: "Repeat expansion visibility",
+      definition: "How well the assay and read length can detect and size a repetitive tract, especially when the expansion is longer than a short read.",
+      clinical: "A negative short-read result may not exclude a large repeat expansion unless the assay was validated for that locus and size range.",
+    },
+    {
+      id: "mtdna",
+      title: "mtDNA heteroplasmy",
+      definition: "The fraction of mitochondrial DNA molecules carrying a variant in the sampled tissue.",
+      clinical: "Heteroplasmy is tissue- and assay-dependent; a measured fraction is not automatically the same in every tissue.",
+    },
+  ];
+
   const organizations = [
     {
       id: "acmg",
@@ -765,6 +909,533 @@
       .replaceAll("'", "&#39;");
   }
 
+  function renderFastqHeaderExplorer() {
+    const primary = fastqHeaderParts.slice(0, 7);
+    const readMetadata = fastqHeaderParts.slice(7);
+    const renderTokenGroup = (parts) =>
+      parts
+        .map(
+          (part, index) => `
+            <button
+              type="button"
+              class="fastq-header-token"
+              data-fastq-token="${escapeHtml(part.id)}"
+              aria-pressed="false"
+            >
+              <code>${escapeHtml(part.value)}</code>
+              <span>${escapeHtml(part.label)}</span>
+            </button>
+            ${index < parts.length - 1 ? '<span class="fastq-header-separator" aria-hidden="true">:</span>' : ""}
+          `
+        )
+        .join("");
+
+    return `
+      <article class="fastq-header-explorer" data-fastq-header-explorer>
+        <div class="fastq-header-heading">
+          <div>
+            <span>Identifier anatomy</span>
+            <h4>Click each FASTQ header field to decode it</h4>
+          </div>
+          <span class="fastq-format-note">Illumina/CASAVA-style example</span>
+        </div>
+        <div class="fastq-header-code" aria-label="Annotated FASTQ identifier">
+          <div class="fastq-header-token-group">${renderTokenGroup(primary)}</div>
+          <span class="fastq-header-space" aria-hidden="true">space</span>
+          <div class="fastq-header-token-group">${renderTokenGroup(readMetadata)}</div>
+        </div>
+        <div class="fastq-header-detail" aria-live="polite">
+          <strong data-fastq-detail-label>Instrument ID</strong>
+          <code data-fastq-detail-value>@A00519</code>
+          <p data-fastq-detail-meaning>The sequencing instrument name. The leading @ marks the FASTQ identifier line.</p>
+        </div>
+        <div class="fastq-four-line-key" aria-label="Meaning of the four lines in one FASTQ record">
+          <span><strong>Line 1</strong> Read identifier and run metadata</span>
+          <span><strong>Line 2</strong> Called nucleotide sequence</span>
+          <span><strong>Line 3</strong> + separator, optionally repeating the identifier</span>
+          <span><strong>Line 4</strong> One encoded Phred quality character per base</span>
+        </div>
+        <p class="fastq-header-caution">Header conventions vary by platform and conversion software; parse the format actually produced by the instrument pipeline.</p>
+      </article>
+    `;
+  }
+
+  function setupFastqHeaderExplorer(container) {
+    const root = container.querySelector("[data-fastq-header-explorer]");
+    if (!root) {
+      return;
+    }
+
+    const label = root.querySelector("[data-fastq-detail-label]");
+    const value = root.querySelector("[data-fastq-detail-value]");
+    const meaning = root.querySelector("[data-fastq-detail-meaning]");
+    const buttons = Array.from(root.querySelectorAll("[data-fastq-token]"));
+
+    function selectPart(id) {
+      const part = fastqHeaderParts.find((item) => item.id === id) || fastqHeaderParts[0];
+      buttons.forEach((button) => {
+        button.setAttribute("aria-pressed", button.dataset.fastqToken === part.id ? "true" : "false");
+      });
+      label.textContent = part.label;
+      value.textContent = part.value;
+      meaning.textContent = part.meaning;
+    }
+
+    root.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-fastq-token]");
+      if (button) {
+        selectPart(button.dataset.fastqToken);
+      }
+    });
+    selectPart(fastqHeaderParts[0].id);
+  }
+
+  function qualitySvg(title, content) {
+    return `
+      <svg viewBox="0 0 840 420" role="img" aria-label="${escapeHtml(title)} teaching diagram">
+        <title>${escapeHtml(title)} teaching diagram</title>
+        ${content}
+      </svg>
+    `;
+  }
+
+  function qualityRead(x, y, width, extraClass, delay) {
+    return `<rect class="qv-read ${extraClass || ""}" x="${x}" y="${y}" width="${width}" height="13" rx="6" style="--delay:${delay || 0}ms" />`;
+  }
+
+  function renderCoverageScene() {
+    const reads = [
+      [92, 68, 190], [150, 88, 205], [225, 108, 170], [92, 128, 230], [265, 148, 125],
+      [498, 68, 180], [545, 88, 165], [485, 108, 230], [590, 128, 150], [520, 148, 210],
+      [120, 188, 210], [175, 208, 190], [500, 188, 190], [560, 208, 175],
+    ];
+    return qualitySvg(
+      "Coverage breadth",
+      `
+        <text class="qv-label" x="80" y="38">Reads across the intended target</text>
+        ${reads.map((read, index) => qualityRead(read[0], read[1], read[2], "", index * 35)).join("")}
+        <line class="qv-reference" x1="80" y1="274" x2="760" y2="274" />
+        <text class="qv-label-small" x="80" y="302">target region</text>
+        <rect class="qv-covered qv-grow" x="80" y="318" width="338" height="24" rx="8" />
+        <rect class="qv-alt qv-grow" x="418" y="318" width="80" height="24" rx="8" />
+        <rect class="qv-covered qv-grow" x="498" y="318" width="262" height="24" rx="8" />
+        <text class="qv-label-small" x="104" y="373">covered at the stated minimum depth</text>
+        <text class="qv-label-small" x="414" y="373">0× dropout</text>
+        <text class="qv-label" x="510" y="399">Breadth = horizontal proportion</text>
+      `
+    );
+  }
+
+  function renderDepthScene() {
+    const reads = Array.from({ length: 14 }, (_, index) => {
+      const x = 150 + (index % 5) * 16;
+      const y = 48 + index * 18;
+      return qualityRead(x, y, 410 - (index % 4) * 22, index % 4 === 0 ? "qv-read-reverse" : "", index * 28);
+    });
+    return qualitySvg(
+      "Read depth",
+      `
+        <text class="qv-label" x="74" y="34">Count usable reads vertically at one base</text>
+        ${reads.join("")}
+        <line class="qv-alt qv-draw" x1="390" y1="38" x2="390" y2="315" />
+        <line class="qv-reference" x1="90" y1="330" x2="660" y2="330" />
+        <path class="qv-connector qv-draw" d="M692 48 h26 v247 h-26" />
+        <text class="qv-label" x="728" y="177">14×</text>
+        <text class="qv-label-small" x="676" y="337">depth at this position</text>
+        <text class="qv-label-small" x="90" y="370">Depth changes from base to base; it is not one number for the whole gene.</text>
+      `
+    );
+  }
+
+  function renderBaseQualityScene() {
+    const bases = "ACCTGAGCTCGA".split("");
+    const scores = [39, 38, 37, 36, 35, 34, 33, 32, 31, 28, 17, 9];
+    const tiles = bases
+      .map((base, index) => {
+        const x = 70 + index * 58;
+        const tone = scores[index] >= 30 ? "qv-covered" : scores[index] >= 20 ? "qv-warn" : "qv-alt";
+        return `
+          <g class="qv-grow" style="--delay:${index * 35}ms">
+            <rect class="${tone}" x="${x}" y="112" width="46" height="66" rx="9" />
+            <text class="qv-label" x="${x + 23}" y="143" text-anchor="middle">${base}</text>
+            <text class="qv-label-small" x="${x + 23}" y="165" text-anchor="middle">Q${scores[index]}</text>
+          </g>
+        `;
+      })
+      .join("");
+    return qualitySvg(
+      "Base quality",
+      `
+        <text class="qv-label" x="70" y="45">Each nucleotide has its own error estimate</text>
+        ${tiles}
+        <line class="qv-reference" x1="70" y1="216" x2="708" y2="216" />
+        <text class="qv-label-small" x="70" y="248">high-confidence bases</text>
+        <text class="qv-label-small" x="570" y="248">low-quality tail</text>
+        <rect class="qv-soft" x="88" y="286" width="195" height="74" rx="15" />
+        <text class="qv-label" x="112" y="316">Q30</text>
+        <text class="qv-label-small" x="112" y="342">0.1% estimated error</text>
+        <rect class="qv-soft" x="323" y="286" width="195" height="74" rx="15" />
+        <text class="qv-label" x="347" y="316">Q20</text>
+        <text class="qv-label-small" x="347" y="342">1% estimated error</text>
+        <rect class="qv-soft" x="558" y="286" width="195" height="74" rx="15" />
+        <text class="qv-label" x="582" y="316">Q10</text>
+        <text class="qv-label-small" x="582" y="342">10% estimated error</text>
+      `
+    );
+  }
+
+  function renderMappingQualityScene() {
+    return qualitySvg(
+      "Mapping quality",
+      `
+        <text class="qv-label" x="62" y="36">Can the read be placed uniquely?</text>
+        <text class="qv-label-small" x="62" y="88">Reference locus</text>
+        <line class="qv-reference" x1="190" y1="82" x2="760" y2="82" />
+        ${qualityRead(270, 118, 260, "", 0)}
+        <line class="qv-connector qv-draw" x1="300" y1="118" x2="300" y2="86" />
+        <line class="qv-connector qv-draw" x1="500" y1="118" x2="500" y2="86" />
+        <text class="qv-label" x="570" y="139">MAPQ 60</text>
+        <text class="qv-label-small" x="570" y="160">highly unique placement</text>
+
+        <text class="qv-label-small" x="62" y="235">Homologous loci</text>
+        <line class="qv-reference" x1="190" y1="220" x2="760" y2="220" />
+        <line class="qv-reference" x1="190" y1="310" x2="760" y2="310" />
+        ${qualityRead(270, 260, 260, "qv-warn", 120)}
+        <path class="qv-connector qv-draw" stroke-dasharray="6 6" d="M315 260 Q315 232 340 222" />
+        <path class="qv-connector qv-draw" stroke-dasharray="6 6" d="M485 273 Q485 300 510 307" />
+        <text class="qv-label" x="570" y="273">MAPQ 0</text>
+        <text class="qv-label-small" x="570" y="294">equally plausible placements</text>
+        <text class="qv-label-small" x="62" y="380">Mapping quality measures placement uncertainty; base quality measures letter uncertainty.</text>
+      `
+    );
+  }
+
+  function renderAlleleFractionScene() {
+    const altRows = new Set([1, 4, 7, 10, 13, 16, 18]);
+    const reads = Array.from({ length: 20 }, (_, index) => {
+      const y = 40 + index * 16;
+      const isAlt = altRows.has(index);
+      return `
+        ${qualityRead(90 + (index % 4) * 8, y, 440, index % 3 === 0 ? "qv-read-reverse" : "", index * 22)}
+        <circle class="${isAlt ? "qv-alt" : "qv-covered"}" cx="330" cy="${y + 6.5}" r="6" />
+        <text class="qv-label-small" x="345" y="${y + 11}">${isAlt ? "A" : "G"}</text>
+      `;
+    });
+    return qualitySvg(
+      "Allele fraction",
+      `
+        <text class="qv-label" x="66" y="28">Pileup at one genomic position</text>
+        ${reads.join("")}
+        <line class="qv-alt qv-draw" x1="330" y1="34" x2="330" y2="360" />
+        <rect class="qv-soft" x="590" y="104" width="205" height="145" rx="18" />
+        <text class="qv-label" x="617" y="142">7 ALT reads</text>
+        <text class="qv-label" x="617" y="177">20 usable reads</text>
+        <line class="qv-reference" x1="617" y1="193" x2="765" y2="193" />
+        <text class="qv-label" x="617" y="226">VAF = 35%</text>
+        <text class="qv-label-small" x="548" y="285">
+          <tspan x="548" dy="0">Illustrative count; read filters decide</tspan>
+          <tspan x="548" dy="19">which observations are usable.</tspan>
+        </text>
+      `
+    );
+  }
+
+  function renderStrandBiasScene() {
+    const forward = Array.from({ length: 8 }, (_, index) => {
+      const y = 70 + index * 22;
+      const isAlt = index < 6;
+      return `
+        ${qualityRead(120 + (index % 3) * 12, y, 310, "", index * 35)}
+        <polygon class="qv-read" points="430,${y} 452,${y + 6.5} 430,${y + 13}" />
+        <circle class="${isAlt ? "qv-alt" : "qv-covered"}" cx="300" cy="${y + 6.5}" r="6" />
+      `;
+    });
+    const reverse = Array.from({ length: 8 }, (_, index) => {
+      const y = 70 + index * 22;
+      return `
+        ${qualityRead(500 - (index % 3) * 12, y, 220, "qv-read-reverse", 110 + index * 35)}
+        <polygon class="qv-read qv-read-reverse" points="500,${y} 478,${y + 6.5} 500,${y + 13}" />
+        <circle class="qv-covered" cx="610" cy="${y + 6.5}" r="6" />
+      `;
+    });
+    return qualitySvg(
+      "Strand bias",
+      `
+        <text class="qv-label" x="80" y="35">Forward-oriented reads</text>
+        <text class="qv-label" x="490" y="35">Reverse-oriented reads</text>
+        ${forward.join("")}
+        ${reverse.join("")}
+        <rect class="qv-soft" x="265" y="292" width="310" height="82" rx="16" />
+        <text class="qv-label" x="300" y="326">ALT support: forward 6, reverse 0</text>
+        <text class="qv-label-small" x="300" y="351">Orientation imbalance requires artifact review.</text>
+      `
+    );
+  }
+
+  function renderContaminationScene() {
+    const molecules = Array.from({ length: 30 }, (_, index) => {
+      const column = index % 10;
+      const row = Math.floor(index / 10);
+      const isForeign = [7, 18, 25].includes(index);
+      return `
+        <g class="qv-grow" style="--delay:${index * 18}ms">
+          <circle class="${isForeign ? "qv-alt" : "qv-read"}" cx="${92 + column * 58}" cy="${92 + row * 62}" r="17" />
+          <text class="qv-label-small" x="${92 + column * 58}" y="${97 + row * 62}" text-anchor="middle">${isForeign ? "B" : "A"}</text>
+        </g>
+      `;
+    });
+    return qualitySvg(
+      "Contamination",
+      `
+        <text class="qv-label" x="70" y="38">Reads expected from sample A</text>
+        ${molecules.join("")}
+        <rect class="qv-soft" x="110" y="302" width="275" height="70" rx="16" />
+        <circle class="qv-read" cx="140" cy="337" r="10" />
+        <text class="qv-label-small" x="160" y="342">intended sample</text>
+        <rect class="qv-soft" x="420" y="302" width="310" height="70" rx="16" />
+        <circle class="qv-alt" cx="450" cy="337" r="10" />
+        <text class="qv-label-small" x="470" y="342">foreign DNA signal</text>
+        <text class="qv-label-small" x="70" y="384">
+          <tspan x="70" dy="0">Mixture is inferred across many loci and sample-fingerprint checks,</tspan>
+          <tspan x="70" dy="19">not from one colored read.</tspan>
+        </text>
+      `
+    );
+  }
+
+  function renderReferenceBuildScene() {
+    return qualitySvg(
+      "Reference build",
+      `
+        <text class="qv-label" x="72" y="42">Same biological locus, different assembly coordinates</text>
+        <text class="qv-label" x="72" y="112">GRCh37</text>
+        <line class="qv-reference" x1="190" y1="105" x2="760" y2="105" />
+        <circle class="qv-alt qv-grow" cx="430" cy="105" r="10" />
+        <text class="qv-mono" x="350" y="145">chr7:140,453,136</text>
+        <text class="qv-label" x="72" y="265">GRCh38</text>
+        <line class="qv-reference" x1="190" y1="258" x2="760" y2="258" />
+        <circle class="qv-alt qv-grow" cx="535" cy="258" r="10" />
+        <text class="qv-mono" x="455" y="298">chr7:140,753,336</text>
+        <path class="qv-connector qv-draw" d="M430 120 C430 185 535 175 535 243" />
+        <text class="qv-label-small" x="286" y="184">
+          <tspan x="286" dy="0">liftover maps the locus;</tspan>
+          <tspan x="286" dy="19">coordinates cannot simply be copied</tspan>
+        </text>
+        <text class="qv-label-small" x="72" y="382">Illustrative BRAF c.1799 locus, shown with 1-based genomic coordinates.</text>
+      `
+    );
+  }
+
+  function renderTranscriptScene() {
+    return qualitySvg(
+      "Transcript choice",
+      `
+        <text class="qv-label" x="65" y="38">One genomic variant</text>
+        <line class="qv-reference" x1="70" y1="78" x2="775" y2="78" />
+        <line class="qv-alt qv-draw" x1="455" y1="55" x2="455" y2="340" />
+        <circle class="qv-alt" cx="455" cy="78" r="9" />
+
+        <text class="qv-label" x="65" y="145">Transcript A</text>
+        <line class="qv-reference" x1="190" y1="138" x2="750" y2="138" />
+        <rect class="qv-soft" x="230" y="118" width="85" height="40" rx="6" />
+        <rect class="qv-covered" x="405" y="118" width="105" height="40" rx="6" />
+        <rect class="qv-soft" x="625" y="118" width="80" height="40" rx="6" />
+        <text class="qv-label-small" x="410" y="183">variant lies in a coding exon</text>
+
+        <text class="qv-label" x="65" y="260">Transcript B</text>
+        <line class="qv-reference" x1="190" y1="253" x2="750" y2="253" />
+        <rect class="qv-soft" x="250" y="233" width="70" height="40" rx="6" />
+        <rect class="qv-warn" x="420" y="233" width="125" height="40" rx="6" />
+        <rect class="qv-soft" x="650" y="233" width="55" height="40" rx="6" />
+        <text class="qv-label-small" x="410" y="296">
+          <tspan x="410" dy="0">same position can have a different</tspan>
+          <tspan x="410" dy="19">transcript consequence</tspan>
+        </text>
+        <text class="qv-label-small" x="65" y="366">
+          <tspan x="65" dy="0">Report transcript accession and version; do not infer consequence</tspan>
+          <tspan x="65" dy="19">from genomic position alone.</tspan>
+        </text>
+      `
+    );
+  }
+
+  function renderCnvScene() {
+    const sampleRatios = [1.02, 0.98, 0.51, 1.01, 0.96];
+    const bars = sampleRatios
+      .map((ratio, index) => {
+        const x = 160 + index * 115;
+        const height = ratio * 170;
+        const y = 320 - height;
+        return `
+          <rect class="qv-soft qv-grow" x="${x}" y="150" width="30" height="170" rx="5" />
+          <rect class="${index === 2 ? "qv-alt" : "qv-read"} qv-grow" x="${x + 36}" y="${y}" width="30" height="${height}" rx="5" style="--delay:${index * 70}ms" />
+          <text class="qv-label-small" x="${x + 33}" y="347" text-anchor="middle">Exon ${index + 1}</text>
+        `;
+      })
+      .join("");
+    return qualitySvg(
+      "CNV support",
+      `
+        <text class="qv-label" x="68" y="36">Normalized exon depth compared with controls</text>
+        <line class="qv-axis" x1="92" y1="64" x2="92" y2="320" />
+        <line class="qv-axis" x1="92" y1="320" x2="755" y2="320" />
+        <line class="qv-gridline" x1="92" y1="150" x2="755" y2="150" />
+        <text class="qv-label-small" x="52" y="155">1.0</text>
+        <text class="qv-label-small" x="52" y="240">0.5</text>
+        ${bars}
+        <rect class="qv-soft" x="520" y="68" width="26" height="18" rx="4" />
+        <text class="qv-label-small" x="554" y="82">control median</text>
+        <rect class="qv-read" x="650" y="68" width="26" height="18" rx="4" />
+        <text class="qv-label-small" x="684" y="82">sample</text>
+        <text class="qv-label" x="262" y="382">
+          <tspan x="262" dy="0">Exon 3: approximately 0.5× relative depth</tspan>
+          <tspan x="262" dy="23">→ deletion candidate, pending validated review</tspan>
+        </text>
+      `
+    );
+  }
+
+  function renderRepeatScene() {
+    const normalRepeats = Array.from({ length: 6 }, (_, index) => `<rect class="qv-covered qv-grow" x="${300 + index * 31}" y="92" width="28" height="32" rx="5" style="--delay:${index * 50}ms" />`).join("");
+    const expandedRepeats = Array.from({ length: 14 }, (_, index) => `<rect class="qv-alt qv-grow" x="${200 + index * 31}" y="252" width="28" height="32" rx="5" style="--delay:${index * 35}ms" />`).join("");
+    return qualitySvg(
+      "Repeat expansion visibility",
+      `
+        <text class="qv-label" x="62" y="42">Repeat shorter than a read</text>
+        <line class="qv-reference" x1="80" y1="108" x2="760" y2="108" />
+        ${normalRepeats}
+        ${qualityRead(205, 62, 420, "qv-read-reverse", 0)}
+        <text class="qv-label-small" x="640" y="74">one read spans both flanks</text>
+
+        <text class="qv-label" x="62" y="211">Expansion longer than a short read</text>
+        <line class="qv-reference" x1="80" y1="268" x2="760" y2="268" />
+        ${expandedRepeats}
+        ${qualityRead(80, 303, 205, "", 120)}
+        ${qualityRead(555, 303, 205, "qv-read-reverse", 220)}
+        <text class="qv-label-small" x="325" y="337">no read spans the full repeat</text>
+        <text class="qv-label-small" x="62" y="377">
+          <tspan x="62" dy="0">Specialized callers or orthogonal assays may be required</tspan>
+          <tspan x="62" dy="19">for validated detection and sizing.</tspan>
+        </text>
+      `
+    );
+  }
+
+  function renderMtdnaScene() {
+    const molecules = Array.from({ length: 20 }, (_, index) => {
+      const x = 95 + (index % 5) * 105;
+      const y = 90 + Math.floor(index / 5) * 75;
+      const isVariant = [2, 7, 11, 18].includes(index);
+      return `
+        <g class="qv-grow" style="--delay:${index * 28}ms">
+          <circle class="qv-ring ${isVariant ? "qv-ring-alt" : ""}" cx="${x}" cy="${y}" r="24" />
+          <circle class="${isVariant ? "qv-alt" : "qv-covered"}" cx="${x + 17}" cy="${y - 17}" r="5" />
+        </g>
+      `;
+    });
+    return qualitySvg(
+      "mtDNA heteroplasmy",
+      `
+        <text class="qv-label" x="58" y="38">Mixture of mitochondrial DNA molecules in this sample</text>
+        ${molecules.join("")}
+        <rect class="qv-soft" x="640" y="95" width="150" height="160" rx="18" />
+        <text class="qv-label" x="665" y="135">4 variant</text>
+        <text class="qv-label" x="665" y="171">20 total</text>
+        <line class="qv-reference" x1="665" y1="188" x2="760" y2="188" />
+        <text class="qv-label" x="665" y="224">20%</text>
+        <text class="qv-label-small" x="602" y="306">fraction in the sampled tissue</text>
+        <text class="qv-label-small" x="58" y="382">
+          <tspan x="58" dy="0">A heteroplasmy fraction can differ across tissues, time,</tspan>
+          <tspan x="58" dy="19">extraction, and assay sensitivity.</tspan>
+        </text>
+      `
+    );
+  }
+
+  function renderQualityMetricScene(metricId) {
+    const renderers = {
+      coverage: renderCoverageScene,
+      depth: renderDepthScene,
+      "base-quality": renderBaseQualityScene,
+      "mapping-quality": renderMappingQualityScene,
+      "allele-fraction": renderAlleleFractionScene,
+      "strand-bias": renderStrandBiasScene,
+      contamination: renderContaminationScene,
+      "reference-build": renderReferenceBuildScene,
+      "transcript-choice": renderTranscriptScene,
+      "cnv-support": renderCnvScene,
+      "repeat-expansion": renderRepeatScene,
+      mtdna: renderMtdnaScene,
+    };
+    return (renderers[metricId] || renderCoverageScene)();
+  }
+
+  function setupQualityMetricsExplorer() {
+    const root = document.querySelector("[data-quality-explorer]");
+    if (!root) {
+      return;
+    }
+
+    const figure = root.closest(".figure-card");
+    const buttons = Array.from(figure.querySelectorAll("[data-quality-metric]"));
+    const title = root.querySelector("#quality-metric-title");
+    const progress = root.querySelector("#quality-metric-progress");
+    const scene = root.querySelector("#quality-metric-scene");
+    const definition = root.querySelector("#quality-metric-definition");
+    const clinical = root.querySelector("#quality-metric-clinical");
+    const playButton = root.querySelector("[data-quality-play]");
+    let activeIndex = 0;
+    let timer = null;
+
+    function render(index) {
+      activeIndex = (index + qualityMetrics.length) % qualityMetrics.length;
+      const metric = qualityMetrics[activeIndex];
+      title.textContent = metric.title;
+      progress.textContent = `${activeIndex + 1} of ${qualityMetrics.length}`;
+      definition.textContent = metric.definition;
+      clinical.textContent = metric.clinical;
+      scene.innerHTML = renderQualityMetricScene(metric.id);
+      scene.setAttribute("aria-label", `${metric.title} teaching diagram. ${metric.definition}`);
+      buttons.forEach((button) => {
+        button.setAttribute("aria-pressed", button.dataset.qualityMetric === metric.id ? "true" : "false");
+      });
+    }
+
+    function stopPlayback() {
+      if (timer) {
+        window.clearInterval(timer);
+        timer = null;
+      }
+      playButton.setAttribute("aria-pressed", "false");
+      playButton.textContent = "Play walkthrough";
+    }
+
+    function startPlayback() {
+      stopPlayback();
+      playButton.setAttribute("aria-pressed", "true");
+      playButton.textContent = "Pause walkthrough";
+      timer = window.setInterval(() => render(activeIndex + 1), 4800);
+    }
+
+    figure.addEventListener("click", (event) => {
+      const metricButton = event.target.closest("[data-quality-metric]");
+      if (metricButton) {
+        stopPlayback();
+        render(qualityMetrics.findIndex((metric) => metric.id === metricButton.dataset.qualityMetric));
+      }
+    });
+
+    playButton.addEventListener("click", () => {
+      if (timer) {
+        stopPlayback();
+      } else {
+        startPlayback();
+      }
+    });
+
+    render(0);
+  }
+
   function renderWorkflowExplorer() {
     const root = document.querySelector("[data-workflow-explorer]");
     if (!root) {
@@ -832,12 +1503,14 @@
             <h4>${escapeHtml(stage.snippetLabel)}</h4>
             <pre class="acmg-command-block"><code>${escapeHtml(stage.snippet)}</code></pre>
           </article>
+          ${stage.id === "fastq" ? renderFastqHeaderExplorer() : ""}
           <article>
             <h4>Clinical reading point</h4>
             <p>${escapeHtml(stage.doctorWhy)}</p>
           </article>
         </div>
       `;
+      setupFastqHeaderExplorer(panel);
     }
 
     function activate(id) {
@@ -2018,6 +2691,168 @@
     render();
   }
 
+  function setupTeachingSketchPads() {
+    const pads = Array.from(document.querySelectorAll("[data-sketch-pad]"));
+    if (!pads.length) {
+      return;
+    }
+
+    function createPadController(pad) {
+      const canvas = pad.querySelector("[data-sketch-canvas]");
+      const clearButton = pad.querySelector("[data-sketch-clear]");
+      const frame = pad.querySelector(".teaching-sketch-canvas-frame");
+      if (!canvas || !frame) {
+        return null;
+      }
+
+      const context = canvas.getContext("2d");
+      if (!context) {
+        return null;
+      }
+
+      const state = {
+        drawing: false,
+        pointerId: null,
+        strokes: [],
+        currentStroke: null,
+        width: 1,
+        height: 1,
+      };
+
+      function updateInkClass() {
+        pad.classList.toggle("has-ink", state.strokes.length > 0);
+      }
+
+      function getRelativePoint(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.min(Math.max(event.clientX - rect.left, 0), rect.width || 1);
+        const y = Math.min(Math.max(event.clientY - rect.top, 0), rect.height || 1);
+        return {
+          x,
+          y,
+          nx: rect.width ? x / rect.width : 0,
+          ny: rect.height ? y / rect.height : 0,
+        };
+      }
+
+      function drawStroke(stroke) {
+        if (!stroke?.points?.length) {
+          return;
+        }
+
+        context.save();
+        context.lineCap = "round";
+        context.lineJoin = "round";
+        context.strokeStyle = stroke.color;
+        context.lineWidth = stroke.lineWidth;
+        context.beginPath();
+        stroke.points.forEach((point, index) => {
+          const x = point.nx * state.width;
+          const y = point.ny * state.height;
+          if (index === 0) {
+            context.moveTo(x, y);
+          } else {
+            context.lineTo(x, y);
+          }
+        });
+        if (stroke.points.length === 1) {
+          const onlyPoint = stroke.points[0];
+          const x = onlyPoint.nx * state.width;
+          const y = onlyPoint.ny * state.height;
+          context.arc(x, y, stroke.lineWidth / 2, 0, Math.PI * 2);
+        }
+        context.stroke();
+        context.restore();
+      }
+
+      function redraw() {
+        context.clearRect(0, 0, state.width, state.height);
+        state.strokes.forEach(drawStroke);
+      }
+
+      function resizeCanvas() {
+        const rect = frame.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const width = Math.max(1, Math.round(rect.width));
+        const height = Math.max(1, Math.round(rect.height));
+        state.width = width;
+        state.height = height;
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        context.setTransform(dpr, 0, 0, dpr, 0, 0);
+        redraw();
+      }
+
+      function finishStroke() {
+        state.drawing = false;
+        state.pointerId = null;
+        state.currentStroke = null;
+      }
+
+      canvas.addEventListener("pointerdown", (event) => {
+        if (event.button !== undefined && event.button !== 0) {
+          return;
+        }
+        event.preventDefault();
+        const point = getRelativePoint(event);
+        const stroke = {
+          color: "#cb4a3f",
+          lineWidth: 3.2,
+          points: [{ nx: point.nx, ny: point.ny }],
+        };
+        state.strokes.push(stroke);
+        state.currentStroke = stroke;
+        state.drawing = true;
+        state.pointerId = event.pointerId;
+        updateInkClass();
+        canvas.setPointerCapture?.(event.pointerId);
+        redraw();
+      });
+
+      canvas.addEventListener("pointermove", (event) => {
+        if (!state.drawing || state.pointerId !== event.pointerId || !state.currentStroke) {
+          return;
+        }
+        event.preventDefault();
+        const point = getRelativePoint(event);
+        state.currentStroke.points.push({ nx: point.nx, ny: point.ny });
+        redraw();
+      });
+
+      ["pointerup", "pointercancel", "pointerleave"].forEach((eventName) => {
+        canvas.addEventListener(eventName, (event) => {
+          if (state.pointerId !== event.pointerId) {
+            return;
+          }
+          finishStroke();
+        });
+      });
+
+      clearButton?.addEventListener("click", () => {
+        state.strokes = [];
+        updateInkClass();
+        redraw();
+      });
+
+      resizeCanvas();
+      updateInkClass();
+      return { resizeCanvas };
+    }
+
+    const controllers = pads.map(createPadController).filter(Boolean);
+    if (!controllers.length) {
+      return;
+    }
+
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        controllers.forEach((controller) => controller.resizeCanvas());
+      }, 120);
+    });
+  }
+
   renderWorkflowExplorer();
   renderOrganizations();
   renderCriteriaExplorer();
@@ -2025,4 +2860,6 @@
   setupPvs1Lab();
   renderCommandConcepts();
   setupTerminalSimulator();
+  setupQualityMetricsExplorer();
+  setupTeachingSketchPads();
 })();

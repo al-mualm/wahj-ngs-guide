@@ -241,6 +241,40 @@
             </p>
           </div>
 
+          <figure class="figure-card bioinformatics-story-video reveal" aria-labelledby="bioinformatics-story-title">
+            <div class="bioinformatics-story-heading">
+              <div>
+                <p class="figure-label">Visual bridge • Signal → data → evidence</p>
+                <h3 id="bioinformatics-story-title">The sequencer produces data, not a diagnosis</h3>
+                <p>
+                  Watch this short story before the three analysis levels. It introduces why raw
+                  sequencing output must pass through computational and clinical interpretation
+                  before it becomes reportable evidence.
+                </p>
+              </div>
+              <span class="bioinformatics-story-duration" aria-label="Video duration 34 seconds">34 sec</span>
+            </div>
+
+            <div class="bioinformatics-video-frame">
+              <video
+                controls
+                playsinline
+                preload="metadata"
+                poster="./assets/bioinformatics-cartoon-book-poster.png"
+                aria-describedby="bioinformatics-story-caption"
+              >
+                <source src="./assets/bioinformatics-cartoon-book-preview.mp4" type="video/mp4" />
+                Your browser cannot play this MP4 video.
+              </video>
+            </div>
+
+            <figcaption id="bioinformatics-story-caption">
+              Teaching sequence: instrument signal becomes base calls and FASTQ data; analysis then
+              aligns, calls, annotates, and evaluates evidence. Clinical meaning is added through
+              validated interpretation, not by the sequencing instrument itself.
+            </figcaption>
+          </figure>
+
           <div class="acmg-three-up reveal">
             <article class="summary-card">
               <h3>Primary analysis</h3>
@@ -297,65 +331,183 @@
             </div>
           </figure>
 
-          <figure class="figure-card reveal">
+          <figure class="figure-card reveal" id="quality-language">
             <div class="figure-heading">
               <p class="figure-label">Quality language doctors should understand</p>
               <h3>These terms define whether a negative or positive call can be trusted</h3>
+              <p>
+                Select one concept to move through the same sequencing evidence from a different
+                technical viewpoint. The values are teaching examples, not universal laboratory
+                acceptance thresholds.
+              </p>
             </div>
-            <div class="quality-chip-grid">
-              <span>Coverage breadth</span>
-              <span>Read depth</span>
-              <span>Base quality</span>
-              <span>Mapping quality</span>
-              <span>Allele fraction</span>
-              <span>Strand bias</span>
-              <span>Contamination</span>
-              <span>Reference build</span>
-              <span>Transcript choice</span>
-              <span>CNV support</span>
-              <span>Repeat expansion visibility</span>
-              <span>mtDNA heteroplasmy</span>
+            <div class="quality-teaching-studio">
+              <aside class="teaching-sketch-pad quality-sketch-pad" data-sketch-pad data-sketch-title="NGS quality concepts">
+                <div class="teaching-sketch-toolbar">
+                  <span>Live teaching sketch</span>
+                  <button type="button" class="secondary-action teaching-sketch-clear" data-sketch-clear>
+                    Clear
+                  </button>
+                </div>
+                <div class="teaching-sketch-canvas-frame">
+                  <canvas
+                    class="teaching-sketch-canvas"
+                    data-sketch-canvas
+                    aria-label="Drawing area for explaining NGS quality concepts"
+                  ></canvas>
+                  <p class="teaching-sketch-hint">Draw beside the live figure while teaching depth, quality, bias, or assay limitations.</p>
+                </div>
+              </aside>
+
+              <div class="quality-metric-explorer" data-quality-explorer>
+                <div class="quality-explorer-toolbar">
+                  <div>
+                    <span class="quality-explorer-kicker">Interactive evidence view</span>
+                    <strong id="quality-metric-title">Coverage breadth</strong>
+                  </div>
+                  <div class="quality-playback-controls">
+                    <span id="quality-metric-progress" aria-live="polite">1 of 12</span>
+                    <button type="button" class="secondary-action" data-quality-play aria-pressed="false">
+                      Play walkthrough
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="quality-scene"
+                  id="quality-metric-scene"
+                  role="img"
+                  aria-live="polite"
+                  aria-label="Coverage breadth teaching diagram"
+                >
+                  <p>Choose a quality concept to load its scientific teaching diagram.</p>
+                </div>
+                <div class="quality-explorer-reading" aria-live="polite">
+                  <p id="quality-metric-definition"></p>
+                  <p id="quality-metric-clinical"></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="quality-chip-grid" role="group" aria-label="Choose an NGS quality concept">
+              <button type="button" data-quality-metric="coverage" aria-pressed="true">Coverage breadth</button>
+              <button type="button" data-quality-metric="depth" aria-pressed="false">Read depth</button>
+              <button type="button" data-quality-metric="base-quality" aria-pressed="false">Base quality</button>
+              <button type="button" data-quality-metric="mapping-quality" aria-pressed="false">Mapping quality</button>
+              <button type="button" data-quality-metric="allele-fraction" aria-pressed="false">Allele fraction</button>
+              <button type="button" data-quality-metric="strand-bias" aria-pressed="false">Strand bias</button>
+              <button type="button" data-quality-metric="contamination" aria-pressed="false">Contamination</button>
+              <button type="button" data-quality-metric="reference-build" aria-pressed="false">Reference build</button>
+              <button type="button" data-quality-metric="transcript-choice" aria-pressed="false">Transcript choice</button>
+              <button type="button" data-quality-metric="cnv-support" aria-pressed="false">CNV support</button>
+              <button type="button" data-quality-metric="repeat-expansion" aria-pressed="false">Repeat expansion visibility</button>
+              <button type="button" data-quality-metric="mtdna" aria-pressed="false">mtDNA heteroplasmy</button>
             </div>
           </figure>
 
           <div class="acmg-three-up reveal">
-            <article class="summary-card">
-              <h3>Reference build and transcript choice</h3>
-              <p>
-                A genomic coordinate is meaningful only if the reference build and transcript are
-                explicit. The same variant may receive different cDNA or protein consequences
-                depending on transcript selection.
-              </p>
-              <ul class="acmg-checklist">
-                <li>GRCh37 and GRCh38 coordinates are not interchangeable.</li>
-                <li>Transcript choice changes exon numbering, HGVS, and sometimes consequence class.</li>
-                <li>Every report should document the build and transcript used.</li>
-              </ul>
+            <article class="summary-card teaching-sketch-card">
+              <div class="teaching-sketch-copy">
+                <h3>Reference build and transcript choice</h3>
+                <p>
+                  A genomic coordinate is meaningful only if the reference build and transcript are
+                  explicit. The same variant may receive different cDNA or protein consequences
+                  depending on transcript selection.
+                </p>
+                <ul class="acmg-checklist">
+                  <li>GRCh37 and GRCh38 coordinates are not interchangeable.</li>
+                  <li>Transcript choice changes exon numbering, HGVS, and sometimes consequence class.</li>
+                  <li>Every report should document the build and transcript used.</li>
+                </ul>
+              </div>
+              <div
+                class="teaching-sketch-pad"
+                data-sketch-pad
+                data-sketch-title="Reference build and transcript choice"
+              >
+                <div class="teaching-sketch-toolbar">
+                  <span>Teaching sketch pad</span>
+                  <button type="button" class="secondary-action teaching-sketch-clear" data-sketch-clear>
+                    Clear
+                  </button>
+                </div>
+                <div class="teaching-sketch-canvas-frame">
+                  <canvas
+                    class="teaching-sketch-canvas"
+                    data-sketch-canvas
+                    aria-label="Drawing area for reference build and transcript explanation"
+                  ></canvas>
+                  <p class="teaching-sketch-hint">Draw here while explaining coordinates, exons, and transcript choice.</p>
+                </div>
+              </div>
             </article>
-            <article class="summary-card">
-              <h3>Variant types the pipeline may or may not detect well</h3>
-              <p>
-                Clinical NGS is not one method for one variant type. Detection performance differs
-                between SNVs, indels, CNVs, structural variants, repeat expansions, and mtDNA
-                heteroplasmy.
-              </p>
-              <ul class="acmg-checklist">
-                <li>SNVs and small indels are the classic strengths of short-read pipelines.</li>
-                <li>CNV and exon-dropout logic need separate evidence and coverage review.</li>
-                <li>Negative results must be interpreted in the context of assay scope.</li>
-              </ul>
+            <article class="summary-card teaching-sketch-card">
+              <div class="teaching-sketch-copy">
+                <h3>Variant types the pipeline may or may not detect well</h3>
+                <p>
+                  Clinical NGS is not one method for one variant type. Detection performance differs
+                  between SNVs, indels, CNVs, structural variants, repeat expansions, and mtDNA
+                  heteroplasmy.
+                </p>
+                <ul class="acmg-checklist">
+                  <li>SNVs and small indels are the classic strengths of short-read pipelines.</li>
+                  <li>CNV and exon-dropout logic need separate evidence and coverage review.</li>
+                  <li>Negative results must be interpreted in the context of assay scope.</li>
+                </ul>
+              </div>
+              <div
+                class="teaching-sketch-pad"
+                data-sketch-pad
+                data-sketch-title="Variant types the pipeline may or may not detect well"
+              >
+                <div class="teaching-sketch-toolbar">
+                  <span>Teaching sketch pad</span>
+                  <button type="button" class="secondary-action teaching-sketch-clear" data-sketch-clear>
+                    Clear
+                  </button>
+                </div>
+                <div class="teaching-sketch-canvas-frame">
+                  <canvas
+                    class="teaching-sketch-canvas"
+                    data-sketch-canvas
+                    aria-label="Drawing area for variant type explanation"
+                  ></canvas>
+                  <p class="teaching-sketch-hint">Draw here to compare SNVs, indels, CNVs, dropout, and assay scope.</p>
+                </div>
+              </div>
             </article>
-            <article class="summary-card">
-              <h3>Validation, provenance, and security</h3>
-              <p>
-                A clinically defensible result requires pipeline validation, software version
-                control, sample identity checks, audit trails, and secure handling of genomic data.
-              </p>
-              <ul class="acmg-checklist">
-                <li>Sample swaps and contamination can invalidate interpretation before ACMG review starts.</li>
-                <li>Software version drift can change the VCF even when the patient is the same.</li>
-                <li>Audit trails are a laboratory requirement, not optional informatics decoration.</li>
-              </ul>
+            <article class="summary-card teaching-sketch-card">
+              <div class="teaching-sketch-copy">
+                <h3>Validation, provenance, and security</h3>
+                <p>
+                  A clinically defensible result requires pipeline validation, software version
+                  control, sample identity checks, audit trails, and secure handling of genomic data.
+                </p>
+                <ul class="acmg-checklist">
+                  <li>Sample swaps and contamination can invalidate interpretation before ACMG review starts.</li>
+                  <li>Software version drift can change the VCF even when the patient is the same.</li>
+                  <li>Audit trails are a laboratory requirement, not optional informatics decoration.</li>
+                </ul>
+              </div>
+              <div
+                class="teaching-sketch-pad"
+                data-sketch-pad
+                data-sketch-title="Validation, provenance, and security"
+              >
+                <div class="teaching-sketch-toolbar">
+                  <span>Teaching sketch pad</span>
+                  <button type="button" class="secondary-action teaching-sketch-clear" data-sketch-clear>
+                    Clear
+                  </button>
+                </div>
+                <div class="teaching-sketch-canvas-frame">
+                  <canvas
+                    class="teaching-sketch-canvas"
+                    data-sketch-canvas
+                    aria-label="Drawing area for validation and provenance explanation"
+                  ></canvas>
+                  <p class="teaching-sketch-hint">Draw here to show file flow, audit trails, sample identity, or security checkpoints.</p>
+                </div>
+              </div>
             </article>
           </div>
         </section>
@@ -613,6 +765,73 @@
               cautions.
             </p>
           </div>
+
+          <figure class="figure-card acmg-strength-map reveal">
+            <div class="figure-heading">
+              <p class="figure-label">Evidence strength map</p>
+              <h3>Sixteen pathogenic and twelve benign codes, grouped by their original strength</h3>
+              <p>
+                The point equivalents are a later Bayesian teaching model. They help compare
+                evidence strength, but they do not make variant classification a simple unchecked
+                sum.
+              </p>
+            </div>
+            <div class="table-wrap acmg-strength-table-wrap">
+              <table class="acmg-strength-table">
+                <thead>
+                  <tr>
+                    <th>Original strength</th>
+                    <th>Pathogenic-direction codes</th>
+                    <th>Point equivalent</th>
+                    <th>Benign-direction codes</th>
+                    <th>Point equivalent</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Very strong / stand-alone</th>
+                    <td><strong>PVS1</strong> — predicted loss of function when loss of function is an established disease mechanism</td>
+                    <td class="point-value point-pathogenic">+8</td>
+                    <td><strong>BA1</strong> — allele frequency incompatible with the disorder, with known exceptions considered</td>
+                    <td class="point-value point-standalone">Stand-alone; do not sum</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Strong</th>
+                    <td><strong>PS1-PS4</strong></td>
+                    <td class="point-value point-pathogenic">+4</td>
+                    <td><strong>BS1-BS4</strong></td>
+                    <td class="point-value point-benign">-4</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Moderate</th>
+                    <td><strong>PM1-PM6</strong></td>
+                    <td class="point-value point-pathogenic">+2</td>
+                    <td>None in the original 2015 framework</td>
+                    <td class="point-value">—</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Supporting</th>
+                    <td><strong>PP1-PP5</strong></td>
+                    <td class="point-value point-pathogenic">+1</td>
+                    <td><strong>BP1-BP7</strong></td>
+                    <td class="point-value point-benign">-1</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="acmg-point-thresholds" aria-label="Tavtigian 2020 point classification ranges">
+              <span class="point-range range-benign"><strong>≤ -7</strong> Benign</span>
+              <span class="point-range range-likely-benign"><strong>-6 to -1</strong> Likely benign</span>
+              <span class="point-range range-vus"><strong>0 to 5</strong> VUS</span>
+              <span class="point-range range-likely-pathogenic"><strong>6 to 9</strong> Likely pathogenic</span>
+              <span class="point-range range-pathogenic"><strong>≥ 10</strong> Pathogenic</span>
+            </div>
+            <p class="interpretation acmg-strength-caution">
+              Apply current ClinGen guidance and gene/disease-specific VCEP specifications before
+              assigning, modifying, combining, or counting evidence. Avoid double-counting dependent
+              evidence. BA1 is stand-alone and is commonly handled outside the point sum.
+            </p>
+          </figure>
 
           <div class="criteria-controls reveal" data-criteria-controls>
             <label class="criteria-control">
@@ -899,6 +1118,7 @@
               <ol class="reference-list">
                 <li>Richards S, Aziz N, Bale S, et al. Genetics in Medicine. 2015;17:405-423.</li>
                 <li>ClinGen Variant Classification Guidance. Updated July 2025.</li>
+                <li>Tavtigian SV, Harrison SM, Boucher KM, Biesecker LG. Human Mutation. 2020;41:1734-1737.</li>
                 <li>Li MM, Datto M, Duncavage EJ, et al. J Mol Diagn. 2017;19:4-23.</li>
                 <li>Horak P, Griffith M, Danos AM, et al. Genetics in Medicine. 2022;24:986-998.</li>
               </ol>
@@ -908,6 +1128,18 @@
                   download="acmg-guidelines-paper.pdf"
                   type="application/pdf"
                   >Download ACMG guideline paper (PDF)</a
+                >
+                <a
+                  href="https://clinicalgenome.org/tools/clingen-variant-classification-guidance/"
+                  target="_blank"
+                  rel="noreferrer"
+                  >Open current ClinGen variant-classification guidance</a
+                >
+                <a
+                  href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8011844/"
+                  target="_blank"
+                  rel="noreferrer"
+                  >Read the Bayesian point-system paper</a
                 >
                 <a
                   href="https://www.genomatics.net/guides/acmg-variant-classification-guide"
