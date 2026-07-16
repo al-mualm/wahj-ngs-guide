@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A standalone Wahj preview for exploring read-level NGS evidence and pipeline benchmarking."
+    />
+    <title>Variant Reality Check Preview | Wahj Al-DNA</title>
+    <script>
+      if (new URLSearchParams(window.location.search).get("embed") === "1") {
+        document.documentElement.classList.add("variant-reality-embedded");
+      }
+    </script>
+    <link rel="icon" href="../assets/wahj-logo.png" type="image/png" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="variant-reality-check.css" />
+  </head>
+  <body class="variant-reality-page">
+    <a class="skip-link" href="#main-content">Skip to the interactive laboratory</a>
+
+    <div class="reality-shell">
+      <header class="reality-header">
+        <a class="brand-lockup reality-brand" href="../" aria-label="Return to Wahj Al-DNA homepage">
+          <img class="brand-logo" src="../assets/wahj-logo.png" alt="" />
+          <span>
+            <span class="eyebrow">Wahj Molecular Biology Learning Hub</span>
+            <strong class="brand-title">Variant Reality Check</strong>
+          </span>
+        </a>
+
+        <div class="preview-label" aria-label="Local design preview">
+          <span class="preview-dot"></span>
+          Local preview
+        </div>
+
+        <a class="header-link" href="../ngs-bioinformatics-acmg/">
+          Back to NGS lecture
+        </a>
+      </header>
+
+      <main id="main-content">
+        <section class="reality-hero">
+          <div class="hero-copy">
+            <p class="section-kicker">From BAM evidence to interpretation</p>
+            <h1>Is this variant technically credible enough to interpret?</h1>
+            <p class="hero-lead">
+              Explore how depth, allele support, quality, orientation, read position,
+              contamination, and genomic context change the confidence of one candidate call.
+            </p>
+
+            <div class="hero-principles" aria-label="Scientific guardrails">
+              <span>Technical validity first</span>
+              <span>Classification stays separate</span>
+              <span>Assay-specific thresholds</span>
+            </div>
+          </div>
+
+          <div class="hero-bridge" aria-label="Workflow from sequencing reads to interpretation">
+            <div class="bridge-track" aria-hidden="true">
+              <span class="bridge-read bridge-read-a"></span>
+              <span class="bridge-read bridge-read-b"></span>
+              <span class="bridge-read bridge-read-c"></span>
+              <span class="bridge-variant"></span>
+            </div>
+            <div class="bridge-steps">
+              <div>
+                <span>01</span>
+                <strong>BAM reads</strong>
+                <small>Observed signal</small>
+              </div>
+              <div>
+                <span>02</span>
+                <strong>Technical review</strong>
+                <small>Quality and bias</small>
+              </div>
+              <div>
+                <span>03</span>
+                <strong>Annotation</strong>
+                <small>Gene and consequence</small>
+              </div>
+              <div>
+                <span>04</span>
+                <strong>Interpretation</strong>
+                <small>Evidence framework</small>
+              </div>
+            </div>
+            <p>
+              A technically plausible call may proceed to interpretation. It is not automatically
+              pathogenic, clinically actionable, or reportable.
+            </p>
+          </div>
+        </section>
+
+        <section class="reality-lab" aria-labelledby="lab-heading">
+          <div class="lab-intro">
+            <div>
+              <p class="section-kicker">Interactive laboratory</p>
+              <h2 id="lab-heading">Inspect one call, then test a complete pipeline</h2>
+            </div>
+            <p>
+              All scenarios use synthetic teaching data. No patient information is uploaded or
+              transmitted.
+            </p>
+          </div>
+
+          <div class="lab-tabs" role="tablist" aria-label="Variant reality check sections">
+            <button
+              class="lab-tab is-active"
+              id="evidence-tab"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="evidence-panel"
+              data-lab-tab="evidence"
+            >
+              <span>1</span>
+              Read-level evidence
+            </button>
+            <button
+              class="lab-tab"
+              id="benchmark-tab"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="benchmark-panel"
+              data-lab-tab="benchmark"
+              tabindex="-1"
+            >
+              <span>2</span>
+              Pipeline benchmarking
+            </button>
+          </div>
+
+          <section
+            class="lab-panel evidence-panel"
+            id="evidence-panel"
+            role="tabpanel"
+            aria-labelledby="evidence-tab"
+            data-lab-panel="evidence"
+          >
+            <div class="evidence-controls">
+              <section class="control-card preset-card" aria-labelledby="preset-heading">
+                <div class="control-heading">
+                  <div>
+                    <span class="control-number">01</span>
+                    <h3 id="preset-heading">Choose a teaching scenario</h3>
+                  </div>
+                  <span class="micro-label">Instant setup</span>
+                </div>
+
+                <div class="preset-grid">
+                  <button type="button" class="preset-button is-active" data-preset="credible">
+                    <span class="preset-signal signal-pass"></span>
+                    Credible heterozygous SNV
+                  </button>
+                  <button type="button" class="preset-button" data-preset="low-depth">
+                    <span class="preset-signal signal-stop"></span>
+                    Low-depth uncertain call
+                  </button>
+                  <button type="button" class="preset-button" data-preset="strand-bias">
+                    <span class="preset-signal signal-review"></span>
+                    Strand-biased artifact
+                  </button>
+                  <button type="button" class="preset-button" data-preset="mosaic">
+                    <span class="preset-signal signal-review"></span>
+                    Low-VAF mosaic candidate
+                  </button>
+                  <button type="button" class="preset-button" data-preset="tumor-purity">
+                    <span class="preset-signal signal-review"></span>
+                    Tumor call affected by purity
+                  </button>
+                  <button type="button" class="preset-button" data-preset="pseudogene">
+                    <span class="preset-signal signal-review"></span>
+                    Pseudogene misalignment
+                  </button>
+                  <button type="button" class="preset-button" data-preset="homopolymer">
+                    <span class="preset-signal signal-review"></span>
+                    Homopolymer indel artifact
+                  </button>
+                  <button type="button" class="preset-button" data-preset="dropout">
+                    <span class="preset-signal signal-stop"></span>
+                    Exon coverage dropout
+                  </button>
+                </div>
+              </section>
+
+              <section class="control-card" aria-labelledby="context-heading">
+                <div class="control-heading">
+                  <div>
+                    <span class="control-number">02</span>
+                    <h3 id="context-heading">Define the specimen and locus</h3>
+                  </div>
+                </div>
+
+                <div class="select-grid">
+                  <label>
+                    <span>Sample context</span>
+                    <select id="sample-type">
+                      <option value="germline">Germline</option>
+                      <option value="somatic">Somatic tumor</option>
+                      <option value="mosaic">Possible mosaic</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Variant type</span>
+                    <select id="variant-type">
+                      <option value="snv">Single-nucleotide variant</option>
+                      <option value="insertion">1-bp insertion</option>
+                      <option value="deletion">1-bp deletion</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Genomic context</span>
+                    <select id="genomic-context">
+                      <option value="exon">Unique coding exon</option>
+                      <option value="intron">Intronic region</option>
+                      <option value="homopolymer">Homopolymer tract</option>
+                      <option value="pseudogene">Gene with pseudogene homology</option>
+                      <option value="repetitive">Repetitive / low-mappability region</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Reference build</span>
+                    <select id="reference-build">
+                      <option value="GRCh38">GRCh38</option>
+                      <option value="GRCh37">GRCh37</option>
+                    </select>
+                  </label>
+                </div>
+              </section>
+
+              <section class="control-card" aria-labelledby="signal-heading">
+                <div class="control-heading">
+                  <div>
+                    <span class="control-number">03</span>
+                    <h3 id="signal-heading">Adjust the observed evidence</h3>
+                  </div>
+                  <button class="reset-button" id="reset-evidence" type="button">Reset</button>
+                </div>
+
+                <div class="slider-stack">
+                  <label class="slider-control" for="read-depth">
+                    <span class="slider-copy">
+                      <strong>Read depth</strong>
+                      <small>Usable reads overlapping this position</small>
+                    </span>
+                    <output id="read-depth-output" for="read-depth">38x</output>
+                    <input id="read-depth" type="range" min="0" max="80" value="38" />
+                  </label>
+
+                  <label class="slider-control" for="alt-reads">
+                    <span class="slider-copy">
+                      <strong>Alternate-supporting reads</strong>
+                      <small>Reads carrying the candidate allele</small>
+                    </span>
+                    <output id="alt-reads-output" for="alt-reads">18 / 38</output>
+                    <input id="alt-reads" type="range" min="0" max="38" value="18" />
+                  </label>
+
+                  <label class="slider-control" for="base-quality">
+                    <span class="slider-copy">
+                      <strong>Median alternate base quality</strong>
+                      <small>Confidence in the called nucleotide</small>
+                    </span>
+                    <output id="base-quality-output" for="base-quality">Q36</output>
+                    <input id="base-quality" type="range" min="5" max="40" value="36" />
+                  </label>
+
+                  <label class="slider-control" for="mapping-quality">
+                    <span class="slider-copy">
+                      <strong>Median mapping quality</strong>
+                      <small>Confidence in genomic placement</small>
+                    </span>
+                    <output id="mapping-quality-output" for="mapping-quality">MQ58</output>
+                    <input id="mapping-quality" type="range" min="0" max="60" value="58" />
+                  </label>
+
+                  <label class="slider-control" for="strand-balance">
+                    <span class="slider-copy">
+                      <strong>Alternate support on forward strand</strong>
+                      <small>50% indicates balanced orientations</small>
+                    </span>
+                    <output id="strand-balance-output" for="strand-balance">50%</output>
+                    <input id="strand-balance" type="range" min="0" max="100" value="50" />
+                  </label>
+
+                  <label class="slider-control" for="read-position">
+                    <span class="slider-copy">
+                      <strong>Alternate bases near read center</strong>
+                      <small>Low values move support toward read ends</small>
+                    </span>
+                    <output id="read-position-output" for="read-position">82%</output>
+                    <input id="read-position" type="range" min="0" max="100" value="82" />
+                  </label>
+
+                  <label class="slider-control" for="duplicate-fraction">
+                    <span class="slider-copy">
+                      <strong>Duplicate fraction</strong>
+                      <small>Potentially non-independent read support</small>
+                    </span>
+                    <output id="duplicate-fraction-output" for="duplicate-fraction">4%</output>
+                    <input id="duplicate-fraction" type="range" min="0" max="60" value="4" />
+                  </label>
+
+                  <label class="slider-control" for="contamination">
+                    <span class="slider-copy">
+                      <strong>Estimated contamination</strong>
+                      <small>Unexpected DNA mixture in the specimen</small>
+                    </span>
+                    <output id="contamination-output" for="contamination">0.3%</output>
+                    <input id="contamination" type="range" min="0" max="20" step="0.1" value="0.3" />
+                  </label>
+
+                  <label class="slider-control conditional-control" for="tumor-purity" id="tumor-purity-control">
+                    <span class="slider-copy">
+                      <strong>Estimated tumor purity</strong>
+                      <small>Illustrates dilution of somatic allele fraction</small>
+                    </span>
+                    <output id="tumor-purity-output" for="tumor-purity">65%</output>
+                    <input id="tumor-purity" type="range" min="5" max="100" value="65" />
+                  </label>
+                </div>
+              </section>
+            </div>
+
+            <div class="evidence-stage">
+              <section class="pileup-card" aria-labelledby="pileup-heading">
+                <div class="pileup-heading">
+                  <div>
+                    <p class="micro-label">Simplified read pileup</p>
+                    <h3 id="pileup-heading">Candidate locus evidence</h3>
+                  </div>
+                  <div class="locus-chip">
+                    <span id="locus-build">GRCh38 synthetic locus</span>
+                    <strong id="locus-coordinate">chr7:117,559,593 G&gt;T</strong>
+                  </div>
+                </div>
+
+                <div class="pileup-context" id="pileup-context">
+                  <span class="context-label">Unique coding exon</span>
+                  <div class="context-track">
+                    <span class="context-exon"></span>
+                    <span class="context-variant"></span>
+                  </div>
+                </div>
+
+                <div class="pileup-frame">
+                  <svg
+                    id="pileup-svg"
+                    viewBox="0 0 920 430"
+                    role="img"
+                    aria-labelledby="pileup-svg-title pileup-svg-description"
+                  >
+                    <title id="pileup-svg-title">Synthetic sequencing read pileup</title>
+                    <desc id="pileup-svg-description">
+                      Reference and alternate reads displayed around one candidate variant.
+                    </desc>
+                  </svg>
+                </div>
+                <p class="mobile-scroll-hint">Swipe horizontally to inspect the full read pileup.</p>
+
+                <div class="pileup-legend" aria-label="Pileup legend">
+                  <span><i class="legend-line legend-forward"></i>Forward read</span>
+                  <span><i class="legend-line legend-reverse"></i>Reverse read</span>
+                  <span><i class="legend-base"></i>Alternate base</span>
+                  <span><i class="legend-dashed"></i>Uncertain mapping</span>
+                  <span><i class="legend-duplicate">D</i>Duplicate</span>
+                </div>
+              </section>
+
+              <section class="status-card" aria-labelledby="status-heading">
+                <div class="status-topline">
+                  <div>
+                    <p class="micro-label">Illustrative technical assessment</p>
+                    <h3 id="status-heading">Evidence review</h3>
+                  </div>
+                  <span class="status-badge status-pass" id="technical-status">Pass for review</span>
+                </div>
+
+                <div class="status-metrics">
+                  <div>
+                    <span>Depth</span>
+                    <strong id="metric-depth">38x</strong>
+                  </div>
+                  <div>
+                    <span>Alternate support</span>
+                    <strong id="metric-alt">18 / 38</strong>
+                  </div>
+                  <div>
+                    <span>Allele fraction</span>
+                    <strong id="metric-vaf">47.4%</strong>
+                  </div>
+                  <div>
+                    <span>Strand support</span>
+                    <strong id="metric-strand">9 F / 9 R</strong>
+                  </div>
+                </div>
+
+                <div class="review-grid">
+                  <div class="review-panel">
+                    <span class="review-label">Quality review</span>
+                    <ul id="quality-concerns">
+                      <li>No major concern detected in this synthetic scenario.</li>
+                    </ul>
+                  </div>
+                  <div class="review-panel review-decision">
+                    <span class="review-label">Interpretation eligibility</span>
+                    <strong id="interpretation-eligibility">
+                      Suitable for annotation review
+                    </strong>
+                    <p id="recommended-action">
+                      Continue to annotation and disease-specific interpretation.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="guardrail-note">
+                  <strong>Important:</strong>
+                  Technical evidence does not assign pathogenicity, clinical significance, or
+                  reportability. Validated laboratory thresholds and professional review remain
+                  necessary.
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section
+            class="lab-panel benchmark-panel"
+            id="benchmark-panel"
+            role="tabpanel"
+            aria-labelledby="benchmark-tab"
+            data-lab-panel="benchmark"
+            hidden
+          >
+            <div class="benchmark-toolbar">
+              <div>
+                <p class="section-kicker">Synthetic GIAB-style exercise</p>
+                <h3>Move the threshold and watch sensitivity trade against precision</h3>
+                <p>
+                  The dataset below is synthetic. It demonstrates benchmarking logic and does not
+                  reproduce an actual Genome in a Bottle result.
+                </p>
+              </div>
+
+              <div class="benchmark-actions">
+                <label>
+                  <span>Region set</span>
+                  <select id="benchmark-region">
+                    <option value="all">All benchmark regions</option>
+                    <option value="easy">Easy / high-confidence regions</option>
+                    <option value="difficult">Difficult genomic regions</option>
+                  </select>
+                </label>
+                <button type="button" class="export-button" id="export-benchmark">
+                  Export CSV
+                </button>
+              </div>
+            </div>
+
+            <div class="benchmark-layout">
+              <section class="threshold-card" aria-labelledby="threshold-heading">
+                <div class="control-heading">
+                  <div>
+                    <span class="control-number">01</span>
+                    <h3 id="threshold-heading">Variant-quality threshold</h3>
+                  </div>
+                  <output id="threshold-output" for="quality-threshold">50</output>
+                </div>
+
+                <input id="quality-threshold" type="range" min="0" max="100" value="50" />
+
+                <div class="threshold-scale" aria-hidden="true">
+                  <span>More sensitive</span>
+                  <span>Balanced</span>
+                  <span>More specific</span>
+                </div>
+
+                <div class="threshold-presets">
+                  <button type="button" data-threshold="30">Sensitive</button>
+                  <button type="button" data-threshold="50" class="is-active">Balanced</button>
+                  <button type="button" data-threshold="70">Specific</button>
+                </div>
+
+                <div class="threshold-message" id="threshold-message">
+                  A balanced threshold retains most true variants while removing many false calls.
+                </div>
+              </section>
+
+              <section class="benchmark-chart-card" aria-labelledby="curve-heading">
+                <div class="chart-heading">
+                  <div>
+                    <p class="micro-label">Threshold response</p>
+                    <h3 id="curve-heading">Precision and recall</h3>
+                  </div>
+                  <div class="chart-legend">
+                    <span><i class="precision-key"></i>Precision</span>
+                    <span><i class="recall-key"></i>Recall</span>
+                  </div>
+                </div>
+                <svg
+                  id="benchmark-chart"
+                  viewBox="0 0 760 350"
+                  role="img"
+                  aria-labelledby="benchmark-chart-title benchmark-chart-description"
+                >
+                  <title id="benchmark-chart-title">Precision and recall by quality threshold</title>
+                  <desc id="benchmark-chart-description">
+                    Synthetic benchmark curves with the selected threshold marked.
+                  </desc>
+                </svg>
+              </section>
+            </div>
+
+            <section class="benchmark-results" aria-labelledby="benchmark-results-heading">
+              <div class="results-heading">
+                <div>
+                  <p class="micro-label">Current operating point</p>
+                  <h3 id="benchmark-results-heading">Benchmark result</h3>
+                </div>
+                <span id="benchmark-scope">All benchmark regions</span>
+              </div>
+
+              <div class="benchmark-metrics">
+                <div class="metric-tile metric-tp">
+                  <span>True positives</span>
+                  <strong id="benchmark-tp">0</strong>
+                  <small>Truth variants detected</small>
+                </div>
+                <div class="metric-tile metric-fp">
+                  <span>False positives</span>
+                  <strong id="benchmark-fp">0</strong>
+                  <small>Incorrect calls retained</small>
+                </div>
+                <div class="metric-tile metric-fn">
+                  <span>False negatives</span>
+                  <strong id="benchmark-fn">0</strong>
+                  <small>Truth variants missed</small>
+                </div>
+                <div class="metric-tile">
+                  <span>Precision</span>
+                  <strong id="benchmark-precision">0%</strong>
+                  <small>TP / (TP + FP)</small>
+                </div>
+                <div class="metric-tile">
+                  <span>Recall</span>
+                  <strong id="benchmark-recall">0%</strong>
+                  <small>TP / (TP + FN)</small>
+                </div>
+                <div class="metric-tile metric-f1">
+                  <span>F1 score</span>
+                  <strong id="benchmark-f1">0.000</strong>
+                  <small>Balance of precision and recall</small>
+                </div>
+              </div>
+
+              <div class="benchmark-table-wrap" tabindex="0" role="region" aria-label="Benchmark comparison table">
+                <table id="benchmark-table">
+                  <caption>Comparison of easy and difficult benchmark regions</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Region group</th>
+                      <th scope="col">Truth variants</th>
+                      <th scope="col">TP</th>
+                      <th scope="col">FP</th>
+                      <th scope="col">FN</th>
+                      <th scope="col">Precision</th>
+                      <th scope="col">Recall</th>
+                      <th scope="col">F1</th>
+                    </tr>
+                  </thead>
+                  <tbody id="benchmark-table-body"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <aside class="benchmark-reference">
+              <div>
+                <span class="reference-mark">NIST</span>
+                <p>
+                  Real validation should use appropriate reference samples, benchmark VCF/BED
+                  regions, difficult-region stratifications, and a documented pipeline version.
+                </p>
+              </div>
+              <a
+                href="https://www.nist.gov/programs-projects/genome-bottle"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open Genome in a Bottle
+              </a>
+            </aside>
+          </section>
+        </section>
+
+        <section class="interpretation-boundary" aria-labelledby="boundary-heading">
+          <div>
+            <p class="section-kicker">The boundary this figure protects</p>
+            <h2 id="boundary-heading">A real-looking call is only the beginning</h2>
+          </div>
+          <div class="boundary-flow">
+            <div>
+              <span>Technical validity</span>
+              <strong>Is the signal credible?</strong>
+            </div>
+            <i aria-hidden="true"></i>
+            <div>
+              <span>Biological annotation</span>
+              <strong>What gene or transcript is affected?</strong>
+            </div>
+            <i aria-hidden="true"></i>
+            <div>
+              <span>Clinical interpretation</span>
+              <strong>What evidence applies in this disease context?</strong>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="reality-footer">
+        <p>
+          Educational preview only. It does not analyze patient data, validate a sequencing assay,
+          or replace professional laboratory review.
+        </p>
+        <a href="../ngs-bioinformatics-acmg/">Return to the lecture</a>
+      </footer>
+    </div>
+
+    <script src="variant-reality-check.js"></script>
+  </body>
+</html>

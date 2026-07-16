@@ -11,6 +11,7 @@
     <script>
       document.documentElement.classList.add("js");
     </script>
+    <link rel="icon" href="../assets/wahj-logo.png" type="image/png" />
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="./ngs-bioinformatics-acmg.css" />
   </head>
@@ -49,6 +50,7 @@
           <a href="#doctor-view">Clinical view</a>
           <a href="#foundation">Bioinformatics</a>
           <a href="#workflow">Workflow</a>
+          <a href="#variant-reality-check">Reality check</a>
           <a href="#organizations">Standards</a>
           <a href="#history">History</a>
           <a href="#germline-somatic">Germline vs somatic</a>
@@ -514,17 +516,94 @@
 
         <section class="section" id="workflow">
           <div class="section-heading reveal">
-            <span class="section-chip">Part 3 • Interactive workflow journey</span>
-            <h2>From FASTQ to report: each step removes a different kind of uncertainty</h2>
+            <span class="section-chip">Part 3 • Specimen-to-report journey</span>
+            <h2>The bioinformatics story begins before the first FASTQ file exists</h2>
             <p>
-              Click a stage to see the input, process, output, key quality checks, typical tools,
-              failure modes, and why a doctor should care about that checkpoint.
+              Follow one specimen from laboratory receipt through extraction, library preparation,
+              sequencing, primary analysis, secondary analysis, interpretation, and the signed
+              report. Every stage has a different input, output, quality gate, and failure risk.
             </p>
           </div>
 
+          <div class="journey-opening reveal">
+            <article>
+              <span>Pre-analytical truth</span>
+              <strong>The correct result requires the correct specimen.</strong>
+              <p>Identity, suitability, nucleic-acid quality, and assay choice are established first.</p>
+            </article>
+            <i aria-hidden="true"></i>
+            <article>
+              <span>Computational truth</span>
+              <strong>Files are checkpoints, not interchangeable containers.</strong>
+              <p>BCL, FASTQ, BAM/CRAM, VCF, and evidence tables answer different questions.</p>
+            </article>
+            <i aria-hidden="true"></i>
+            <article>
+              <span>Clinical truth</span>
+              <strong>A technically real variant is not automatically explanatory.</strong>
+              <p>Disease mechanism, phenotype, inheritance, evidence, and test scope still matter.</p>
+            </article>
+          </div>
+
           <div class="workflow-explorer reveal" data-workflow-explorer>
+            <div
+              class="workflow-phase-map"
+              data-workflow-phase-map
+              aria-label="Four phases of the NGS specimen-to-report journey"
+            ></div>
             <div class="workflow-stage-list" role="tablist" aria-label="NGS workflow stages"></div>
-            <div class="workflow-stage-panel" data-workflow-panel></div>
+            <div
+              class="workflow-stage-panel"
+              data-workflow-panel
+              role="tabpanel"
+              aria-live="polite"
+            ></div>
+          </div>
+        </section>
+
+        <section
+          class="section section-alt variant-reality-lecture-section"
+          id="variant-reality-check"
+        >
+          <div class="section-heading reveal">
+            <span class="section-chip">Part 3B • Variant Reality Check</span>
+            <h2>Before interpreting a variant, ask whether the read-level evidence is credible</h2>
+            <p>
+              This laboratory connects secondary analysis to clinical interpretation. Change the
+              pileup evidence, inspect technical warning patterns, and then explore how pipeline
+              thresholds affect precision, recall, false positives, and false negatives.
+            </p>
+          </div>
+
+          <div class="variant-reality-transition reveal" aria-label="Transition from variant calling to interpretation">
+            <article>
+              <span>Candidate call</span>
+              <strong>VCF proposes a difference</strong>
+              <small>Coordinates, alleles, genotype fields, and caller confidence</small>
+            </article>
+            <i aria-hidden="true"></i>
+            <article>
+              <span>Reality check</span>
+              <strong>BAM evidence tests credibility</strong>
+              <small>Depth, allele support, quality, orientation, position, and context</small>
+            </article>
+            <i aria-hidden="true"></i>
+            <article>
+              <span>Interpretation</span>
+              <strong>Only credible calls move forward</strong>
+              <small>Annotation and evidence review remain separate scientific steps</small>
+            </article>
+          </div>
+
+          <div class="variant-reality-frame-shell reveal">
+            <iframe
+              class="variant-reality-frame"
+              data-variant-reality-frame
+              src="../variant-reality-check-preview/index.html?embed=1"
+              title="Interactive Variant Reality Check laboratory"
+              loading="lazy"
+              scrolling="no"
+            ></iframe>
           </div>
         </section>
 
@@ -753,6 +832,296 @@
               </table>
             </div>
           </figure>
+        </section>
+
+        <section class="section myh7-specification-section" id="myh7-specification">
+          <div class="section-heading reveal">
+            <span class="section-chip">Part 7A • Gene-specific worked example</span>
+            <h2>How an expert panel adapts ACMG/AMP criteria for one gene-disease context</h2>
+            <p>
+              The table below recreates the published ClinGen Inherited Cardiomyopathy Expert
+              Panel specification for <em>MYH7</em>-associated inherited cardiomyopathies. It is a
+              useful example of evidence calibration, not a universal replacement for the
+              original ACMG/AMP framework.
+            </p>
+          </div>
+
+          <div class="scope-alert reveal" role="note" aria-label="Important scope warning">
+            <strong>Disease-specific example:</strong>
+            these 2018 <em>MYH7</em> thresholds were developed for inherited cardiomyopathy using
+            the evidence and population resources available at that time. Do not apply the
+            thresholds to another gene or disease. Check the current ClinGen Variant Curation
+            Expert Panel specification before clinical use.
+          </div>
+
+          <figure class="figure-card specification-figure reveal">
+            <div class="figure-heading">
+              <p class="figure-label">MYH7 specification table</p>
+              <h3>Published pathogenic and benign evidence-rule adaptations</h3>
+              <p>
+                “Removed” means the original rule was considered inapplicable in this specific
+                <em>MYH7</em> disease model; “modified strength” creates a calibrated evidence
+                level. The wording is condensed from Kelly et al. (2018).
+              </p>
+            </div>
+
+            <div class="table-wrap specification-table-wrap" tabindex="0" role="region" aria-label="MYH7 ACMG AMP specification table">
+              <table class="specification-table">
+                <caption>Pathogenic criteria</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Original strength</th>
+                    <th scope="col">Rule</th>
+                    <th scope="col">Specification type</th>
+                    <th scope="col">MYH7-specific rule description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="rowgroup">Very strong</th>
+                    <th scope="row">PVS1</th>
+                    <td><span class="spec-status spec-removed">Removed</span></td>
+                    <td>Null variant in a gene where loss of function is an established disease mechanism.</td>
+                  </tr>
+                  <tr>
+                    <th scope="rowgroup" rowspan="5">Strong</th>
+                    <th scope="row">PS1</th>
+                    <td><span class="spec-status spec-unchanged">No change</span></td>
+                    <td>Different nucleotide change causing the same amino-acid change as a previously established pathogenic variant.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PS2</th>
+                    <td><span class="spec-status spec-disease">Disease/gene</span></td>
+                    <td>De novo occurrence with confirmed parentage in an affected individual with no family history.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PS3</th>
+                    <td><span class="spec-status spec-disease">Disease/gene</span></td>
+                    <td>Mammalian knock-in functional studies support a damaging effect on the gene or gene product.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PS4</th>
+                    <td><span class="spec-status spec-disease">Disease/gene</span></td>
+                    <td>Significant enrichment in affected individuals versus controls, or identification in at least 15 probands with consistent phenotypes.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PP1_Strong</th>
+                    <td><span class="spec-status spec-modified">Modified strength</span></td>
+                    <td>Variant segregates with disease through at least 7 informative meioses.</td>
+                  </tr>
+                  <tr>
+                    <th scope="rowgroup" rowspan="9">Moderate</th>
+                    <th scope="row">PM1</th>
+                    <td><span class="spec-status spec-disease">Disease/gene</span></td>
+                    <td>Missense variant in the established MYH7 hotspot/functional domain spanning amino acids 181-937, without benign variation.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PM2</th>
+                    <td><span class="spec-status spec-disease">Disease/gene</span></td>
+                    <td>Absent or extremely rare (filtering allele frequency below 0.004%) in the large population studies used by the 2018 specification.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PM3</th>
+                    <td><span class="spec-status spec-removed">Removed</span></td>
+                    <td>Detected in trans with a pathogenic variant for a recessive disorder.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PM4</th>
+                    <td><span class="spec-status spec-unchanged">No change</span></td>
+                    <td>Protein-length change caused by an in-frame insertion/deletion in a nonrepeat region or by a stop-loss variant.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PM5</th>
+                    <td><span class="spec-status spec-unchanged">No change</span></td>
+                    <td>Missense change at a residue where a different missense change was previously established as pathogenic.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PM6</th>
+                    <td><span class="spec-status spec-disease">Disease/gene</span></td>
+                    <td>Assumed de novo occurrence without confirmed parentage.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PVS1_Moderate</th>
+                    <td><span class="spec-status spec-modified">Modified strength</span></td>
+                    <td>Null variant where evidence supports loss of function as an MYH7 disease mechanism.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PS4_Moderate</th>
+                    <td><span class="spec-status spec-modified">Modified strength</span></td>
+                    <td>Variant identified in at least 6 probands with consistent phenotypes.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PP1_Moderate</th>
+                    <td><span class="spec-status spec-modified">Modified strength</span></td>
+                    <td>Variant segregates with disease through at least 5 informative meioses.</td>
+                  </tr>
+                  <tr>
+                    <th scope="rowgroup" rowspan="6">Supporting</th>
+                    <th scope="row">PP1</th>
+                    <td><span class="spec-status spec-disease">Disease/gene</span></td>
+                    <td>Variant segregates with disease through at least 3 informative meioses.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PP2</th>
+                    <td><span class="spec-status spec-removed">Removed</span></td>
+                    <td>Missense variant in a gene with little benign missense variation where missense is a common disease mechanism.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PP3</th>
+                    <td><span class="spec-status spec-unchanged">No change</span></td>
+                    <td>Multiple computational evidence sources support a deleterious effect on the gene or gene product.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PP4</th>
+                    <td><span class="spec-status spec-removed">Removed</span></td>
+                    <td>Phenotype or family history is highly specific for a disease with a single genetic etiology.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PP5</th>
+                    <td><span class="spec-status spec-removed">Removed</span></td>
+                    <td>A reputable source reports the variant as pathogenic without independently evaluable evidence.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">PS4_Supporting</th>
+                    <td><span class="spec-status spec-modified">Modified strength</span></td>
+                    <td>Variant identified in at least 2 probands with consistent phenotypes.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-wrap specification-table-wrap" tabindex="0" role="region" aria-label="MYH7 benign ACMG AMP specification table">
+              <table class="specification-table specification-table-benign">
+                <caption>Benign criteria</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Original strength</th>
+                    <th scope="col">Rule</th>
+                    <th scope="col">Specification type</th>
+                    <th scope="col">MYH7-specific rule description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="rowgroup">Stand-alone</th>
+                    <th scope="row">BA1</th>
+                    <td><span class="spec-status spec-disease">Disease/gene</span></td>
+                    <td>Filtering allele frequency at least 0.1% in the ExAC-era population data used by the 2018 specification.</td>
+                  </tr>
+                  <tr>
+                    <th scope="rowgroup" rowspan="4">Strong</th>
+                    <th scope="row">BS1</th>
+                    <td><span class="spec-status spec-disease">Disease/gene</span></td>
+                    <td>Filtering allele frequency at least 0.02% in the ExAC-era data, provided no substantial conflicting information exists.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">BS2</th>
+                    <td><span class="spec-status spec-removed">Removed</span></td>
+                    <td>Observed in a healthy adult when full penetrance at an early age is expected.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">BS3</th>
+                    <td><span class="spec-status spec-unchanged">No change</span></td>
+                    <td>Mammalian knock-in functional studies support no damaging effect on protein function or splicing.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">BS4</th>
+                    <td><span class="spec-status spec-disease">Disease/gene</span></td>
+                    <td>Nonsegregation in affected members of a family.</td>
+                  </tr>
+                  <tr>
+                    <th scope="rowgroup" rowspan="7">Supporting</th>
+                    <th scope="row">BP1</th>
+                    <td><span class="spec-status spec-removed">Removed</span></td>
+                    <td>Missense variant in a gene where only loss-of-function variants cause disease.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">BP2</th>
+                    <td><span class="spec-status spec-disease">Disease/gene</span></td>
+                    <td>Observed in trans or in cis with another pathogenic variant under the inheritance and disease-model conditions defined by the expert panel.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">BP3</th>
+                    <td><span class="spec-status spec-removed">Removed</span></td>
+                    <td>In-frame insertion/deletion in a repetitive region without a known function.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">BP4</th>
+                    <td><span class="spec-status spec-unchanged">No change</span></td>
+                    <td>Multiple computational evidence sources suggest no effect on the gene or gene product.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">BP5</th>
+                    <td><span class="spec-status spec-disease">Disease/gene</span></td>
+                    <td>Variant found in a case with an alternate molecular basis for disease.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">BP6</th>
+                    <td><span class="spec-status spec-removed">Removed</span></td>
+                    <td>A reputable source reports the variant as benign without independently evaluable evidence.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">BP7</th>
+                    <td><span class="spec-status spec-unchanged">No change</span></td>
+                    <td>Synonymous variant with no predicted splice impact, no new splice site, and a nucleotide that is not highly conserved.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <figcaption class="specification-source">
+              Source: Kelly MA, Caleshu C, Morales A, et al. <em>Genetics in Medicine</em>
+              (2018). This historical specification used ExAC-era population resources; current
+              databases, expert-panel versions, and disease-specific thresholds must be checked.
+              <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5876064/" target="_blank" rel="noreferrer">Read the open-access publication</a>.
+            </figcaption>
+          </figure>
+
+          <article class="pangea-clin-panel reveal" aria-labelledby="pangea-clin-heading">
+            <div class="pangea-clin-copy">
+              <span class="pangea-kicker">Open-source research framework</span>
+              <h3 id="pangea-clin-heading">PANGEA-Clin sorts evidence for review, not for diagnosis</h3>
+              <p>
+                PANGEA-Clin produces a transparent research-prioritization score. Its current
+                default model weights functional impact, rarity, clinical evidence,
+                gene-disease validity, phenotype match, tissue relevance, GWAS evidence,
+                literature support, and ancestry confidence. It subtracts penalties for missing,
+                conflicting, weak, poorly represented, or biologically implausible evidence and
+                then sorts variants by the final integrated score from highest to lowest.
+              </p>
+              <a class="pangea-link" href="https://github.com/al-mualm/pangea-clin" target="_blank" rel="noreferrer">
+                Open al-mualm/pangea-clin on GitHub
+              </a>
+            </div>
+
+            <div class="pangea-sort-flow" aria-label="PANGEA-Clin variant prioritization flow">
+              <div class="pangea-step">
+                <span>1</span>
+                <strong>Join safely</strong>
+                <small>Normalize variant, gene, disease, phenotype, and evidence records.</small>
+              </div>
+              <div class="pangea-step">
+                <span>2</span>
+                <strong>Score components</strong>
+                <small>Apply explicit configurable weights to nine evidence dimensions.</small>
+              </div>
+              <div class="pangea-step">
+                <span>3</span>
+                <strong>Penalize uncertainty</strong>
+                <small>Reduce scores for missing, conflicting, weak, or noisy evidence.</small>
+              </div>
+              <div class="pangea-step">
+                <span>4</span>
+                <strong>Rank for review</strong>
+                <small>Sort the integrated scores in descending order and retain explanations.</small>
+              </div>
+            </div>
+
+            <p class="pangea-disclaimer">
+              Research-only boundary: PANGEA-Clin is not clinically validated, does not diagnose,
+              and does not automatically reclassify variants or variants of uncertain significance.
+            </p>
+          </article>
         </section>
 
         <section class="section section-alt" id="criteria">
@@ -1117,6 +1486,7 @@
               <h3>Primary sources</h3>
               <ol class="reference-list">
                 <li>Richards S, Aziz N, Bale S, et al. Genetics in Medicine. 2015;17:405-423.</li>
+                <li>Kelly MA, Caleshu C, Morales A, et al. Genetics in Medicine. 2018;20:351-359.</li>
                 <li>ClinGen Variant Classification Guidance. Updated July 2025.</li>
                 <li>Tavtigian SV, Harrison SM, Boucher KM, Biesecker LG. Human Mutation. 2020;41:1734-1737.</li>
                 <li>Li MM, Datto M, Duncavage EJ, et al. J Mol Diagn. 2017;19:4-23.</li>
@@ -1142,6 +1512,12 @@
                   >Read the Bayesian point-system paper</a
                 >
                 <a
+                  href="https://github.com/al-mualm/pangea-clin"
+                  target="_blank"
+                  rel="noreferrer"
+                  >Open the PANGEA-Clin research repository</a
+                >
+                <a
                   href="https://www.genomatics.net/guides/acmg-variant-classification-guide"
                   target="_blank"
                   rel="noreferrer"
@@ -1155,7 +1531,7 @@
     </div>
 
     <script src="../config.js"></script>
-    <script src="../script.js"></script>
+    <script src="../script.js?v=20260716-ngs-reality"></script>
     <script src="./ngs-bioinformatics-acmg.js"></script>
   </body>
 </html>

@@ -6,6 +6,132 @@
 
   const workflowStages = [
     {
+      id: "accession",
+      label: "Specimen receipt",
+      fileType: "LIMS accession",
+      count: "1 labeled specimen",
+      question: "Is this the correct specimen for the correct clinical question?",
+      input: "Labeled blood, tissue, extracted nucleic acid, or another validated specimen with a complete test request.",
+      process: "Verify identifiers, specimen type, collection and transport conditions, indication, consent requirements, volume, and acceptance criteria before assigning a laboratory accession.",
+      output: "Accepted specimen linked to a traceable LIMS record, or a documented rejection/request for replacement.",
+      doctorWhy: "Excellent sequencing cannot rescue a mislabeled, unsuitable, contaminated, or clinically mismatched specimen.",
+      metrics: ["Identifier concordance", "Specimen type and volume", "Transport and acceptance status"],
+      failureModes: [
+        "Patient or specimen identifiers do not agree",
+        "Insufficient material or inappropriate container",
+        "Clinical indication does not match the ordered assay",
+      ],
+      tools: ["LIMS", "Barcode tracking", "Accession checklist"],
+      snippetLabel: "Accession record example",
+      snippet:
+        "ACCESSION: WAHJ-2026-0017\n" +
+        "SPECIMEN: EDTA whole blood\n" +
+        "INDICATION: inherited cardiomyopathy\n" +
+        "IDENTIFIERS: concordant\n" +
+        "STATUS: accepted",
+    },
+    {
+      id: "extraction",
+      label: "Extraction and QC",
+      fileType: "DNA/RNA QC record",
+      count: "1.62 ug extracted DNA",
+      question: "Is there enough intact, amplifiable nucleic acid for this validated assay?",
+      input: "An accepted specimen processed with a validated extraction method appropriate to the specimen type.",
+      process: "Extract nucleic acid, quantify it with an appropriate method, assess purity and integrity when relevant, and retain identity throughout the workflow.",
+      output: "Qualified DNA or RNA at a documented concentration, volume, purity, and integrity, or a failed/suboptimal QC decision.",
+      doctorWhy: "Low quantity, fragmentation, inhibitors, or fixation damage can produce uneven coverage, high duplication, allele dropout, and false-negative results.",
+      metrics: ["Fluorometric concentration and total yield", "Purity/inhibition assessment", "DIN/RIN or fragment integrity when applicable"],
+      failureModes: [
+        "Spectrophotometric concentration overestimates usable DNA",
+        "FFPE damage or fragmentation reduces amplifiable template",
+        "Extraction contamination or sample identity loss",
+      ],
+      tools: ["Qubit or validated fluorometry", "Spectrophotometry", "TapeStation/Bioanalyzer or validated integrity method"],
+      snippetLabel: "Nucleic-acid QC example",
+      snippet:
+        "QUBIT: 32.4 ng/uL\n" +
+        "VOLUME: 50 uL\n" +
+        "TOTAL YIELD: 1.62 ug\n" +
+        "A260/A280: 1.86\n" +
+        "DIN: 8.7\n" +
+        "QC DECISION: proceed",
+    },
+    {
+      id: "library",
+      label: "Library preparation",
+      fileType: "Indexed library",
+      count: "360 bp median library",
+      question: "Has the sample been converted into sequenceable molecules without losing important regions?",
+      input: "Qualified nucleic acid plus an assay-specific fragmentation, amplification, or capture strategy.",
+      process: "Fragment or amplify targets, repair ends when required, add platform adapters and sample indexes, enrich intended regions, purify, quantify, and normalize libraries.",
+      output: "A traceable indexed library pool with documented concentration, fragment distribution, and target-enrichment QC.",
+      doctorWhy: "Uneven capture, primer-site variants, excessive PCR, or poor pooling can cause exon dropout, high duplication, and misleading allele fractions.",
+      metrics: ["Library concentration or molarity", "Fragment-size distribution", "Library complexity and index balance"],
+      failureModes: [
+        "Allele dropout at an amplification primer site",
+        "Low-complexity library dominated by duplicate molecules",
+        "Unbalanced pooling causes one sample to be under-sequenced",
+      ],
+      tools: ["Validated library kit", "Hybrid capture or amplicon workflow", "Library quantification and sizing"],
+      snippetLabel: "Library QC example",
+      snippet:
+        "LIBRARY: WAHJ-2026-0017-L1\n" +
+        "MEDIAN FRAGMENT: 360 bp\n" +
+        "CONCENTRATION: 12.8 nM\n" +
+        "INDEX i7/i5: ATCACG / CGATGT\n" +
+        "POOL STATUS: balanced",
+    },
+    {
+      id: "sequencing",
+      label: "Sequencing run",
+      fileType: "Run folder / BCL",
+      count: "2 x 151 cycles",
+      question: "Did the instrument convert library molecules into a stable, high-quality signal?",
+      input: "A normalized indexed library pool loaded at a validated concentration with appropriate run controls.",
+      process: "Generate clusters or another platform-specific signal, perform sequencing cycles, image or measure each incorporation event, and monitor run-level quality.",
+      output: "Raw instrument signal and base-call files with run metrics, index reads, and control performance.",
+      doctorWhy: "Poor cluster density, low diversity, phasing, chemistry failure, or a weak control can affect every downstream result in the run.",
+      metrics: ["Yield and reads passing filter", "Q30 by read and cycle", "Control and index performance"],
+      failureModes: [
+        "Over- or under-clustering reduces usable signal",
+        "Quality declines late in the read",
+        "Index imbalance or index hopping misassigns reads",
+      ],
+      tools: ["Sequencing instrument", "Run-control software", "Run metrics dashboard"],
+      snippetLabel: "Sequencing run example",
+      snippet:
+        "READ STRUCTURE: 151 + 8 + 8 + 151 cycles\n" +
+        "CLUSTERS PASSING FILTER: 82.4%\n" +
+        "Q30 READ 1: 92.1%\n" +
+        "Q30 READ 2: 89.8%\n" +
+        "CONTROL: within validated range",
+    },
+    {
+      id: "primary-analysis",
+      label: "Primary analysis",
+      fileType: "BCL -> FASTQ",
+      count: "35M read pairs",
+      question: "How does instrument signal become sample-specific bases and quality scores?",
+      input: "Raw cycle-level instrument signal, run metadata, sample sheet, and i7/i5 index definitions.",
+      process: "Call bases, assign Phred quality scores, apply instrument filters, and demultiplex clusters by sample index into read files.",
+      output: "Per-sample FASTQ files containing sequence identifiers, called bases, and one quality character per base.",
+      doctorWhy: "An incorrect sample sheet, index mismatch, or failed demultiplexing can mix, lose, or mislabel reads before alignment begins.",
+      metrics: ["Reads assigned per sample", "Undetermined index fraction", "Per-cycle base quality"],
+      failureModes: [
+        "Sample-sheet or index orientation error",
+        "Unexpectedly high undetermined reads",
+        "Read and quality strings are truncated or mismatched",
+      ],
+      tools: ["Instrument base caller", "bcl-convert / DRAGEN", "Demultiplexing report"],
+      snippetLabel: "Primary-analysis handoff",
+      snippet:
+        "RUN SIGNAL: cycle images / intensities\n" +
+        "BASE CALLS: BCL\n" +
+        "DEMULTIPLEX: i7 + i5 indexes\n" +
+        "OUTPUT: WAHJ-0017_R1.fastq.gz\n" +
+        "        WAHJ-0017_R2.fastq.gz",
+    },
+    {
       id: "fastq",
       label: "FASTQ QC",
       fileType: "FASTQ",
@@ -90,7 +216,7 @@
       tools: ["VEP", "ANNOVAR", "snpEff"],
       snippetLabel: "Annotation example",
       snippet:
-        "GENE=CFTR | TRANSCRIPT=NM_000492.4 | CONSEQUENCE=missense_variant | HGVSc=c.1521_1523delCTT | HGVSp=p.Phe508del | gnomAD_AF=0.006 | ClinVar=Pathogenic",
+        "GENE=CFTR | TRANSCRIPT=NM_000492.4 | CONSEQUENCE=inframe_deletion | HGVSc=c.1521_1523delCTT | HGVSp=p.Phe508del | gnomAD_AF=0.006 | ClinVar=Pathogenic",
     },
     {
       id: "prioritization",
@@ -156,6 +282,52 @@
         "Finding: Pathogenic CFTR variant detected.\nLimitation: No evidence of a second pathogenic variant in adequately covered coding regions.\nRecommendation: Correlate with phenotype and consider deletion/duplication analysis if clinically indicated.",
     },
   ];
+
+  const workflowPhases = [
+    {
+      id: "preanalytical",
+      label: "Pre-analytical",
+      range: "Stages 1-3",
+      description: "Receive, identify, extract, and prepare the sample.",
+      firstStage: "accession",
+    },
+    {
+      id: "sequencing",
+      label: "Sequencing and primary",
+      range: "Stages 4-5",
+      description: "Generate signal, call bases, and demultiplex samples.",
+      firstStage: "sequencing",
+    },
+    {
+      id: "secondary",
+      label: "Secondary analysis",
+      range: "Stages 6-8",
+      description: "Review FASTQ, align reads, and call candidate variants.",
+      firstStage: "fastq",
+    },
+    {
+      id: "tertiary",
+      label: "Tertiary and reporting",
+      range: "Stages 9-12",
+      description: "Annotate, prioritize, classify, and communicate.",
+      firstStage: "annotation",
+    },
+  ];
+
+  const workflowPhaseByStage = {
+    accession: "preanalytical",
+    extraction: "preanalytical",
+    library: "preanalytical",
+    sequencing: "sequencing",
+    "primary-analysis": "sequencing",
+    fastq: "secondary",
+    alignment: "secondary",
+    calling: "secondary",
+    annotation: "tertiary",
+    prioritization: "tertiary",
+    classification: "tertiary",
+    report: "tertiary",
+  };
 
   const fastqHeaderParts = [
     {
@@ -1436,27 +1608,298 @@
     render(0);
   }
 
+  function workflowPhaseForStage(stageId) {
+    const phaseId = workflowPhaseByStage[stageId] || "tertiary";
+    return workflowPhases.find((phase) => phase.id === phaseId) || workflowPhases[0];
+  }
+
+  function renderWorkflowStageVisual(stage) {
+    const flowCellClusters = Array.from({ length: 35 }, (_, index) => {
+      const baseClass = ["base-a", "base-c", "base-g", "base-t"][index % 4];
+      return `<span class="${baseClass}" style="--cluster-delay:${index % 7}"></span>`;
+    }).join("");
+    const alignmentReads = Array.from({ length: 9 }, (_, index) => {
+      const variant = index === 2 || index === 4 || index === 7;
+      return `
+        <span class="${variant ? "has-variant" : ""}" style="--read-offset:${8 + (index % 5) * 9}%">
+          ${variant ? "<i></i>" : ""}
+        </span>
+      `;
+    }).join("");
+    const callingReads = Array.from({ length: 7 }, (_, index) => `
+      <span class="${index === 1 || index === 3 || index === 5 ? "has-variant" : ""}">
+        <i>${index === 1 || index === 3 || index === 5 ? "A" : "G"}</i>
+      </span>
+    `).join("");
+
+    const visualByStage = {
+      accession: `
+        <div class="journey-scene accession-scene">
+          <div class="specimen-vial">
+            <span class="vial-cap"></span>
+            <span class="vial-sample"></span>
+            <small>EDTA blood</small>
+          </div>
+          <div class="accession-scanner">
+            <span class="scanner-beam"></span>
+            <strong>Identity check</strong>
+            <small>2 identifiers + requisition</small>
+          </div>
+          <div class="journey-transfer-arrow" aria-hidden="true"></div>
+          <div class="lims-record">
+            <span class="lims-barcode"></span>
+            <strong>WAHJ-2026-0017</strong>
+            <small><i></i> Specimen accepted</small>
+            <small><i></i> Assay matched</small>
+            <small><i></i> Chain recorded</small>
+          </div>
+        </div>
+      `,
+      extraction: `
+        <div class="journey-scene extraction-scene">
+          <div class="extraction-tube">
+            <span class="tube-pellet"></span>
+            <small>Cells</small>
+          </div>
+          <div class="dna-release" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="qc-gauge-stack">
+            <div><span>Yield</span><i style="--qc-value:82%"></i><strong>1.62 ug</strong></div>
+            <div><span>Purity</span><i style="--qc-value:76%"></i><strong>1.86</strong></div>
+            <div><span>Integrity</span><i style="--qc-value:88%"></i><strong>DIN 8.7</strong></div>
+          </div>
+        </div>
+      `,
+      library: `
+        <div class="journey-scene library-scene">
+          <div class="library-step">
+            <span class="long-dna"></span>
+            <small>Genomic DNA</small>
+          </div>
+          <div class="journey-transfer-arrow" aria-hidden="true"></div>
+          <div class="fragment-cloud">
+            <span></span><span></span><span></span><span></span><span></span>
+            <small>Fragment / capture</small>
+          </div>
+          <div class="journey-transfer-arrow" aria-hidden="true"></div>
+          <div class="indexed-library">
+            <span><i></i><b></b></span>
+            <span><i></i><b></b></span>
+            <span><i></i><b></b></span>
+            <small>Adapters + i7/i5 indexes</small>
+          </div>
+        </div>
+      `,
+      sequencing: `
+        <div class="journey-scene sequencing-scene">
+          <div class="flow-cell">
+            <div class="flow-cell-grid">${flowCellClusters}</div>
+            <small>Clonal clusters on flow cell</small>
+          </div>
+          <div class="cycle-reader">
+            <div class="cycle-laser"></div>
+            <div class="base-calls">
+              <span class="base-a">A</span>
+              <span class="base-c">C</span>
+              <span class="base-g">G</span>
+              <span class="base-t">T</span>
+            </div>
+            <strong>Cycle-by-cycle signal</strong>
+            <small>Read 1 -> indexes -> Read 2</small>
+          </div>
+        </div>
+      `,
+      "primary-analysis": `
+        <div class="journey-scene primary-scene">
+          <div class="bcl-tile">
+            <span class="base-a"></span><span class="base-c"></span><span class="base-g"></span>
+            <span class="base-t"></span><span class="base-g"></span><span class="base-a"></span>
+            <span class="base-c"></span><span class="base-t"></span><span class="base-a"></span>
+            <small>Cycle signal / BCL</small>
+          </div>
+          <div class="primary-converter">
+            <span>Base calling</span>
+            <i></i>
+            <span>Demultiplexing</span>
+          </div>
+          <div class="fastq-file-card">
+            <strong>WAHJ-0017_R1.fastq.gz</strong>
+            <code>@read_001</code>
+            <code>ACCTGAGCTC...</code>
+            <code>FFFFFFFFFF...</code>
+          </div>
+        </div>
+      `,
+      fastq: `
+        <div class="journey-scene fastq-scene">
+          <div class="fastq-read-stack">
+            <span>R1</span><span>R2</span><span>R1</span><span>R2</span>
+            <small>Sequence + Phred quality</small>
+          </div>
+          <div class="quality-chart">
+            <i class="quality-zone"></i>
+            <svg viewBox="0 0 260 100" aria-hidden="true">
+              <path d="M8 24 C55 22, 95 26, 138 30 S210 43, 252 71" fill="none" stroke="#2f95b8" stroke-width="6" stroke-linecap="round"></path>
+              <line x1="8" y1="62" x2="252" y2="62" stroke="#c96a58" stroke-width="2" stroke-dasharray="5 5"></line>
+            </svg>
+            <small>Per-cycle quality</small>
+          </div>
+          <div class="trimmed-output">
+            <strong>35M</strong>
+            <span>raw pairs</span>
+            <i></i>
+            <strong>33.8M</strong>
+            <span>retained</span>
+          </div>
+        </div>
+      `,
+      alignment: `
+        <div class="journey-scene alignment-scene">
+          <div class="reference-ruler">
+            <span>GRCh38 reference</span>
+            <i></i>
+          </div>
+          <div class="alignment-read-stack">${alignmentReads}</div>
+          <div class="alignment-output">
+            <strong>BAM</strong>
+            <small>coordinates + MAPQ + CIGAR</small>
+          </div>
+        </div>
+      `,
+      calling: `
+        <div class="journey-scene calling-scene">
+          <div class="mini-pileup">
+            <strong>Reference G</strong>
+            ${callingReads}
+          </div>
+          <div class="journey-transfer-arrow" aria-hidden="true"></div>
+          <div class="vcf-card">
+            <span>CHROM POS REF ALT QUAL</span>
+            <strong>chr7 117199646 G A 412.7</strong>
+            <small>Candidate call, not interpretation</small>
+          </div>
+        </div>
+      `,
+      annotation: `
+        <div class="journey-scene annotation-scene">
+          <div class="bare-variant">
+            <span>chr7</span><span>G</span><span>A</span>
+            <small>Technical call</small>
+          </div>
+          <div class="annotation-lines" aria-hidden="true"></div>
+          <div class="annotation-record">
+            <strong>CFTR / NM_000492.4</strong>
+            <span>coding consequence</span>
+            <span>population frequency</span>
+            <span>ClinVar review status</span>
+            <span>transcript version</span>
+          </div>
+        </div>
+      `,
+      prioritization: `
+        <div class="journey-scene prioritization-scene">
+          <div class="candidate-funnel">
+            <span><strong>4,200</strong> annotated</span>
+            <span><strong>340</strong> rare + coding</span>
+            <span><strong>76</strong> disease genes</span>
+            <span><strong>28</strong> expert review</span>
+          </div>
+          <div class="phenotype-orbit">
+            <strong>Phenotype</strong>
+            <span>inheritance</span>
+            <span>mechanism</span>
+            <span>assay scope</span>
+          </div>
+        </div>
+      `,
+      classification: `
+        <div class="journey-scene classification-scene">
+          <div class="evidence-stack evidence-pathogenic">
+            <span>Population</span><span>Functional</span><span>Segregation</span>
+          </div>
+          <div class="evidence-scale">
+            <i></i>
+            <strong>Evidence integration</strong>
+            <small>Gene/disease-specific rules</small>
+          </div>
+          <div class="evidence-stack evidence-benign">
+            <span>Frequency</span><span>Functional</span><span>Clinical</span>
+          </div>
+          <div class="class-output">
+            <span>B</span><span>LB</span><span class="is-active">VUS</span><span>LP</span><span>P</span>
+          </div>
+        </div>
+      `,
+      report: `
+        <div class="journey-scene report-scene">
+          <div class="report-document">
+            <span class="report-logo"></span>
+            <strong>Clinical molecular report</strong>
+            <div><b>Finding</b><i></i><i></i></div>
+            <div><b>Interpretation</b><i></i><i></i><i></i></div>
+            <div><b>Limitations</b><i></i><i></i></div>
+            <small>Electronically reviewed and signed</small>
+          </div>
+          <div class="report-audience">
+            <span>Clinician</span>
+            <span>Patient</span>
+            <span>Laboratory record</span>
+          </div>
+        </div>
+      `,
+    };
+
+    return `
+      <figure
+        class="workflow-visual-card workflow-visual-${escapeHtml(stage.id)}"
+        role="img"
+        aria-label="Educational schematic for ${escapeHtml(stage.label)}"
+      >
+        ${visualByStage[stage.id] || visualByStage.fastq}
+        <figcaption>Educational schematic; exact instruments, metrics, and thresholds are assay-specific.</figcaption>
+      </figure>
+    `;
+  }
+
   function renderWorkflowExplorer() {
     const root = document.querySelector("[data-workflow-explorer]");
     if (!root) {
       return;
     }
 
+    const phaseMap = root.querySelector("[data-workflow-phase-map]");
     const buttonRow = root.querySelector(".workflow-stage-list");
     const panel = root.querySelector("[data-workflow-panel]");
-    if (!buttonRow || !panel) {
+    if (!phaseMap || !buttonRow || !panel) {
       return;
     }
 
     let activeId = workflowStages[0].id;
 
     function renderPanel(stage) {
+      const stageIndex = workflowStages.findIndex((item) => item.id === stage.id);
+      const phase = workflowPhaseForStage(stage.id);
+      const previousStage = workflowStages[Math.max(0, stageIndex - 1)];
+      const nextStage = workflowStages[Math.min(workflowStages.length - 1, stageIndex + 1)];
+      const progress = ((stageIndex + 1) / workflowStages.length) * 100;
       panel.innerHTML = `
-        <h3>${escapeHtml(stage.label)}</h3>
-        <p>${escapeHtml(stage.question)}</p>
+        <div class="workflow-panel-heading">
+          <div>
+            <span class="workflow-phase-chip phase-${escapeHtml(phase.id)}">${escapeHtml(phase.label)}</span>
+            <span class="workflow-stage-counter">Stage ${stageIndex + 1} of ${workflowStages.length}</span>
+            <h3>${escapeHtml(stage.label)}</h3>
+            <p>${escapeHtml(stage.question)}</p>
+          </div>
+          <div class="workflow-progress" style="--journey-progress:${progress.toFixed(2)}%">
+            <span></span>
+            <small>${Math.round(progress)}% of the journey</small>
+          </div>
+        </div>
+        ${renderWorkflowStageVisual(stage)}
         <div class="workflow-stage-kpis">
           <article>
-            <span>Checkpoint file</span>
+            <span>Checkpoint record / file</span>
             <strong>${escapeHtml(stage.fileType)}</strong>
           </article>
           <article>
@@ -1509,6 +1952,24 @@
             <p>${escapeHtml(stage.doctorWhy)}</p>
           </article>
         </div>
+        <div class="workflow-panel-navigation" aria-label="Move through the workflow">
+          <button
+            type="button"
+            data-workflow-move="${escapeHtml(previousStage.id)}"
+            ${stageIndex === 0 ? "disabled" : ""}
+          >
+            <span>Previous</span>
+            <strong>${stageIndex === 0 ? "Start of journey" : escapeHtml(previousStage.label)}</strong>
+          </button>
+          <button
+            type="button"
+            data-workflow-move="${escapeHtml(nextStage.id)}"
+            ${stageIndex === workflowStages.length - 1 ? "disabled" : ""}
+          >
+            <span>Next</span>
+            <strong>${stageIndex === workflowStages.length - 1 ? "Signed report reached" : escapeHtml(nextStage.label)}</strong>
+          </button>
+        </div>
       `;
       setupFastqHeaderExplorer(panel);
     }
@@ -1520,32 +1981,85 @@
         const isActive = button.dataset.stageId === activeId;
         button.classList.toggle("is-active", isActive);
         button.setAttribute("aria-selected", isActive ? "true" : "false");
+        button.tabIndex = isActive ? 0 : -1;
+      });
+      Array.from(phaseMap.querySelectorAll("button")).forEach((button) => {
+        const isActive = button.dataset.phaseId === workflowPhaseByStage[activeId];
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-current", isActive ? "step" : "false");
       });
       renderPanel(stage);
     }
 
-    buttonRow.innerHTML = workflowStages
+    phaseMap.innerHTML = workflowPhases
       .map(
-        (stage) => `
+        (phase, index) => `
           <button
             type="button"
-            data-stage-id="${escapeHtml(stage.id)}"
-            aria-selected="false"
+            data-phase-id="${escapeHtml(phase.id)}"
+            data-phase-target="${escapeHtml(phase.firstStage)}"
+            aria-current="false"
           >
-            ${escapeHtml(stage.label)}
+            <span>Phase ${index + 1}</span>
+            <strong>${escapeHtml(phase.label)}</strong>
+            <small>${escapeHtml(phase.range)} · ${escapeHtml(phase.description)}</small>
           </button>
         `
       )
       .join("");
 
-    buttonRow.addEventListener("click", (event) => {
+    buttonRow.innerHTML = workflowStages
+      .map(
+        (stage, index) => {
+          const phase = workflowPhaseForStage(stage.id);
+          return `
+          <button
+            type="button"
+            data-stage-id="${escapeHtml(stage.id)}"
+            class="stage-phase-${escapeHtml(phase.id)}"
+            role="tab"
+            aria-controls="workflow-stage-detail"
+            aria-selected="false"
+          >
+            <span>${String(index + 1).padStart(2, "0")}</span>
+            <strong>${escapeHtml(stage.label)}</strong>
+            <small>${escapeHtml(stage.fileType)}</small>
+          </button>
+        `;
+        }
+      )
+      .join("");
+
+    root.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-stage-id]");
-      if (!button) {
+      if (button) {
+        activate(button.dataset.stageId);
         return;
       }
-      activate(button.dataset.stageId);
+      const phaseButton = event.target.closest("button[data-phase-target]");
+      if (phaseButton) {
+        activate(phaseButton.dataset.phaseTarget);
+        return;
+      }
+      const moveButton = event.target.closest("button[data-workflow-move]");
+      if (moveButton && !moveButton.disabled) {
+        activate(moveButton.dataset.workflowMove);
+      }
     });
 
+    buttonRow.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+        return;
+      }
+      const currentIndex = workflowStages.findIndex((stage) => stage.id === activeId);
+      const direction = event.key === "ArrowRight" ? 1 : -1;
+      const nextIndex = (currentIndex + direction + workflowStages.length) % workflowStages.length;
+      event.preventDefault();
+      activate(workflowStages[nextIndex].id);
+      buttonRow.querySelector(`[data-stage-id="${workflowStages[nextIndex].id}"]`)?.focus();
+    });
+
+    panel.id = "workflow-stage-detail";
     activate(activeId);
   }
 
@@ -2853,6 +3367,28 @@
     });
   }
 
+  function setupVariantRealityEmbed() {
+    const frame = document.querySelector("[data-variant-reality-frame]");
+    if (!frame) {
+      return;
+    }
+
+    window.addEventListener("message", (event) => {
+      if (
+        event.source !== frame.contentWindow ||
+        event.data?.source !== "wahj-variant-reality" ||
+        event.data?.type !== "resize"
+      ) {
+        return;
+      }
+      const height = Number(event.data.height);
+      if (!Number.isFinite(height) || height < 600 || height > 12000) {
+        return;
+      }
+      frame.style.height = `${Math.ceil(height)}px`;
+    });
+  }
+
   renderWorkflowExplorer();
   renderOrganizations();
   renderCriteriaExplorer();
@@ -2862,4 +3398,5 @@
   setupTerminalSimulator();
   setupQualityMetricsExplorer();
   setupTeachingSketchPads();
+  setupVariantRealityEmbed();
 })();
