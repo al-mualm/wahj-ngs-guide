@@ -170,10 +170,22 @@
                     <span>Organism</span>
                     <input id="reference-organism" type="text" placeholder="Homo sapiens" />
                   </label>
+                  <label class="field">
+                    <span>Uploaded sequence material</span>
+                    <select id="reference-sequence-type">
+                      <option value="genomic" selected>
+                        Genomic DNA amplicon (standard PCR/Sanger)
+                      </option>
+                      <option value="cdna">
+                        cDNA / transcript read (reverse-transcribed RNA)
+                      </option>
+                    </select>
+                  </label>
                 </div>
                 <p class="field-help">
-                  This mode uses Ensembl to fetch a canonical transcript reference plus exon,
-                  CDS, and UTR annotations when available.
+                  Genomic DNA is the safe default for PCR amplicons because it preserves introns
+                  and primer-flanking sequence. Choose cDNA only when the sequenced template was
+                  made from RNA. The reference type must match the laboratory material.
                 </p>
               </div>
 
@@ -216,6 +228,7 @@
                 <div><strong>Length:</strong> <span id="reference-length">—</span></div>
                 <div><strong>Features:</strong> <span id="reference-features">—</span></div>
                 <div><strong>Annotation source:</strong> <span id="reference-source">—</span></div>
+                <div><strong>Reference system:</strong> <span id="reference-system">—</span></div>
               </div>
             </section>
 
@@ -354,6 +367,7 @@
                     <tr>
                       <th>Sample</th>
                       <th>Reference position</th>
+                      <th>AB1 trace base</th>
                       <th>Reference / sample</th>
                       <th>Type</th>
                       <th>Quality</th>

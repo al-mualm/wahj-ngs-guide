@@ -29,6 +29,18 @@ function buildSample(sequence, qualities) {
 
 async function run() {
   assert.equal(core.reverseComplement("ATGCR"), "YGCAT");
+  assert.equal(
+    core.extractSequenceResponse('{"id":"ENSG-test","seq":"acgtNN"}', "application/json"),
+    "ACGTNN"
+  );
+  assert.equal(
+    core.extractSequenceResponse(">reference description\nACGT\nNRY\n", "text/x-fasta"),
+    "ACGTNRY"
+  );
+  assert.throws(
+    () => core.extractSequenceResponse("<html>service unavailable</html>", "text/html"),
+    /non-sequence content/u
+  );
 
   const trim = core.trimByQuality(
     "AACCGGTTAACC",
@@ -77,6 +89,96 @@ async function run() {
   assert.equal(analyzed[0].variants.length, 1);
   assert.equal(analyzed[0].variants[0].codingEffect, "Missense");
   assert.equal(analyzed[0].variants[0].aminoAcidChange, "E2K");
+
+  const guardedAnalysis = core.analyzeSamplesAgainstReference(
+    [buildSample("ATGAAA")],
+    codingReference,
+    {
+      minimumAlignmentIdentity: 95,
+      minimumQueryCoverage: 70,
+      withholdUnreliableVariants: true,
+    }
+  );
+  assert.equal(guardedAnalysis[0].alignmentQc.passed, false);
+  assert.equal(guardedAnalysis[0].candidateCallingWithheld, true);
+  assert.equal(guardedAnalysis[0].variants.length, 0);
+  assert.equal(guardedAnalysis[0].withheldVariants.length, 1);
+
+  assert.equal(
+    core.referencePositionToGenomic(
+      {
+        coordinateSystem: {
+          type: "genomic",
+          regionStart: 100,
+          regionEnd: 200,
+          strand: -1,
+        },
+      },
+      1
+    ),
+    200
+  );
+  assert.equal(
+    core.getRawTraceIndexForVariant(
+      { trimStart: 29, trimEnd: 358 },
+      "forward",
+      { samplePosition: 270 }
+    ),
+    298
+  );
+  assert.equal(
+    core.getRawTraceIndexForVariant(
+      { trimStart: 29, trimEnd: 358 },
+      "reverse-complement",
+      { samplePosition: 1 }
+    ),
+    357
+  );
+
+  const ambiguousSecondary = core.buildSecondaryPeakCalls(
+    "S",
+    {
+      basePos: [2],
+      aTrace: [0, 0, 2, 0],
+      cTrace: [0, 0, 80, 0],
+      gTrace: [0, 0, 100, 0],
+      tTrace: [0, 0, 1, 0],
+    },
+    [30],
+    { secondaryRatioThreshold: 0.35 }
+  )[0];
+  assert.equal(ambiguousSecondary.primaryBase, "G");
+  assert.equal(ambiguousSecondary.secondaryBase, "C");
+  assert.equal(ambiguousSecondary.secondaryRatio, 0.8);
+  assert.equal(ambiguousSecondary.iupacCall, "S");
+
+  const lowQualityAmbiguousSample = buildSample("AAASCCC", [35, 35, 35, 19, 35, 35, 35]);
+  lowQualityAmbiguousSample.secondaryPeaks[3] = {
+    primaryBase: "G",
+    secondaryBase: "C",
+    secondaryRatio: 0.64,
+    heterozygousCandidate: false,
+    iupacCall: "S",
+  };
+  const lowQualityAmbiguous = core.analyzeSamplesAgainstReference(
+    [lowQualityAmbiguousSample],
+    { sequence: "AAAGCCC", features: [], cdsParts: [] },
+    {}
+  )[0].variants[0];
+  assert.equal(lowQualityAmbiguous.label, "Ambiguous compatible");
+  assert.equal(lowQualityAmbiguous.lowQuality, true);
+  assert.equal(lowQualityAmbiguous.status, "Candidate low-quality difference");
+
+  const gappedAnalysis = core.analyzeSamplesAgainstReference(
+    [buildSample("AAACCC", [35, 35, 35, 8, 7, 6])],
+    { sequence: "AAATCCC", features: [], cdsParts: [] },
+    {}
+  )[0];
+  const detectedDeletion = gappedAnalysis.variants.find((variant) => variant.type === "deletion");
+  assert.ok(detectedDeletion);
+  assert.equal(detectedDeletion.lowQuality, true);
+  assert.equal(detectedDeletion.manualReviewRequired, true);
+  assert.equal(detectedDeletion.status, "Candidate low-quality difference");
 
   const deletionVariant = core.annotateVariant(
     {

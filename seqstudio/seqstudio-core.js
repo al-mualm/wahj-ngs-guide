@@ -177,6 +177,39 @@
       .replace(/U/g, "T");
   }
 
+  function extractSequenceResponse(responseText, contentType) {
+    const raw = String(responseText || "").trim();
+    const type = String(contentType || "").toLowerCase();
+    if (!raw) {
+      throw new Error("The reference service returned an empty sequence response.");
+    }
+
+    let sequenceText = raw;
+    if (type.includes("json") || raw.startsWith("{")) {
+      let payload;
+      try {
+        payload = JSON.parse(raw);
+      } catch (error) {
+        throw new Error("The reference service returned malformed JSON instead of a sequence.");
+      }
+      sequenceText = payload?.seq || payload?.sequence || "";
+      if (typeof sequenceText !== "string" || !sequenceText.trim()) {
+        throw new Error("The reference service JSON response did not contain a sequence field.");
+      }
+    } else if (raw.startsWith(">")) {
+      sequenceText = raw
+        .split(/\r?\n/u)
+        .filter((line) => !line.trim().startsWith(">"))
+        .join("");
+    }
+
+    const compact = String(sequenceText).replace(/\s+/gu, "").toUpperCase();
+    if (!compact || /[^ACGTURYSWKMBDHVN-]/u.test(compact)) {
+      throw new Error("The reference service response contained non-sequence content.");
+    }
+    return compact.replace(/U/g, "T");
+  }
+
   function reverseComplement(sequence) {
     return normalizeSequence(sequence)
       .split("")
@@ -196,6 +229,7 @@
     }
 
     return {
+      primaryBase: COMPLEMENT_MAP[entry.primaryBase] || entry.primaryBase || "",
       secondaryBase: COMPLEMENT_MAP[entry.secondaryBase] || entry.secondaryBase || "",
       secondaryRatio: Number(entry.secondaryRatio || 0),
       heterozygousCandidate: Boolean(entry.heterozygousCandidate),
@@ -537,21 +571,32 @@
       }));
       channels.sort((left, right) => right.intensity - left.intensity);
 
-      const primaryIntensity = getTraceIntensityForBase(base, chromatogramData, index) || channels[0]?.intensity || 0;
-      const secondary = channels.find((channel) => channel.base !== normalizeBase(base)) || {
+      const normalizedBase = normalizeBase(base);
+      const calledChannel = /^[ACGT]$/u.test(normalizedBase)
+        ? channels.find((channel) => channel.base === normalizedBase)
+        : null;
+      const primary = calledChannel?.intensity > 0 ? calledChannel : channels[0] || {
+        base: "",
+        intensity: 0,
+      };
+      const secondary = channels.find((channel) => channel.base !== primary.base) || {
         base: "",
         intensity: 0,
       };
 
-      const ratio = primaryIntensity > 0 ? secondary.intensity / primaryIntensity : 0;
+      const ratio = primary.intensity > 0 ? secondary.intensity / primary.intensity : 0;
       const quality = Number(qualities?.[index] || 0);
-      const heterozygousCandidate = quality >= qualityThreshold && ratio >= ratioThreshold;
+      const heterozygousCandidate =
+        primary.intensity > 0 && quality >= qualityThreshold && ratio >= ratioThreshold;
 
       return {
+        primaryBase: primary.base,
         secondaryBase: secondary.base,
         secondaryRatio: round(ratio, 3),
         heterozygousCandidate,
-        iupacCall: heterozygousCandidate ? getIupacForPair(base, secondary.base) : base,
+        iupacCall: heterozygousCandidate
+          ? getIupacForPair(primary.base, secondary.base)
+          : normalizedBase,
       };
     });
   }
@@ -888,11 +933,82 @@
     }/${columns[centerIndex].queryBase}] ${right.join("").slice(0, 5) || "—"}`;
   }
 
+  function referencePositionToGenomic(reference, localPosition) {
+    const coordinateSystem = reference?.coordinateSystem;
+    const position = Number(localPosition);
+    if (
+      coordinateSystem?.type !== "genomic" ||
+      !Number.isFinite(position) ||
+      !Number.isFinite(Number(coordinateSystem.regionStart)) ||
+      !Number.isFinite(Number(coordinateSystem.regionEnd))
+    ) {
+      return null;
+    }
+
+    return Number(coordinateSystem.strand || 1) >= 0
+      ? Number(coordinateSystem.regionStart) + position - 1
+      : Number(coordinateSystem.regionEnd) - position + 1;
+  }
+
+  function getRawTraceIndexForVariant(sample, orientation, variant) {
+    const queryPosition = Number(
+      variant?.samplePosition || variant?.previousQueryPosition || 0
+    );
+    if (
+      !queryPosition ||
+      !Number.isFinite(Number(sample?.trimStart)) ||
+      !Number.isFinite(Number(sample?.trimEnd))
+    ) {
+      return null;
+    }
+
+    return orientation === "reverse-complement"
+      ? Number(sample.trimEnd) - queryPosition
+      : Number(sample.trimStart) + queryPosition - 1;
+  }
+
+  function formatReferencePosition(reference, localPosition) {
+    const genomicPosition = referencePositionToGenomic(reference, localPosition);
+    if (!Number.isFinite(genomicPosition)) {
+      return String(localPosition || "—");
+    }
+
+    const chromosome = String(reference?.coordinateSystem?.chromosome || "").replace(
+      /^chr/iu,
+      ""
+    );
+    return `chr${chromosome}:${genomicPosition}`;
+  }
+
   function detectVariants(alignmentResult, reference, options) {
     const columns = getAlignmentColumns(alignmentResult);
     const qualityThreshold = Number(options?.qualityThreshold || 20);
     const variants = [];
     let variantNumber = 0;
+
+    function getConservativeColumnQuality(columnIndex) {
+      const column = columns[columnIndex];
+      if (column.queryBase !== "-") {
+        return Number(column.quality || 0);
+      }
+
+      const flankingQualities = [];
+      for (let offset = 1; offset <= 2; offset += 1) {
+        const left = columns[columnIndex - offset];
+        const right = columns[columnIndex + offset];
+        if (left?.queryBase && left.queryBase !== "-") {
+          flankingQualities.push(Number(left.quality || 0));
+        }
+        if (right?.queryBase && right.queryBase !== "-") {
+          flankingQualities.push(Number(right.quality || 0));
+        }
+        if (flankingQualities.length >= 2) {
+          break;
+        }
+      }
+
+      return flankingQualities.length ? Math.min(...flankingQualities) : 0;
+    }
 
     for (let index = 0; index < columns.length; index += 1) {
       const column = columns[index];
@@ -908,14 +1024,15 @@
 
       variantNumber += 1;
       const qualityUnavailable = alignmentResult.sample?.reportedQualityScores === false;
+      const evidenceQuality = getConservativeColumnQuality(index);
+      const isIndel = classification.type === "insertion" || classification.type === "deletion";
       const lowQuality =
         !qualityUnavailable &&
-        column.queryBase !== "-" &&
-        Number(column.quality || 0) < qualityThreshold;
+        evidenceQuality < qualityThreshold;
       const referencePositionLabel =
         column.referenceBase === "-"
-          ? `after ${column.previousReferencePosition || 0}`
-          : String(column.referencePosition || "—");
+          ? `after ${formatReferencePosition(reference, column.previousReferencePosition)}`
+          : formatReferencePosition(reference, column.referencePosition);
       const samplePositionLabel =
         column.queryBase === "-"
           ? `after ${column.previousQueryPosition || 0}`
@@ -932,6 +1049,8 @@
             ? classification.changeType || "substitution"
             : classification.type,
         referencePosition: column.referencePosition,
+        referenceLocalPosition: column.referencePosition,
+        genomicPosition: referencePositionToGenomic(reference, column.referencePosition),
         samplePosition: column.queryPosition,
         previousReferencePosition: column.previousReferencePosition,
         previousQueryPosition: column.previousQueryPosition,
@@ -939,9 +1058,12 @@
         samplePositionLabel,
         referenceBase: column.referenceBase,
         queryBase: column.queryBase,
-        quality: qualityUnavailable ? null : round(column.quality, 2),
+        quality: qualityUnavailable ? null : round(evidenceQuality, 2),
+        qualityBasis: column.queryBase === "-" ? "flanking bases" : "called base",
+        qualityThreshold,
         qualityReported: !qualityUnavailable,
         lowQuality,
+        manualReviewRequired: lowQuality || qualityUnavailable || isIndel,
         secondaryBase: column.secondary?.secondaryBase || "",
         secondaryRatio: round(column.secondary?.secondaryRatio || 0, 3),
         heterozygousCandidate: Boolean(column.secondary?.heterozygousCandidate),
@@ -951,11 +1073,17 @@
           ? "Candidate low-quality difference"
           : qualityUnavailable
             ? "Candidate variant (quality scores unavailable)"
-            : "Candidate variant",
+            : isIndel
+              ? "Candidate indel requiring manual review"
+              : "Candidate variant",
         candidateReason: lowQuality
-          ? "Low base quality at the called difference position."
+          ? column.queryBase === "-"
+            ? "Low base quality in the trace flanking this alignment gap."
+            : "Low base quality at the called difference position."
           : qualityUnavailable
             ? "The AB1 file did not report usable quality scores, so this candidate requires manual chromatogram review."
+          : isIndel
+            ? "An alignment gap requires manual chromatogram review and confirmation with an independent or opposite-direction read."
           : classification.type === "heterozygous-candidate"
             ? "Secondary peak ratio suggests a mixed or heterozygous signal."
             : "Single-read difference requires bidirectional or repeat confirmation.",
@@ -965,6 +1093,54 @@
     return {
       columns,
       variants,
+    };
+  }
+
+  function assessAlignmentReliability(alignmentResult, sample, reference, options) {
+    const sampleLength = Math.max(0, Number(sample?.trimmedSequence?.length || 0));
+    const referenceLength = Math.max(0, Number(reference?.sequence?.length || 0));
+    const queryCoverage =
+      sampleLength > 0
+        ? round(((alignmentResult.queryEnd - alignmentResult.queryStart) / sampleLength) * 100, 2)
+        : 0;
+    const referenceCoverage =
+      referenceLength > 0
+        ? round(((alignmentResult.refEnd - alignmentResult.refStart) / referenceLength) * 100, 2)
+        : 0;
+    const minimumIdentity = Number(options?.minimumAlignmentIdentity ?? 95);
+    const minimumQueryCoverage = Number(options?.minimumQueryCoverage ?? 70);
+    const minimumAlignedLength = Math.min(
+      sampleLength,
+      Math.max(1, Number(options?.minimumAlignedLength ?? 40))
+    );
+    const reasons = [];
+
+    if (!alignmentResult.alignedLength || alignmentResult.alignedLength < minimumAlignedLength) {
+      reasons.push(
+        `Aligned length ${alignmentResult.alignedLength || 0} bp is below ${minimumAlignedLength} bp.`
+      );
+    }
+    if (Number(alignmentResult.identity || 0) < minimumIdentity) {
+      reasons.push(
+        `Identity ${round(alignmentResult.identity || 0, 2)}% is below ${minimumIdentity}%.`
+      );
+    }
+    if (queryCoverage < minimumQueryCoverage) {
+      reasons.push(`Query coverage ${queryCoverage}% is below ${minimumQueryCoverage}%.`);
+    }
+
+    return {
+      passed: reasons.length === 0,
+      status: reasons.length ? "reference-mismatch" : "pass",
+      reasons,
+      identity: round(alignmentResult.identity || 0, 2),
+      queryCoverage,
+      referenceCoverage,
+      thresholds: {
+        minimumIdentity,
+        minimumQueryCoverage,
+        minimumAlignedLength,
+      },
     };
   }
 
@@ -1051,7 +1227,7 @@
       return null;
     }
 
-    const priorities = ["cds", "exon", "utr", "mrna", "gene", "source"];
+    const priorities = ["cds", "exon", "utr", "intron", "mrna", "gene", "source"];
     overlapping.sort((left, right) => {
       const leftIndex = priorities.indexOf(left.type);
       const rightIndex = priorities.indexOf(right.type);
@@ -1074,6 +1250,8 @@
       case "5'utr":
       case "3'utr":
         return "UTR";
+      case "intron":
+        return "Intron / noncoding";
       case "rrna":
         return "rRNA gene";
       case "trna":
@@ -1193,20 +1371,27 @@
     return toArray(samples).map((sample) => {
       const alignment = alignSampleToReference(sample, reference, options);
       const variantData = detectVariants(alignment, reference, options);
-      const annotatedVariants = variantData.variants.map((variant) =>
+      const alignmentQc = assessAlignmentReliability(
+        alignment,
+        sample,
+        reference,
+        options
+      );
+      const withholdUnreliableVariants = Boolean(options?.withholdUnreliableVariants);
+      const candidateVariants =
+        withholdUnreliableVariants && !alignmentQc.passed ? [] : variantData.variants;
+      const annotatedVariants = candidateVariants.map((variant) =>
         annotateVariant(variant, reference, null)
       );
       return Object.assign({}, alignment, {
         columns: variantData.columns,
         variants: annotatedVariants,
-        queryCoverage:
-          sample.trimmedSequence.length > 0
-            ? round(((alignment.queryEnd - alignment.queryStart) / sample.trimmedSequence.length) * 100, 2)
-            : 0,
-        referenceCoverage:
-          reference.sequence.length > 0
-            ? round(((alignment.refEnd - alignment.refStart) / reference.sequence.length) * 100, 2)
-            : 0,
+        withheldVariants:
+          withholdUnreliableVariants && !alignmentQc.passed ? variantData.variants : [],
+        candidateCallingWithheld: withholdUnreliableVariants && !alignmentQc.passed,
+        alignmentQc,
+        queryCoverage: alignmentQc.queryCoverage,
+        referenceCoverage: alignmentQc.referenceCoverage,
       });
     });
   }
@@ -1276,6 +1461,7 @@
     round,
     normalizeBase,
     normalizeSequence,
+    extractSequenceResponse,
     reverseComplement,
     parseAb1Data,
     trimByQuality,
@@ -1285,6 +1471,9 @@
     alignSampleToReference,
     getAlignmentColumns,
     detectVariants,
+    referencePositionToGenomic,
+    getRawTraceIndexForVariant,
+    assessAlignmentReliability,
     buildCdsModel,
     getFeatureAtPosition,
     annotateVariant,

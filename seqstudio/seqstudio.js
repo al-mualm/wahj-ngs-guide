@@ -34,6 +34,7 @@
     },
     geneSymbol: document.querySelector("#reference-gene-symbol"),
     organism: document.querySelector("#reference-organism"),
+    sequenceType: document.querySelector("#reference-sequence-type"),
     accession: document.querySelector("#reference-accession"),
     fasta: document.querySelector("#reference-fasta"),
     loadReferenceButton: document.querySelector("#load-reference-button"),
@@ -42,6 +43,7 @@
     referenceLength: document.querySelector("#reference-length"),
     referenceFeatures: document.querySelector("#reference-features"),
     referenceSource: document.querySelector("#reference-source"),
+    referenceSystem: document.querySelector("#reference-system"),
     runAnalysisButton: document.querySelector("#run-analysis-button"),
     analysisStatus: document.querySelector("#analysis-status"),
     generateReportButton: document.querySelector("#generate-report-button"),
@@ -192,6 +194,20 @@
       throw new Error(`Request failed: ${response.status}`);
     }
     return response.text();
+  }
+
+  async function fetchSequenceText(url) {
+    const response = await fetch(url, {
+      headers: {
+        Accept: "text/plain, text/x-fasta, application/json;q=0.9",
+        "Content-Type": "text/plain",
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Reference sequence request failed: ${response.status}`);
+    }
+    const body = await response.text();
+    return core.extractSequenceResponse(body, response.headers.get("content-type"));
   }
 
   async function fetchJson(url) {
@@ -361,6 +377,169 @@
     };
   }
 
+  function genomicToReferencePosition(coordinateSystem, genomicPosition) {
+    const position = Number(genomicPosition);
+    if (
+      !Number.isFinite(position) ||
+      !Number.isFinite(Number(coordinateSystem?.regionStart)) ||
+      !Number.isFinite(Number(coordinateSystem?.regionEnd))
+    ) {
+      return null;
+    }
+
+    return Number(coordinateSystem.strand || 1) >= 0
+      ? position - Number(coordinateSystem.regionStart) + 1
+      : Number(coordinateSystem.regionEnd) - position + 1;
+  }
+
+  function buildEnsemblGenomicReference(
+    geneRecord,
+    transcriptRecord,
+    genomicSequence,
+    organismInput,
+    flankSize
+  ) {
+    const flank = Math.max(0, Number(flankSize || 0));
+    const geneStart = Number(geneRecord.start);
+    const geneEnd = Number(geneRecord.end);
+    const strand = Number(geneRecord.strand || 1) >= 0 ? 1 : -1;
+    const coordinateSystem = {
+      type: "genomic",
+      assembly: geneRecord.assembly_name || transcriptRecord.assembly_name || "—",
+      chromosome: geneRecord.seq_region_name || transcriptRecord.seq_region_name || "—",
+      regionStart: Math.max(1, geneStart - flank),
+      regionEnd: geneEnd + flank,
+      strand,
+      flank,
+    };
+    const toLocalRange = (start, end) => {
+      const first = genomicToReferencePosition(coordinateSystem, start);
+      const second = genomicToReferencePosition(coordinateSystem, end);
+      return {
+        start: Math.min(first, second),
+        end: Math.max(first, second),
+      };
+    };
+    const features = [];
+    const cdsParts = [];
+    const geneRange = toLocalRange(geneStart, geneEnd);
+    features.push({
+      type: "gene",
+      label: geneRecord.display_name || "Gene locus",
+      start: geneRange.start,
+      end: geneRange.end,
+      strand: 1,
+      metadata: {
+        genomicStart: geneStart,
+        genomicEnd: geneEnd,
+      },
+    });
+
+    const exonList = Array.isArray(transcriptRecord?.Exon)
+      ? transcriptRecord.Exon.slice()
+      : [];
+    exonList.sort((left, right) =>
+      strand >= 0 ? left.start - right.start : right.end - left.end
+    );
+    const translation = transcriptRecord?.Translation || null;
+    const codingStart = translation ? Math.min(translation.start, translation.end) : null;
+    const codingEnd = translation ? Math.max(translation.start, translation.end) : null;
+    const transcriptExons = [];
+
+    exonList.forEach((exon, index) => {
+      const exonRange = toLocalRange(exon.start, exon.end);
+      transcriptExons.push({
+        rank: index + 1,
+        genomicStart: Number(exon.start),
+        genomicEnd: Number(exon.end),
+        cdnaStart: exonRange.start,
+        cdnaEnd: exonRange.end,
+        strand,
+      });
+      features.push({
+        type: "exon",
+        label: `Canonical transcript exon ${index + 1}`,
+        start: exonRange.start,
+        end: exonRange.end,
+        strand: 1,
+        metadata: {
+          exonId: exon.id || "",
+          genomicStart: Number(exon.start),
+          genomicEnd: Number(exon.end),
+        },
+      });
+
+      if (!Number.isFinite(codingStart) || !Number.isFinite(codingEnd)) {
+        return;
+      }
+      const overlapStart = Math.max(Number(exon.start), codingStart);
+      const overlapEnd = Math.min(Number(exon.end), codingEnd);
+      if (overlapStart <= overlapEnd) {
+        const cdsRange = toLocalRange(overlapStart, overlapEnd);
+        const cdsPart = {
+          start: cdsRange.start,
+          end: cdsRange.end,
+          strand: 1,
+        };
+        cdsParts.push(cdsPart);
+        features.push({
+          type: "cds",
+          label: `Coding sequence, exon ${index + 1}`,
+          ...cdsPart,
+          metadata: {
+            proteinId: translation.id || "",
+            genomicStart: overlapStart,
+            genomicEnd: overlapEnd,
+          },
+        });
+      }
+    });
+
+    for (let index = 0; index < transcriptExons.length - 1; index += 1) {
+      const intronStart = transcriptExons[index].cdnaEnd + 1;
+      const intronEnd = transcriptExons[index + 1].cdnaStart - 1;
+      if (intronStart <= intronEnd) {
+        features.push({
+          type: "intron",
+          label: `Canonical transcript intron ${index + 1}`,
+          start: intronStart,
+          end: intronEnd,
+          strand: 1,
+          metadata: {},
+        });
+      }
+    }
+
+    return {
+      sequence: core.normalizeSequence(genomicSequence),
+      label: `${geneRecord.display_name || "Gene"} genomic locus (${
+        coordinateSystem.assembly
+      } chr${coordinateSystem.chromosome})`,
+      accession: stripVersion(geneRecord.id),
+      sourceLabel: geneRecord.description || "Ensembl genomic gene locus",
+      annotationSource: `Ensembl genomic locus with ${flank} bp flanks`,
+      geneName: geneRecord.display_name || transcriptRecord.display_name || "—",
+      organism: organismInput || geneRecord.species || "—",
+      features,
+      cdsParts,
+      geneId: stripVersion(geneRecord.id),
+      transcriptId: stripVersion(transcriptRecord.id),
+      transcriptExons,
+      strand: 1,
+      coordinateSystem,
+      sourceKind: "ensembl-genomic",
+      sequenceKind: "genomic-dna",
+      links: {
+        ensemblGene: `https://www.ensembl.org/${
+          (geneRecord.species || "homo_sapiens").replace(
+            /(^|_)([a-z])/g,
+            (_, prefix, letter) => `${prefix}${letter.toUpperCase()}`
+          )
+        }/Gene/Summary?g=${stripVersion(geneRecord.id)}`,
+      },
+    };
+  }
+
   function convertGenbankFeatures(parsedSequence) {
     const features = Array.isArray(parsedSequence?.features) ? parsedSequence.features : [];
     return features.map((feature) => ({
@@ -488,13 +667,34 @@
       transcriptId
     )}?expand=1;content-type=application/json`;
     const transcriptRecord = await fetchJson(transcriptLookupUrl);
-    const cdnaSequence = await fetchText(
-      `https://rest.ensembl.org/sequence/id/${encodeURIComponent(
-        transcriptId
-      )}?type=cdna;content-type=text/plain`
-    );
+    const requestedSequenceType = elements.sequenceType?.value || "genomic";
+    if (requestedSequenceType === "cdna") {
+      const cdnaSequence = await fetchSequenceText(
+        `https://rest.ensembl.org/sequence/id/${encodeURIComponent(
+          transcriptId
+        )}?type=cdna;content-type=text/plain`
+      );
+      return buildEnsemblTranscriptReference(
+        geneRecord,
+        transcriptRecord,
+        cdnaSequence,
+        organism
+      );
+    }
 
-    return buildEnsemblTranscriptReference(geneRecord, transcriptRecord, cdnaSequence, organism);
+    const flankSize = 500;
+    const genomicSequence = await fetchSequenceText(
+      `https://rest.ensembl.org/sequence/id/${encodeURIComponent(
+        stripVersion(geneRecord.id)
+      )}?type=genomic;expand_5prime=${flankSize};expand_3prime=${flankSize};content-type=text/plain`
+    );
+    return buildEnsemblGenomicReference(
+      geneRecord,
+      transcriptRecord,
+      genomicSequence,
+      organism,
+      flankSize
+    );
   }
 
   async function loadReferenceFromAccession() {
@@ -572,6 +772,13 @@
       ? `${reference.features.length || 0} feature(s)`
       : "—";
     elements.referenceSource.textContent = reference ? reference.annotationSource : "—";
+    if (elements.referenceSystem) {
+      elements.referenceSystem.textContent = reference?.coordinateSystem
+        ? `${reference.coordinateSystem.assembly} chr${reference.coordinateSystem.chromosome}:${reference.coordinateSystem.regionStart}-${reference.coordinateSystem.regionEnd} (${reference.coordinateSystem.strand >= 0 ? "+" : "−"} strand)`
+        : reference
+          ? reference.sequenceKind || "Sequence coordinates"
+          : "—";
+    }
     elements.metrics.reference.textContent = reference ? "Yes" : "No";
   }
 
@@ -668,6 +875,45 @@
     return mapped;
   }
 
+  function mapKnownVariationsToGenomicReference(variations, reference) {
+    const mapped = new Map();
+    const coordinateSystem = reference?.coordinateSystem;
+    const reverseReference = Number(coordinateSystem?.strand || 1) < 0;
+
+    variations.forEach((variation) => {
+      const position = genomicToReferencePosition(coordinateSystem, variation.start);
+      if (!position || position < 1 || position > reference.sequence.length) {
+        return;
+      }
+      const alleles = Array.isArray(variation.alleles)
+        ? variation.alleles.map((allele) => {
+            const normalized = String(allele || "").toUpperCase();
+            return reverseReference && /^[ACGT]+$/u.test(normalized)
+              ? core.reverseComplement(normalized)
+              : normalized;
+          })
+        : [];
+      const entry = {
+        position,
+        genomicPosition: Number(variation.start),
+        id: variation.id || "",
+        source: variation.source || "",
+        clinicalSignificance: Array.isArray(variation.clinical_significance)
+          ? variation.clinical_significance.join("; ")
+          : "—",
+        consequence: Array.isArray(variation.consequence_type)
+          ? variation.consequence_type.join("; ")
+          : "—",
+        alleles,
+      };
+      const current = mapped.get(position) || [];
+      current.push(entry);
+      mapped.set(position, current);
+    });
+
+    return mapped;
+  }
+
   function chooseKnownMatch(variant, knownEntries) {
     if (!Array.isArray(knownEntries) || !knownEntries.length) {
       return null;
@@ -686,7 +932,11 @@
   async function enrichAnnotations() {
     state.knownVariantsByPosition = new Map();
 
-    if (state.reference?.sourceKind !== "ensembl-transcript" || !state.reference?.transcriptId) {
+    const transcriptReference =
+      state.reference?.sourceKind === "ensembl-transcript" && state.reference?.transcriptId;
+    const genomicReference =
+      state.reference?.sourceKind === "ensembl-genomic" && state.reference?.coordinateSystem;
+    if (!transcriptReference && !genomicReference) {
       state.results = state.results.map((result) => ({
         ...result,
         variants: result.variants.map((variant) => ({
@@ -702,11 +952,21 @@
     }
 
     try {
-      const variationUrl = `https://rest.ensembl.org/overlap/id/${encodeURIComponent(
-        state.reference.transcriptId
-      )}?feature=variation;content-type=application/json`;
+      const coordinateSystem = state.reference.coordinateSystem;
+      const species = normalizeSpeciesName(state.reference.organism);
+      const variationUrl = genomicReference
+        ? `https://rest.ensembl.org/overlap/region/${encodeURIComponent(
+            species
+          )}/${encodeURIComponent(
+            `${coordinateSystem.chromosome}:${coordinateSystem.regionStart}-${coordinateSystem.regionEnd}`
+          )}?feature=variation;content-type=application/json`
+        : `https://rest.ensembl.org/overlap/id/${encodeURIComponent(
+            state.reference.transcriptId
+          )}?feature=variation;content-type=application/json`;
       const variations = await fetchJson(variationUrl);
-      const mapped = mapKnownVariationsToCdna(variations, state.reference);
+      const mapped = genomicReference
+        ? mapKnownVariationsToGenomicReference(variations, state.reference)
+        : mapKnownVariationsToCdna(variations, state.reference);
       state.knownVariantsByPosition = mapped;
       state.results = state.results.map((result) => ({
         ...result,
@@ -732,7 +992,9 @@
 
       setStatus(
         elements.knownVariantNote,
-        "Known-variant markers were loaded from Ensembl/dbSNP overlap records for the selected transcript.",
+        genomicReference
+          ? "Known-variant markers were loaded from Ensembl/dbSNP records across the selected genomic locus."
+          : "Known-variant markers were loaded from Ensembl/dbSNP overlap records for the selected transcript.",
         "success"
       );
     } catch (error) {
@@ -799,24 +1061,36 @@
   function renderVariantSummaryTable() {
     const variants = flattenVariants();
     if (!variants.length) {
+      const withheld = state.results.filter((result) => result.candidateCallingWithheld);
+      const message = withheld.length
+        ? `Candidate calling was withheld for ${withheld.length} sample(s) because the selected reference did not pass alignment QC.`
+        : state.results.length
+          ? "No candidate nucleotide differences were detected in the reliable aligned region."
+          : "Run the analysis to detect candidate variants.";
       elements.variantSummaryBody.innerHTML =
-        '<tr><td colspan="7">Run the analysis to detect candidate variants.</td></tr>';
+        `<tr><td colspan="8">${escapeHtml(message)}</td></tr>`;
       return;
     }
 
     elements.variantSummaryBody.innerHTML = variants
       .map(
-        (variant) => `
+        (variant) => {
+          const result = getResultForSample(variant.sampleName);
+          const rawIndex = result ? getRawIndexForVariant(result, variant) : null;
+          const traceBase = Number.isFinite(rawIndex) ? rawIndex + 1 : "—";
+          return `
           <tr>
             <td>${escapeHtml(variant.sampleName)}</td>
             <td>${escapeHtml(variant.referencePositionLabel)}</td>
+            <td>${escapeHtml(traceBase)}</td>
             <td>${escapeHtml(`${variant.referenceBase} / ${variant.queryBase}`)}</td>
             <td>${escapeHtml(variant.label)}</td>
             <td>${formatNumber(variant.quality, 2)}</td>
             <td>${escapeHtml(variant.status)}</td>
             <td>${escapeHtml(variant.context)}</td>
           </tr>
-        `
+        `;
+        }
       )
       .join("");
   }
@@ -824,8 +1098,15 @@
   function renderAnnotationTable() {
     const variants = flattenVariants();
     if (!variants.length) {
+      const withheld = state.results.some((result) => result.candidateCallingWithheld);
       elements.annotationBody.innerHTML =
-        '<tr><td colspan="8">Run the analysis to populate candidate variant annotations.</td></tr>';
+        `<tr><td colspan="8">${escapeHtml(
+          withheld
+            ? "Annotation was not attempted because candidate calling was withheld by alignment QC."
+            : state.results.length
+              ? "No candidate variants are available for annotation."
+              : "Run the analysis to populate candidate variant annotations."
+        )}</td></tr>`;
       return;
     }
 
@@ -1124,10 +1405,15 @@
     const options = [
       '<option value="">Select a candidate variant</option>',
       ...result.variants.map(
-        (variant) =>
+        (variant) => {
+          const rawIndex = getRawIndexForVariant(result, variant);
+          const traceLabel = Number.isFinite(rawIndex) ? `trace base ${rawIndex + 1}` : "trace base —";
+          return (
           `<option value="${escapeHtml(variant.id)}">${escapeHtml(
-            `${variant.referencePositionLabel} | ${variant.referenceBase}>${variant.queryBase} | ${variant.label}`
-          )}</option>`
+              `${variant.referencePositionLabel} | ${traceLabel} | ${variant.referenceBase}>${variant.queryBase} | ${variant.label}`
+            )}</option>`
+          );
+        }
       ),
     ];
     elements.chromatogramVariant.innerHTML = options.join("");
@@ -1135,21 +1421,7 @@
   }
 
   function getRawIndexForVariant(result, variant) {
-    const sample = result.sample;
-    if (!sample) {
-      return null;
-    }
-
-    const queryPosition = Number(variant.samplePosition || variant.previousQueryPosition || 0);
-    if (!queryPosition) {
-      return null;
-    }
-
-    if (result.orientation === "forward") {
-      return sample.trimStart + queryPosition - 1;
-    }
-
-    return sample.trimEnd - queryPosition;
+    return core.getRawTraceIndexForVariant(result.sample, result.orientation, variant);
   }
 
   function renderChromatogram() {
@@ -1266,21 +1538,28 @@
     context.stroke();
 
     context.fillStyle = "#173753";
-    context.font = "bold 20px sans-serif";
+    context.font = "bold 17px sans-serif";
     context.fillText(
-      `${result.sampleName} | ${variant.referencePositionLabel} | ${variant.referenceBase}>${variant.queryBase}`,
+      `${result.sampleName} | reference ${variant.referencePositionLabel} | AB1 trace base ${rawIndex + 1} | ${variant.referenceBase}>${variant.queryBase}`,
       34,
       28
     );
 
-    elements.chromatogramNote.textContent = `Secondary peak ratio: ${formatNumber(
-      variant.secondaryRatio,
-      3
-    )}. ${
-      variant.heterozygousCandidate
-        ? "Secondary-peak evidence suggests a possible mixed or heterozygous signal."
-        : "Secondary-peak evidence does not cross the heterozygous-candidate threshold."
-    }`;
+    const peakInterpretation = variant.lowQuality
+      ? `The evidence quality (Q${formatNumber(
+          variant.quality,
+          0
+        )}) is below the analysis threshold. Treat this as low-quality or ambiguous trace evidence, not a reportable variant, unless an independent or opposite-direction read confirms it.`
+      : variant.heterozygousCandidate
+        ? "Secondary-peak evidence suggests a possible mixed or heterozygous signal that still requires independent confirmation."
+        : variant.type === "ambiguous"
+          ? "The IUPAC call represents overlapping base possibilities and must not be converted into a definite substitution without confirmation."
+          : variant.type === "substitution"
+            ? `A single dominant ${variant.queryBase} peak supports the base call, but does not by itself establish homozygosity; review the opposite-direction read and exclude allele dropout.`
+            : "An alignment gap requires manual chromatogram review and confirmation with an independent or opposite-direction read.";
+    elements.chromatogramNote.textContent = `Reference ${variant.referencePositionLabel} maps to 1-based AB1 trace base ${
+      rawIndex + 1
+    }. Secondary peak ratio: ${formatNumber(variant.secondaryRatio, 3)}. ${peakInterpretation}`;
   }
 
   function buildPublicationTables() {
@@ -1301,6 +1580,8 @@
       "Identity (%)": formatNumber(result.identity, 2),
       "Reference coverage (%)": formatNumber(result.referenceCoverage, 2),
       "Query coverage (%)": formatNumber(result.queryCoverage, 2),
+      "Alignment QC": result.alignmentQc?.passed ? "Pass" : "Reference mismatch",
+      "Alignment QC note": result.alignmentQc?.reasons?.join(" ") || "—",
       "Candidate variants": result.variants.length,
     }));
     const variantRows = variants.map((variant) => ({
@@ -1357,6 +1638,8 @@
           "Identity (%)",
           "Reference coverage (%)",
           "Query coverage (%)",
+          "Alignment QC",
+          "Alignment QC note",
           "Candidate variants",
         ],
         rows: alignmentRows,
@@ -1507,14 +1790,18 @@
     const codingVariants = variants.filter((variant) => variant.codingStatus === "Coding");
     const sampleCount = state.results.length;
     const referenceName = state.reference?.label || "the selected reference";
+    const withheldResults = state.results.filter((result) => result.candidateCallingWithheld);
+    const resultSummary = withheldResults.length
+      ? `${withheldResults.length} of ${sampleCount} sample alignment(s) failed the predefined reference-concordance gate, so candidate calling and downstream annotation were withheld for those samples. This is not a negative variant result.`
+      : `${sampleCount} uploaded sample(s) generated ${variants.length} candidate difference row(s), of which ${highQualityVariants.length} passed the default quality threshold at the candidate site. ${knownVariants.length} candidate difference row(s) overlapped a known dbSNP / ClinVar-linked record, while ${codingVariants.length} row(s) fell inside annotated coding sequence regions.`;
 
     state.report = {
-      methods: `AB1 chromatogram files from ${sampleCount} sample(s) were analyzed in SeqStudio / Sanger Smart Analyzer within the Wahj NGS Guide website. Base calls, quality scores, and chromatogram traces were read directly from the uploaded AB1 files. Each read was quality-trimmed, aligned individually to ${referenceName} using sample-level pairwise local alignment, and reviewed for substitutions, insertions, deletions, ambiguous calls, and secondary-peak evidence. Feature-aware coding interpretation was reported only when trusted reference annotations were available.`,
-      results: `${sampleCount} uploaded sample(s) generated ${variants.length} candidate difference row(s), of which ${highQualityVariants.length} passed the default quality threshold at the candidate site. ${knownVariants.length} candidate difference row(s) overlapped a known dbSNP / ClinVar-linked record, while ${codingVariants.length} row(s) fell inside annotated coding sequence regions.`,
+      methods: `AB1 chromatogram files from ${sampleCount} sample(s) were analyzed in SeqStudio / Sanger Smart Analyzer within the Wahj NGS Guide website. Base calls, quality scores, and chromatogram traces were read directly from the uploaded AB1 files. Each read was quality-trimmed and aligned individually to ${referenceName} using sample-level pairwise local alignment. Candidate calling required at least 95% alignment identity and 70% query coverage. Substitutions, insertions, deletions, ambiguous calls, and secondary-peak evidence were reviewed only after the reference-concordance gate passed.`,
+      results: resultSummary,
       interpretation: `The observed differences should be interpreted as candidate variants until confirmed by bidirectional sequencing or repeat PCR. Low-quality positions were retained as evidence rows but were not presented as confident calls. Database context was used to summarize known records and published relevance only; no diagnostic statement was generated.`,
       figureLegend: `Representative chromatogram evidence from SeqStudio / Sanger Smart Analyzer showing the selected candidate site, local peak pattern, and the aligned reference versus sample base call. Candidate substitutions, insertions, deletions, ambiguous calls, and secondary-peak evidence were highlighted in the alignment browser and chromatogram view.`,
       evidence: `Chromatogram evidence was reviewed at each selected candidate position using the raw AB1 peak traces. When a secondary-peak ratio crossed the default threshold, the site was flagged as a possible mixed or heterozygous signal rather than promoted to a confident variant on peak shape alone.`,
-      limitations: `This educational analysis is based on single-read sample-level alignment and should not replace laboratory confirmation workflows. Low-quality base calls can still produce candidate rows for manual review. Coding-effect interpretation depends on trusted reference features, and external database links are descriptive resources only. Clinical interpretation requires professional review and independent confirmation.`,
+      limitations: `This analysis is based on individual Sanger reads and is not a validated diagnostic assay. A clean single peak does not establish homozygosity because primer-site variation or allele dropout can suppress one allele. Callable intervals, primer-binding regions, reference assembly, transcript, assay limitations, and opposite-direction confirmation must be reviewed. Coding-effect interpretation depends on trusted reference features, and external database links are descriptive resources only.`,
     };
 
     Object.entries(elements.reportFields).forEach(([key, element]) => {
@@ -1646,6 +1933,10 @@
           matchScore: 2,
           mismatchScore: -1,
           gapPenalty: -2,
+          minimumAlignmentIdentity: 95,
+          minimumQueryCoverage: 70,
+          minimumAlignedLength: 40,
+          withholdUnreliableVariants: true,
         })
         .map(prepareResultMaps);
 
@@ -1669,11 +1960,26 @@
 
       elements.publicationStatus.textContent =
         "Publication tables were generated from the current sample-level analysis.";
-      setStatus(
-        elements.analysisStatus,
-        `Analysis complete for ${state.results.length} sample(s). Candidate differences remain flagged as unconfirmed until laboratory confirmation.`,
-        "success"
-      );
+      const withheldResults = state.results.filter((result) => result.candidateCallingWithheld);
+      if (withheldResults.length) {
+        const details = withheldResults
+          .map(
+            (result) =>
+              `${result.sampleName}: ${result.alignmentQc.reasons.join(" ")}`
+          )
+          .join(" ");
+        setStatus(
+          elements.analysisStatus,
+          `Analysis stopped before candidate calling for ${withheldResults.length} sample(s). The reference and read are not sufficiently concordant. Check genomic DNA versus cDNA, gene/accession, assembly, and amplicon scope. ${details}`,
+          "error"
+        );
+      } else {
+        setStatus(
+          elements.analysisStatus,
+          `Analysis complete for ${state.results.length} sample(s). Candidate differences remain unconfirmed until opposite-direction or repeat laboratory confirmation.`,
+          "success"
+        );
+      }
     } catch (error) {
       console.error(error);
       setStatus(
